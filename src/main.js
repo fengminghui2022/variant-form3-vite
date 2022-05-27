@@ -6,10 +6,10 @@ import 'element-plus/dist/index.css'
 import '@/styles/index.scss'
 import '@/iconfont/iconfont.css'
 import Draggable from '@/../lib/vuedraggable/dist/vuedraggable.umd.js'
-//import Draggable from 'vuedraggable'
 import {registerIcon} from '@/utils/el-icons'
 import SvgIcon from '@/components/svg-icon'  //svg组件
 import 'virtual:svg-icons-register'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import ContainerWidgets from '@/components/form-designer/form-widget/container-widget/index'
 import ContainerItems from '@/components/form-render/container-item/index'
@@ -24,6 +24,9 @@ if (typeof window !== 'undefined') {
 
 const vfApp = createApp(App)
 
+for (const [key, iconComponent] of Object.entries(ElementPlusIconsVue)) {
+  vfApp.component(key, iconComponent)
+}
 vfApp.use(ElementPlus)
 registerIcon(vfApp)
 vfApp.component('draggable', Draggable)

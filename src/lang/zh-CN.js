@@ -33,7 +33,8 @@ export default {
       'table-cell':     '单元格',
       'tab-pane':       '选项卡页',
       'data-table':     '数据表格',
-
+			'v-crud':				'CRUD',
+			
       input:          '单行输入',
       textarea:       '多行输入',
       number:         '计数器',
@@ -63,6 +64,15 @@ export default {
     },
 
     hint: {
+			// CRUD
+			reset:'重置',
+			search:'查询',
+			addbtn:"增加",
+			deletebtn:"删除",
+			editbtn:"编辑事件",
+			dropbtnset:"设置下拉按钮",
+			dropdownbtn:"设置下拉",
+			
       selectParentWidget: '选中父组件',
       moveUpWidget: '上移组件',
       moveDownWidget: '下移组件',
@@ -76,7 +86,8 @@ export default {
       onlyFieldWidgetAcceptable: '子表单只能接收字段组件',
       moveUpFirstChildHint: '已经移动到最上面',
       moveDownLastChildHint: '已经移动到最下面',
-
+			
+			save:'保存',
       closePreview: '关闭',
       copyJson: '复制JSON',
       saveFormJson: '保存为文件',
@@ -410,6 +421,9 @@ export default {
       dsRequestBooleanTypeError: '布尔类型值错误',
       dsValidationError: '数据源设置存在错误，请修改',
       dsDuplicatedNameError: '数据源名称重复，请修改！',
+			
+			// CRUD
+			controlLocation:'按钮组对齐',
     }
 
   }

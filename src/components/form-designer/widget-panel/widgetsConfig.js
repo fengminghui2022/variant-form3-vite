@@ -256,6 +256,249 @@ export const containers = [
       //操作按钮点击事件
       onOperationButtonClick: '',
     }
+  },
+
+  {
+    type: 'v-crud',
+    category: 'container',
+    icon: 'data-table',
+    widgetList: [],
+    options: {
+			// 按鈕組
+			toolbarLeft: false,
+			toolbarRight: false,
+			buttonGroupAlign: 'left',
+			toolbarLeftButtons: [
+        {
+          id: 'btnAdd',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '新建',
+          icon: 'el-icon-plus',
+          type: '',
+          onClick: 'alert(\"add\")',
+          bExtend: false,
+        },
+        {
+          id: 'btncopy',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '复制',
+          icon: 'el-icon-document-copy',
+          type: '',
+          onClick: 'alert(\"copy\")',
+          bExtend: false,
+        },
+        {
+          id: 'btnsave',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '保存',
+          icon: 'el-icon-document',
+          type: '',
+          onClick: 'alert(\"save\")',
+          bExtend: false,
+        },
+        {
+          id: 'btnDel',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '删除',
+          icon: 'el-icon-delete',
+          type: '',
+          onClick: 'alert(\"delete\")',
+          bExtend: false,
+        },
+			],
+			toolbarRightButtons:[
+        {
+          id: 'btnExport',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '',
+          icon: 'AlarmClock',
+          type: '',
+          onClick: 'alert(\"add\")',
+          bExtend: false,
+        },
+        {
+          id: 'btnPrint',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '',
+          icon: 'Apple',
+          type: '',
+          onClick: 'alert(\"copy\")',
+          bExtend: false,
+        },
+        {
+          id: 'btnRefresh',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '',
+          icon: 'ArrowDownBol',
+          type: '',
+          onClick: 'alert(\"save\")',
+          bExtend: false,
+        },
+        {
+          id: 'btnToggleColumn',
+          size: 'small',
+          disabled: false,
+          display: true,
+          label: '',
+          icon: 'BrushFilled',
+          type: '',
+          onClick: 'alert(\"delete\")',
+          bExtend: false,
+        },
+			],
+
+      name: '',
+      label: 'v-crud',
+      hidden: false,
+      rowSpacing: 8,
+      tableHeight: '300px', //高度，百分比或像素
+      tableWidth: '100%', //宽度，百分比或像素宽度
+      customClass: '', //自定义css样式
+      stripe: true, // 是否斑马线
+      showIndex: false, // 是否显示行号列
+      showCheckBox: true, // 是否显示复选框列
+      showPagination: true, // 是否分页
+      smallPagination: false, //是否显示小型分页
+      showSummary: false, // 是否合计
+      border: true, // 是否带有纵向边框（拖拽）
+      tableSize: 'default', // 表格大小，large大、default中、small小
+      tableColumns: [ //表格列信息
+        {columnId: 1, prop:'name', label:'姓名', width:'100', show:true, align:'left', fixed:'left', sortable:true,groupName:''},
+        {columnId: 2, prop:'date', label:'日期1', width:'160', show:true, align:'left', formatS:'d1',groupName:''},
+        {columnId: 3, prop:'date2', label:'日期2',width:'160',show:true,align:'left',formatS:'d4',groupName:''},
+        {columnId: 4, prop:'date3', label:'日期3',width:'160',show:true,align:'left',formatS:'d5',groupName:''},
+        {columnId: 5, prop:'f1', label:'基金',width:'150',show:true,align:'right',sortable:true,formatS:'n1',groupName:''},
+        {columnId: 6, prop:'f2',label:'股票',width:'150',show:true,align:'right',sortable:true,formatS:'n2',groupName:''},
+        {columnId: 7, prop:'f3',label:'存款',width:'150',show:true,align:'right',sortable:true,formatS:'n3',groupName:''},
+        {columnId: 8, prop:'f4',label:'基金2',width:'150',show:true,align:'right',sortable:true,formatS:'n4',groupName:''},
+        {columnId: 9, prop:'f5',label:'股票2',width:'150',show:true,align:'right',sortable:true,formatS:'n5',groupName:''},
+        {columnId: 10, prop:'f6',label:'存款2',width:'150',show:true,align:'right',sortable:true,formatS:'n6',groupName:''},
+        {columnId: 11, prop:'f7',label:'成功率',width:'140',show:true,align:'right',sortable:true,formatS:'n7',groupName:''},
+        {columnId: 12, prop:'add',label:'地址',width:'250',show:true,groupName:''},
+        {columnId: 13, prop:'ss',label:'秘密',width:'100',show:false,groupName:''},
+      ],
+      showButtonsColumn: false, // 是否显示操作列
+      buttonsColumnTitle: '操作',
+      buttonsColumnWidth: 120,
+      operationButtons: [{ // 操作按钮配置
+        name: 'detail',
+        label: '详情',
+        type: 'text',
+        size: 'small',
+        round: false,
+        hidden: true,
+        disabled: false,
+      }, {
+        name: 'edit',
+        label: '编辑',
+        type: 'text',
+        size: 'small',
+        round: false,
+        hidden: false,
+        disabled: false,
+      }, {
+        name: 'delete',
+        label: '删除',
+        type: 'text',
+        size: 'small',
+        round: false,
+        hidden: false,
+        disabled: false,
+      },
+      ],
+      pagination: { // 分页信息
+        currentPage: 1,
+        pageSizes: [10, 15, 20, 30, 50, 100, 200],
+        pageSize: 200,
+        total: 366,
+      },
+      dsEnabled: false, //是否使用数据源数据
+      dsName: '',  //数据源名称
+      tableData: [ //表格数据
+        {
+          date: '2016-05-02',
+          date2: '2016-05-02 23:12:12',
+          date3: '2016-05-02 9:11:12',
+          name: '小二',
+          f1: 10001000.2,
+          f2: 10001000.239567,
+          f3: 10001000.239567,
+          f4: 10001000.239567,
+          f5: 10001000.239567,
+          f6: 10001000.239567,
+          f7: 0.25,
+          add: '上海市普陀区金沙江路 1518 弄',
+          ss: 100,
+        }, {
+          date: '2016-05-04',
+          date2: '2016-05-02 11:12:12',
+          date3: '2016-05-02 9:11:12',
+          name: '王小虎2',
+          f1: 10001000.23,
+          f2: 10001000.23,
+          f3: 10001000.239567,
+          f4: 10001000.239567,
+          f5: 10001000.239567,
+          f6: 10001000.239567,
+          f7: 0.256,
+          add: '上海市普陀区金沙江路 1518 弄',
+          ss: 100,
+        }, {
+          date: '2016-05-01',
+          date2: '2016-05-02 12:12:12',
+          date3: '2016-05-02 9:11:12',
+          name: '王小虎3',
+          f1: 10001000.239,
+          f2: 10001000.239,
+          f3: 10001000.239567,
+          f4: 10001000.239567,
+          f5: 10001000.239567,
+          f6: 10001000.239567,
+          f7: 0.2569,
+          add: '上海市普陀区金沙江路 1518 弄',
+          ss: 100,
+        }, {
+          date: '2016-05-03',
+          date2: '2016-05-02 12:12:12',
+          date3: '2016-05-02 9:11:12',
+          name: '王小虎4',
+          f1: 10001000.239567,
+          f2: 10001000.239567,
+          f3: 10001000.239567,
+          f4: 10001000.239567,
+          f5: 10001000.239567,
+          f6: 10001000.239567,
+          f7: 1.9527102,
+          add: '上海市普陀区金沙江路 1518 弄',
+          ss: 100,
+        },
+      ],
+
+      //onCreated: '',
+      //onMounted: '',
+      //分页大小改变事件
+      onPageSizeChange: '',
+      //当前页改变事件
+      onCurrentPageChange: '',
+      //选择项改变事件
+      onSelectionChange: '',
+      //操作按钮点击事件
+      onOperationButtonClick: '',
+    }
   }
 
 ]

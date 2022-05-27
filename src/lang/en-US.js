@@ -33,7 +33,8 @@ export default {
       'table-cell':     'TableCell',
       'tab-pane':       'TabPane',
       'data-table':     'DataTable',
-
+			'v-crud':				'CRUD',
+			
       input:          'Input',
       textarea:       'Textarea',
       number:         'InputNumber',
@@ -63,6 +64,15 @@ export default {
     },
 
     hint: {
+			// CRUD
+			reset:'Reset',
+			search:'Query',
+			addbtn:"add button",
+			deletebtn:"delete button",
+			editbtn:"edit event",
+			dropbtnset:"setting drop button",
+			dropdownbtn:"Drop Down",
+			
       selectParentWidget: 'Select parent of this widget',
       moveUpWidget: 'Move up this widget',
       moveDownWidget: 'Move down this widget',
@@ -77,6 +87,7 @@ export default {
       moveUpFirstChildHint: 'First child can not be move up',
       moveDownLastChildHint: 'Last child can not be move down',
 
+			save:'Save',
       closePreview: 'Close',
       copyJson: 'Copy',
       saveFormJson: 'Save As File',
@@ -410,6 +421,8 @@ export default {
       dsRequestBooleanTypeError: 'Boolean value error',
       dsValidationError: 'Datasource check failure.',
       dsDuplicatedNameError: 'Duplicate datasource name.',
+			// CRUD
+			controlLocation:'controlLocation',
     }
 
   }

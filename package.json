@@ -10,11 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^0.2.4",
+    "@element-plus/icons-vue": "^0.2.7",
     "axios": "^0.24.0",
     "clipboard": "^2.0.8",
     "core-js": "^3.6.5",
-    "element-plus": "^2.0.4",
+    "element-plus": "^2.1.11",
     "file-saver": "^2.0.5",
     "mitt": "^3.0.0",
     "sortablejs": "1.14.0",
