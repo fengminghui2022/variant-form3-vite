@@ -423,6 +423,22 @@ export default {
       dsDuplicatedNameError: 'Duplicate datasource name.',
 			// CRUD
 			controlLocation:'controlLocation',
+
+			toolbarSetting:'Toolbar Setting',
+			enableLeftToolbar:'Enable LeftToolbar',
+			leftToolbarSetting:'LeftToolbar Setting',
+			enableRightToolbar:'Enable RightToolbar',
+			rightToolbarSetting:'RightToolbar Setting',
+			
+			operate:'Operate',
+			btnName:'Name',
+			btnHidden:'Hidden',
+			btnDisable:'Disable',
+			isDropdownBtn:'Dropdown Button',
+			btnType:'Type',
+			btnIcon:'Icon',
+			btnClickEvent:'Click Event',
+			dropdownBtnSetting:'Dropdown Button Setting',
     }
 
   }

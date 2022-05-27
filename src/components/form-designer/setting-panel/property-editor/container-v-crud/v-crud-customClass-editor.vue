@@ -64,17 +64,17 @@
 		</el-form-item>
 		<!-- 以上为表格属性，以下为按钮组属性 -->
 
-		<el-divider content-position="left">工具栏按钮设置</el-divider>
-		<el-form-item label="启用工具栏[左侧]">
+		<el-divider content-position="left">{{i18nt('designer.setting.toolbarSetting')}}</el-divider>
+		<el-form-item :label="i18nt('designer.setting.enableLeftToolbar')">
 			<el-switch v-model="optionModel.toolbarLeft"></el-switch>
 		</el-form-item>
-		<el-form-item v-if="!!optionModel.toolbarLeft" label="工具栏[左侧]编辑">
+		<el-form-item v-if="!!optionModel.toolbarLeft" :label="i18nt('designer.setting.leftToolbarSetting')">
 			<el-button type="primary" plain round @click="editToolbarLeftButtons">{{i18nt('designer.setting.editAction')}}</el-button>
 		</el-form-item>
-		<el-form-item label="启用工具栏[右侧]">
+		<el-form-item :label="i18nt('designer.setting.enableRightToolbar')">
 			<el-switch v-model="optionModel.toolbarRight"></el-switch>
 		</el-form-item>
-		<el-form-item v-if="!!optionModel.toolbarRight" label="工具栏[右侧]编辑">
+		<el-form-item v-if="!!optionModel.toolbarRight" :label="i18nt('designer.setting.rightToolbarSetting')">
 			<el-button type="primary" plain round @click="editToolbarRightButtons">{{i18nt('designer.setting.editAction')}}</el-button>
 		</el-form-item>
 		<!-- <div v-if="!!optionModel.toolbar" style="display: flex;align-items: center;margin-bottom: 5px;">
@@ -351,7 +351,7 @@
 		</div>
 		<!-- 工具栏【左侧】弹窗 -->
 		<div v-if="showToolbarLeftDialog" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
-			<el-dialog title="工具栏[左侧]设置" v-model="showToolbarLeftDialog"
+			<el-dialog :title="i18nt('designer.setting.leftToolbarSetting')" v-model="showToolbarLeftDialog"
 				:show-close="true" custom-class="drag-dialog small-padding-dialog"
 				:close-on-click-modal="false" :close-on-press-escape="false"
 				:destroy-on-close="true" width="1120px">
@@ -359,7 +359,7 @@
 					class="panes-setting" :cell-style="{padding:'1px 0'}"
 					default-expand-all :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
 					height="300" border row-key="btnID" ref="toolbarLeftTable" stripe>
-					<el-table-column label="操作" width="90" fixed="left" align="center">
+					<el-table-column :label="i18nt('designer.setting.operate')" width="90" fixed="left" align="center">
 						<template #default="scope">
 							<!-- <el-tooltip class="item" effect="dark" content="添加按钮" placement="top"> -->
 								<el-button size="small" type="success" circle
@@ -377,46 +377,46 @@
 							v-bind="{group:'panesGroup', ghostClass: 'ghost', handle: '.drag-option'}"></i>
 					</el-table-column> -->
 					<el-table-column label="btnID" width="150" prop="btnID" v-if="false"></el-table-column>
-					<el-table-column label="按钮名" width="160" prop="label">
+					<el-table-column :label="i18nt('designer.setting.btnName')" width="160" prop="label">
 						<template #default="scope">
 							<el-input v-model="scope.row.label" size="small"></el-input>
 						</template>
 					</el-table-column>
-					<el-table-column label="展示" width="70" prop="display">
+					<el-table-column :label="i18nt('designer.setting.btnHidden')" width="70" prop="display">
 						<template #default="scope">
 							<el-switch v-model="scope.row.display" size="small"></el-switch>
 						</template>
 					</el-table-column>
-					<el-table-column label="禁用" width="70" prop="disabled">
+					<el-table-column :label="i18nt('designer.setting.btnDisable')" width="70" prop="disabled">
 						<template #default="scope">
 							<el-switch v-model="scope.row.disabled" size="small"></el-switch>
 						</template>
 					</el-table-column>
-					<el-table-column label="下拉按钮" width="70" prop="disabled">
+					<el-table-column :label="i18nt('designer.setting.isDropdownBtn')" width="70" prop="disabled">
 						<template #default="scope">
 							<el-switch v-model="scope.row.bExtend" size="small"></el-switch>
 						</template>
 					</el-table-column>
-					<el-table-column label="类型" width="120" prop="type">
+					<el-table-column :label="i18nt('designer.setting.btnType')" width="120" prop="type">
 						<template #default="scope">
-							<el-select v-model="scope.row.type" placeholder="请选择" size="small">
+							<el-select v-model="scope.row.type" size="small">
 									<el-option v-for="item in btnTypeOptions" :key="item.value" :label="item.label" :value="item.value">
 									</el-option>
 							</el-select>
 						</template>
 					</el-table-column>
-					<el-table-column label="icon图标" width="160" prop="icon">
+					<el-table-column :label="i18nt('designer.setting.btnIcon')" width="160" prop="icon">
 						<template #default="scope">
 							<el-input v-model="scope.row.icon" size="small"></el-input>
 						</template>
 					</el-table-column>
-					<el-table-column label="点击事件" width="130" >
+					<el-table-column :label="i18nt('designer.setting.btnClickEvent')" width="130" >
 						<template #default="scope">
 							<el-button type="info" icon="el-icon-edit" plain round @click="editClickEventHandler(scope.$index,scope.row.onClick)">
 								{{i18nt('designer.setting.addEventHandler')}}</el-button>
 						</template>
 					</el-table-column>
-					<el-table-column label="下拉按钮编辑" width="130">
+					<el-table-column :label="i18nt('designer.setting.dropdownBtnSetting')" width="130">
 						<template #default="scope">
 							<el-button v-if="scope.row.bExtend"
 								type="info"
@@ -436,7 +436,7 @@
 		</div>
 		<!-- 工具栏[右侧]弹窗 -->
 		<div v-if="showToolbarRightDialog" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
-			<el-dialog title="工具栏[右侧]设置" v-model="showToolbarRightDialog"
+			<el-dialog :title="i18nt('designer.setting.rightToolbarSetting')" v-model="showToolbarRightDialog"
 				:show-close="true" custom-class="drag-dialog small-padding-dialog"
 				:close-on-click-modal="false" :close-on-press-escape="false"
 				:destroy-on-close="true" width="1120px">
@@ -445,7 +445,7 @@
 					class="panes-setting" :cell-style="{padding:'1px 0'}"
 					default-expand-all :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
 					height="300" border row-key="btnID" ref="toolbarRightTable" stripe>
-					<el-table-column label="操作" width="90" fixed="left" align="center">
+					<el-table-column :label="i18nt('designer.setting.operate')" width="90" fixed="left" align="center">
 						<template #default="scope">
 							<!-- <el-tooltip class="item" effect="dark" content="添加按钮" placement="top"> -->
 								<el-button size="small" type="success" circle
@@ -464,24 +464,24 @@
 					</el-table-column> -->
 
 					<el-table-column label="btnID" width="150" prop="btnID" v-if="false"></el-table-column>
-					<el-table-column label="按钮名" width="160" prop="label">
+					<el-table-column :label="i18nt('designer.setting.btnName')" width="160" prop="label">
 						<template #default="scope">
 							<el-input v-model="scope.row.label" size="small"></el-input>
 						</template>
 					</el-table-column>
 
 					<!-- </el-table-column> -->
-					<el-table-column label="展示" width="70" prop="display">
+					<el-table-column :label="i18nt('designer.setting.btnHidden')" width="70" prop="display">
 						<template #default="scope">
 							<el-switch v-model="scope.row.display" size="small"></el-switch>
 						</template>
 					</el-table-column>
-					<el-table-column label="禁用" width="70" prop="disabled">
+					<el-table-column :label="i18nt('designer.setting.btnDisable')" width="70" prop="disabled">
 						<template #default="scope">
 							<el-switch v-model="scope.row.disabled" size="small"></el-switch>
 						</template>
 					</el-table-column>
-					<el-table-column label="下拉按钮" width="70" prop="disabled">
+					<el-table-column :label="i18nt('designer.setting.isDropdownBtn')" width="70" prop="disabled">
 						<template #default="scope">
 							<el-switch v-model="scope.row.bExtend" size="small"></el-switch>
 						</template>
@@ -494,7 +494,7 @@
 							</el-select>
 						</template>
 					</el-table-column> -->
-					<el-table-column label="类型" width="120" prop="type">
+					<el-table-column :label="i18nt('designer.setting.btnType')" width="120" prop="type">
 						<template #default="scope">
 							<el-select v-model="scope.row.type" placeholder="请选择" size="small">
 									<el-option v-for="item in btnTypeOptions" :key="item.value" :label="item.label" :value="item.value">
@@ -502,18 +502,18 @@
 							</el-select>
 						</template>
 					</el-table-column>
-					<el-table-column label="icon图标" width="160" prop="icon">
+					<el-table-column :label="i18nt('designer.setting.btnIcon')" width="160" prop="icon">
 						<template #default="scope">
 							<el-input v-model="scope.row.icon" size="small"></el-input>
 						</template>
 					</el-table-column>
-					<el-table-column label="点击事件" width="130" >
+					<el-table-column :label="i18nt('designer.setting.btnClickEvent')" width="130" >
 						<template #default="scope">
 							<el-button type="info" icon="el-icon-edit" plain round @click="editClickEventHandler(scope.$index,scope.row.onClick)">
 								{{i18nt('designer.setting.addEventHandler')}}</el-button>
 						</template>
 					</el-table-column>
-					<el-table-column label="下拉按钮编辑" width="130">
+					<el-table-column :label="i18nt('designer.setting.dropdownBtnSetting')" width="130">
 						<template #default="scope">
 							<el-button v-if="scope.row.bExtend"
 								type="info"
@@ -531,7 +531,7 @@
 			</el-dialog>
 		</div>
 		<!-- 工具栏 -下拉按钮弹窗 -->
-		<div v-if="toolbarDropdownBtnDialog" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
+		<!-- <div v-if="toolbarDropdownBtnDialog" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
 			<el-dialog title="工具栏按钮设置"
 				v-model="toolbarDropdownBtnDialog"
 				:show-close="true"
@@ -539,7 +539,7 @@
 				:close-on-click-modal="false"
 				:close-on-press-escape="false"
 				:destroy-on-close="true"
-				width="1120px">
+				width="1120px"> 
 				<el-table :data="[]"
 					style="width: 100%"
 					class="panes-setting"
@@ -551,7 +551,7 @@
 					row-key="btnID"
 					ref="toolbarDropdownBtnTable"
 					stripe>
-					<el-table-column label="操作" width="90" fixed="left" align="center">
+					<el-table-column :label="i18nt('designer.setting.operate')" width="90" fixed="left" align="center">
 						<template #default="scope">
 								<el-button size="small" type="success" circle
 									@click="toolbarBtnAdd(scope.$index)" icon="el-icon-plus"></el-button>
@@ -591,11 +591,11 @@
 					<el-button size="large" @click="toolbarDropdownBtnDialog = false">{{i18nt('designer.hint.closePreview')}}</el-button>
 				</div>
 			</el-dialog>
-		</div>
+		</div> -->
 
 		<!-- 按钮事件编辑弹窗 -->
 		<div v-if="eventDialogVisible" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
-			<el-dialog title="点击事件" width="60%" :close-on-click-modal="false" :close-on-press-escape="false"
+			<el-dialog :title="i18nt('designer.setting.btnClickEvent')" width="60%" :close-on-click-modal="false" :close-on-press-escape="false"
 				:destroy-on-close="true" v-model="eventDialogVisible" >
 				<!-- <el-input type="textarea":rows="8" v-model="jsString"></el-input> -->
 				<code-editor ref="jsString" :mode="'javascript'" v-model="jsString"></code-editor>

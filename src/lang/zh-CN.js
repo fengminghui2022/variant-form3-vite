@@ -424,6 +424,22 @@ export default {
 			
 			// CRUD
 			controlLocation:'按钮组对齐',
+			
+			toolbarSetting:'工具栏按钮设置',
+			enableLeftToolbar:'启用工具栏[左侧]',
+			leftToolbarSetting:'工具栏[左侧]设置',
+			enableRightToolbar:'启用工具栏[右侧]',
+			rightToolbarSetting:'工具栏[右侧]设置',
+			
+			operate:'操作',
+			btnName:'按钮名',
+			btnHidden:'隐藏',
+			btnDisable:'禁用',
+			isDropdownBtn:'下拉按钮',
+			btnType:'类型',
+			btnIcon:'icon图标',
+			btnClickEvent:'点击事件',
+			dropdownBtnSetting:'下拉按钮设置',
     }
 
   }
