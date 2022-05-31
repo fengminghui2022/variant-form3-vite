@@ -39,7 +39,7 @@
 			  </draggable>
 			</el-card>
 			<!-- 工具栏按钮 -->
-			<el-row>
+			<el-row class="crud-toolbar">
 				<el-col :span="12">
 					<div style="width: 100%; " class="leftClass" v-if="widget.options.toolbarLeft">
 						<el-button-group :size="widgetSize">
@@ -694,16 +694,22 @@
 		padding: 0px 10px;
 	}
 	.el-dropdown{
-		margin-left:-2px;
-		margin-right: -2px;
-		border-left: 1px solid rgba(255,255,255,.5);
-		border-right: 1px solid rgba(255,255,255,.5);
+		//margin-left:-2px;
+		//margin-right: -2px;
+		//border-left: 1px solid rgba(255,255,255,.5);
+		//border-right: 1px solid rgba(255,255,255,.5);
 		border-radius: 0px;
 	}
 	.el-button{
-		border-left: 1px solid rgba(255,255,255,.5);
-		border-right: 1px solid rgba(255,255,255,.5);
+		//border-left: 1px solid rgba(255,255,255,.5);
+		//border-right: 1px solid rgba(255,255,255,.5);
 	}
+
+	.crud-toolbar {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	}
+
 	.leftClass{
 		text-align: left;
 	}
