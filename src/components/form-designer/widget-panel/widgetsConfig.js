@@ -281,7 +281,7 @@ export const containers = [
           bExtend: false,
         },
         {
-          id: 'btncopy',
+          id: 'btnCopy',
           size: 'small',
           disabled: false,
           display: true,
@@ -292,7 +292,7 @@ export const containers = [
           bExtend: false,
         },
         {
-          id: 'btnsave',
+          id: 'btnSave',
           size: 'small',
           disabled: false,
           display: true,

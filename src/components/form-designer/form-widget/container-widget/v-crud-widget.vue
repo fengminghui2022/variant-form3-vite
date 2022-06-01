@@ -4,20 +4,21 @@
 		:index-of-parent-list="indexOfParentList">
 		<div :key="widget.id" class="collapse-container data-table-container"
 			:class="{'selected': selected}" @click.stop="selectWidget(widget)">
+
 			<!-- 查询条件面板 -->
-			<el-card :key="widget.id" class="card-container" @click.native.stop="selectWidget(widget)" :size="widgetSize"
-			         :shadow="widget.options.shadow" :style="{width: widget.options.cardWidth + '!important' || ''}"
-			         :class="[selected ? 'selected' : '', !!widget.options.folded ? 'folded' : '', customClass]">
+			<el-card :key="widget.id" class="search-card" :size="widgetSize"
+			         shadow="never">
 			  <template #header>
 					<div class="clear-fix" >
-					 <span style="font-size: 18px;padding: 10px;">{{widget.options.label}}</span>
-					 <i v-if="widget.options.showFold" class="float-right" style="padding-top: 10px;"
-							 :class="[!widget.options.folded ? 'el-icon-arrow-down' : 'el-icon-arrow-up']"
-							 @click="toggleCard"></i>
-						<el-button-group class="float-right" :size="widgetSize">
-							<el-button type="primary" icon="el-icon-search" >{{i18nt('designer.hint.search')}}</el-button>
-							<el-button type="" icon="el-icon-edit" >{{i18nt('designer.hint.reset')}}</el-button>
-						</el-button-group>
+					  <span style="font-size: 18px;padding: 10px;">{{widget.options.label}}</span>
+						<i class="float-right" @click="toggleCard">
+							<template v-if="!widget.options.folded">
+								<el-icon><ArrowDown /></el-icon>
+							</template>
+							<template v-else>
+								<el-icon><ArrowUp /></el-icon>
+							</template>
+						</i>
 					</div>
 				</template>
 			  <draggable :list="widget.widgetList" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
@@ -37,11 +38,18 @@
 			      </div>
 			    </template>
 			  </draggable>
+				<div class="search-toolbar">
+					<el-button-group :size="widgetSize">
+						<el-button type="primary" icon="el-icon-search" >{{i18nt('designer.hint.search')}}</el-button>
+						<el-button type="" icon="el-icon-edit" >{{i18nt('designer.hint.reset')}}</el-button>
+					</el-button-group>
+				</div>
 			</el-card>
+
 			<!-- 工具栏按钮 -->
 			<el-row class="crud-toolbar">
 				<el-col :span="12">
-					<div style="width: 100%; " class="leftClass" v-if="widget.options.toolbarLeft">
+					<div style="width: 100%; " class="crud-toolbar-left" v-if="widget.options.toolbarLeft">
 						<el-button-group :size="widgetSize">
 							<template v-for="(item,index) in widget.options.toolbarLeftButtons">
 								<template v-if="!item.bExtend">
@@ -96,7 +104,7 @@
 					</div>
 				</el-col>
 				<el-col :span="12">
-					<div style="width: 100%; " class="rightClass" v-if="widget.options.toolbarRight">
+					<div style="width: 100%; " class="crud-toolbar-right" v-if="widget.options.toolbarRight">
 						<el-button-group :size="widgetSize">
 							<template v-for="(item,index) in widget.options.toolbarRightButtons">
 								<template v-if="!item.bExtend">
@@ -168,21 +176,6 @@
 				<el-table-column v-if="widget.options.showCheckBox" type="selection"
 												 :width="!widget.options.showSummary ? 42: 53" fixed="left"></el-table-column>
 
-				<!-- <template v-for="(item, index) in widget.options.tableColumns">
-					<el-table-column v-if="item.show !== false"
-													 :key="index"
-													 :prop="item.prop"
-													 :label="item.label"
-													 :sortable="item.sortable"
-													 :fixed="!item.fixed ? false : item.fixed"
-													 :align="item.align ? item.align:'center'"
-													 :formatter="formatterValue"
-													 :format="item.format"
-													 :show-overflow-tooltip="true"
-													 :width="item.width">
-						<template #header>{{item.label}}</template>
-					</el-table-column>
-				</template> -->
 				<!-- 渲染表格列 -->
 				<template v-for="(child,groupListIndex) in getGroupList">
 					<template v-if="child.type=='column'">
@@ -331,15 +324,8 @@
 	import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 	import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
 	import refMixinDesign from "@/components/form-designer/refMixinDesign"
-	import { setStorage, getStorage,removeStorageItem} from '@/utils/localstorage'
-	// import {Check,RefreshLeft} from '@element-plus/icons-vue'
-	import {
-	  ArrowLeft,
-	  ArrowRight,
-	  Delete,
-	  Edit,
-	  Share,
-	} from '@element-plus/icons-vue'
+	import { setStorage, getStorage, removeStorageItem} from '@/utils/localstorage'
+
   export default {
     name: "VCrudWidget",
     componentName: 'VCrudWidget',
@@ -623,7 +609,7 @@
 			},
 			dragSort() {
 				const el = this.$refs.singleTable.$el.querySelectorAll('.el-table__body-wrapper > table > tbody')[0]
-				var tableData = this.widget.options.tableColumns;
+				let tableData = this.widget.options.tableColumns;
 				this.sortable = Sortable.create(el, {
 					ghostClass: 'sortable-ghost',
 					setData: function (dataTransfer) {
@@ -658,7 +644,6 @@
 <style lang="scss" scoped>
 
 	.collapse-container {
-	  //padding: 5px;
 	  margin: 2px;
 
 	  .form-widget-list {
@@ -666,12 +651,24 @@
 	  }
 	}
 
-	.card-container {
+	.search-card {
 	  margin: 2px;
 
 	  .form-widget-list {
 	    min-height: 28px;
 	  }
+
+		:deep(.el-card__header) {
+			padding: 5px !important;
+		}
+
+		.search-toolbar {
+			text-align: center;
+
+			:deep(.el-button) {
+				margin-right: 8px !important;
+			}
+		}
 	}
 
 	.collapse-container.selected {
@@ -691,38 +688,38 @@
 
 	.float-right {
 	  float: right;
-		padding: 0px 10px;
+		padding: 0 10px;
 	}
 	.el-dropdown{
-		//margin-left:-2px;
-		//margin-right: -2px;
-		//border-left: 1px solid rgba(255,255,255,.5);
-		//border-right: 1px solid rgba(255,255,255,.5);
-		border-radius: 0px;
-	}
-	.el-button{
-		//border-left: 1px solid rgba(255,255,255,.5);
-		//border-right: 1px solid rgba(255,255,255,.5);
+		border-radius: 0;
 	}
 
 	.crud-toolbar {
 		padding-left: 0 !important;
 		padding-right: 0 !important;
+
+		.crud-toolbar-left :deep(.el-button) {
+			margin-right: 8px !important;
+		}
+
+		.crud-toolbar-right :deep(.el-button) {
+			margin-left: 8px !important;
+		}
 	}
 
-	.leftClass{
+	.crud-toolbar-left {
 		text-align: left;
 	}
-	.centerClass{
-		text-align: center;
-	}
-	.rightClass{
+
+	.crud-toolbar-right  {
 		text-align: right;
 	}
-	.el-button-group>.el-button{
+
+	.el-button-group>.el-button {
 		float: none;
 	}
-	.select-menu{
+
+	.select-menu {
 	  position: absolute;
 	  background-color: #ffffff;
 	  border-radius: 5px;
@@ -730,6 +727,7 @@
 	  padding: 5px;
 	  z-index: 100;
 	}
+
 	.clear-fix:before, .clear-fix:after {
 	  display: table;
 	  content: "";
