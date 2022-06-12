@@ -219,8 +219,12 @@
 
         if (!!this.widget.options.showBlankRow && (this.rowIdData.length === 1)) {
           let oldSubFormData = this.formModel[this.widget.options.name] || []
-          this.handleSubFormRowAdd(oldSubFormData, this.rowIdData[0])
-          this.handleSubFormRowChange(oldSubFormData)
+
+          //确认组件创建成功后触发事件!!
+          this.$nextTick(() => {
+            this.handleSubFormRowAdd(oldSubFormData, this.rowIdData[0])
+            this.handleSubFormRowChange(oldSubFormData)
+          })
         }
       },
 
@@ -237,8 +241,11 @@
         this.addToRowIdData()
         this.addToFieldSchemaData()
 
-        this.handleSubFormRowAdd(oldSubFormData, this.rowIdData[oldSubFormData.length - 1])
-        this.handleSubFormRowChange(oldSubFormData)
+        //确认组件创建成功后触发事件!!
+        this.$nextTick(() => {
+          this.handleSubFormRowAdd(oldSubFormData, this.rowIdData[oldSubFormData.length - 1])
+          this.handleSubFormRowChange(oldSubFormData)
+        })
       },
 
       insertSubFormRow(beforeFormRowIndex) {
@@ -254,8 +261,11 @@
         this.insertToRowIdData(beforeFormRowIndex)
         this.addToFieldSchemaData(beforeFormRowIndex)
 
-        this.handleSubFormRowInsert(oldSubFormData, this.rowIdData[beforeFormRowIndex])
-        this.handleSubFormRowChange(oldSubFormData)
+        //确认组件创建成功后触发事件!!
+        this.$nextTick(() => {
+          this.handleSubFormRowInsert(oldSubFormData, this.rowIdData[beforeFormRowIndex])
+          this.handleSubFormRowChange(oldSubFormData)
+        })
       },
 
       deleteSubFormRow(formRowIndex) {
@@ -269,8 +279,11 @@
           this.deleteFromRowIdData(formRowIndex)
           this.deleteFromFieldSchemaData(formRowIndex)
 
-          this.handelSubFormRowDelete(oldSubFormData, deletedDataRow)
-          this.handleSubFormRowChange(oldSubFormData)
+          //确认组件创建成功后触发事件!!
+          this.$nextTick(() => {
+            this.handelSubFormRowDelete(oldSubFormData, deletedDataRow)
+            this.handleSubFormRowChange(oldSubFormData)
+          })
         }).catch(() => {
           //
         })

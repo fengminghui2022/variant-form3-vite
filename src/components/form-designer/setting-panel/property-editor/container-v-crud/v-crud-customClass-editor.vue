@@ -770,7 +770,7 @@
 			// 工具栏添加按钮
 			toolbarBtnAdd(index){
 				// let newRow = {btnID:new Date().getTime(),type:"primary",show:true};
-				var newRow={disabled:false,display:true,label:'new button',icon:"el-icon-info",type:"primary",onClick:"",extendBtns:[{disabled:false,display:true,onClick:"",label:'new childBtn'}]}
+				let newRow = {disabled:false,display:true,label:'new button',icon:"el-icon-info",type:"primary",onClick:"",extendBtns:[{disabled:false,display:true,onClick:"",label:'new childBtn'}]}
 				// this.optionModel[this.btnGroup].push(newRow);
 				this.optionModel[this.btnGroup].splice(index+1,0,newRow);
 				// debugger

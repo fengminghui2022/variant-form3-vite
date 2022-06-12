@@ -34,7 +34,7 @@ export default {
       'tab-pane':       '选项卡页',
       'data-table':     '数据表格',
 			'v-crud':				'CRUD',
-			
+
       input:          '单行输入',
       textarea:       '多行输入',
       number:         '计数器',
@@ -72,7 +72,7 @@ export default {
 			editbtn:"编辑事件",
 			dropbtnset:"设置下拉按钮",
 			dropdownbtn:"设置下拉",
-			
+
       selectParentWidget: '选中父组件',
       moveUpWidget: '上移组件',
       moveDownWidget: '下移组件',
@@ -86,7 +86,7 @@ export default {
       onlyFieldWidgetAcceptable: '子表单只能接收字段组件',
       moveUpFirstChildHint: '已经移动到最上面',
       moveDownLastChildHint: '已经移动到最下面',
-			
+
 			save:'保存',
       closePreview: '关闭',
       copyJson: '复制JSON',
@@ -421,25 +421,24 @@ export default {
       dsRequestBooleanTypeError: '布尔类型值错误',
       dsValidationError: '数据源设置存在错误，请修改',
       dsDuplicatedNameError: '数据源名称重复，请修改！',
-			
+
 			// CRUD
-			controlLocation:'按钮组对齐',
-			
-			toolbarSetting:'工具栏按钮设置',
-			enableLeftToolbar:'启用工具栏[左侧]',
-			leftToolbarSetting:'工具栏[左侧]设置',
-			enableRightToolbar:'启用工具栏[右侧]',
-			rightToolbarSetting:'工具栏[右侧]设置',
-			
-			operate:'操作',
-			btnName:'按钮名',
-			btnHidden:'隐藏',
-			btnDisable:'禁用',
-			isDropdownBtn:'下拉按钮',
-			btnType:'类型',
-			btnIcon:'icon图标',
-			btnClickEvent:'点击事件',
-			dropdownBtnSetting:'下拉按钮设置',
+      noSearchWidgetHint: '列表搜索区：请拖动组件放置于此处',
+			controlLocation: '按钮组对齐',
+			toolbarSetting: '工具栏按钮设置',
+			enableLeftToolbar: '启用工具栏[左侧]',
+			leftToolbarSetting: '工具栏[左侧]设置',
+			enableRightToolbar: '启用工具栏[右侧]',
+			rightToolbarSetting: '工具栏[右侧]设置',
+			operate: '操作',
+			btnName: '按钮名',
+			btnHidden: '隐藏',
+			btnDisable: '禁用',
+			isDropdownBtn: '下拉按钮',
+			btnType: '类型',
+			btnIcon: 'icon图标',
+			btnClickEvent: '点击事件',
+			dropdownBtnSetting: '下拉按钮设置',
     }
 
   }

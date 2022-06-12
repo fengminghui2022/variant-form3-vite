@@ -1288,6 +1288,7 @@ export const advancedFields = [
       label: '',
       defaultValue: '',
       placeholder: '',
+      columnWidth: '200px',
       size: '',
       labelWidth: null,
       labelHidden: false,

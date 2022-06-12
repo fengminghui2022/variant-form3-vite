@@ -34,7 +34,7 @@ export default {
       'tab-pane':       'TabPane',
       'data-table':     'DataTable',
 			'v-crud':				'CRUD',
-			
+
       input:          'Input',
       textarea:       'Textarea',
       number:         'InputNumber',
@@ -72,7 +72,7 @@ export default {
 			editbtn:"edit event",
 			dropbtnset:"setting drop button",
 			dropdownbtn:"Drop Down",
-			
+
       selectParentWidget: 'Select parent of this widget',
       moveUpWidget: 'Move up this widget',
       moveDownWidget: 'Move down this widget',
@@ -421,24 +421,24 @@ export default {
       dsRequestBooleanTypeError: 'Boolean value error',
       dsValidationError: 'Datasource check failure.',
       dsDuplicatedNameError: 'Duplicate datasource name.',
-			// CRUD
-			controlLocation:'controlLocation',
 
-			toolbarSetting:'Toolbar Setting',
-			enableLeftToolbar:'Enable LeftToolbar',
-			leftToolbarSetting:'LeftToolbar Setting',
-			enableRightToolbar:'Enable RightToolbar',
-			rightToolbarSetting:'RightToolbar Setting',
-			
-			operate:'Operate',
-			btnName:'Name',
-			btnHidden:'Hidden',
-			btnDisable:'Disable',
-			isDropdownBtn:'Dropdown Button',
-			btnType:'Type',
-			btnIcon:'Icon',
-			btnClickEvent:'Click Event',
-			dropdownBtnSetting:'Dropdown Button Setting',
+			// CRUD
+      noSearchWidgetHint: 'Search Area: please drag widgets to place here.',
+			controlLocation: 'controlLocation',
+			toolbarSetting: 'Toolbar Setting',
+			enableLeftToolbar: 'Enable LeftToolbar',
+			leftToolbarSetting: 'LeftToolbar Setting',
+			enableRightToolbar: 'Enable RightToolbar',
+			rightToolbarSetting: 'RightToolbar Setting',
+			operate: 'Operate',
+			btnName: 'Name',
+			btnHidden: 'Hidden',
+			btnDisable: 'Disable',
+			isDropdownBtn: 'Dropdown Button',
+			btnType: 'Type',
+			btnIcon: 'Icon',
+			btnClickEvent: 'Click Event',
+			dropdownBtnSetting: 'Dropdown Button Setting',
     }
 
   }

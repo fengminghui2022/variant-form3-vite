@@ -2,12 +2,13 @@
 	<container-item-wrapper v-show="!widget.options.hidden" :widget="widget">
 			<!-- 查询条件面板 -->
 			<el-card :key="widget.id" class="search-card" :size="widgetSize"
+							 :class="[!!searchCardFolded ? 'folded' : '']"
 			         shadow="never" style="width: 100%">
 			  <template #header>
 					<div class="clear-fix" >
 					 <span style="font-size: 18px;padding: 10px;">{{widget.options.label}}</span>
-						<i class="float-right" @click="toggleCard">
-							<template v-if="!widget.options.folded">
+						<i class="float-right" @click="toggleSearchCard">
+							<template v-if="searchCardFolded">
 								<el-icon><ArrowDown /></el-icon>
 							</template>
 							<template v-else>
@@ -177,21 +178,6 @@
 				<el-table-column v-if="widget.options.showCheckBox" type="selection"
 												 :width="!widget.options.showSummary ? 42: 53" fixed="left"></el-table-column>
 
-				<!-- <template v-for="(item, index) in widget.options.tableColumns">
-					<el-table-column v-if="item.show !== false"
-													 :key="index"
-													 :prop="item.prop"
-													 :label="item.label"
-													 :sortable="item.sortable"
-													 :fixed="!item.fixed ? false : item.fixed"
-													 :align="item.align ? item.align:'center'"
-													 :formatter="formatterValue"
-													 :format="item.format"
-													 :show-overflow-tooltip="true"
-													 :width="item.width">
-						<template #header>{{item.label}}</template>
-					</el-table-column>
-				</template> -->
 				<!-- 渲染表格列 -->
 				<template v-for="(child,groupListIndex) in getGroupList">
 					<template v-if="child.type=='column'">
@@ -357,7 +343,8 @@
 				top:0,
 				left:0,
 
-				menuVisible:false,
+				menuVisible: false,
+				searchCardFolded: false,
 				pageSize: this.widget.options.pagination.pageSize,
 				currentPage: this.widget.options.pagination.currentPage,
 			}
@@ -381,43 +368,43 @@
 		computed: {
 			// 计算表格列分组信息
 			getGroupList(){
-				var groupList=[];
-				var baseColumnItem=this.widget.options.tableColumns;
-				baseColumnItem.forEach((item,index)=>{
-					if(item.groupName==undefined){
-						item.groupName='';
+				let groupList = []
+				let baseColumnItem = this.widget.options.tableColumns
+				baseColumnItem.forEach((item,index) => {
+					if (item.groupName === undefined) {
+						item.groupName = ''
 					}
 				})
-				baseColumnItem.forEach((item)=>{
-					if(item.groupName!=""){
-						var flag=false;
-						for(var i=0;i<groupList.length;i++){
-							var child=groupList[i];
-							if(child.type=='group' && child.groupName==item.groupName){
-								flag=true;
-								child.columnList.push(item);
-								break;
+
+				baseColumnItem.forEach((item) => {
+					if (item.groupName !== "") {
+						let flag = false
+						for(let i = 0; i < groupList.length; i++) {
+							let child = groupList[i]
+							if ((child.type === 'group') && (child.groupName ===item.groupName)) {
+								flag = true
+								child.columnList.push(item)
+								break
 							}
 						}
-						if(!flag){
-							var info={};
-							info.type="group"
-							info.groupName=item.groupName
-							info.columnList=[];
-							info.columnList.push(item);
-							groupList.push(info);
-						}
-					}
-					else{
-						var info={};
-						info.type="column"
-						info.columnList=[];
-						info.columnList.push(item);
-						groupList.push(info);
-					}
 
+						if (!flag) {
+							let info = {}
+							info.type = "group"
+							info.groupName = item.groupName
+							info.columnList = []
+							info.columnList.push(item)
+							groupList.push(info)
+						}
+					} else {
+						let info = {}
+						info.type = "column"
+						info.columnList = []
+						info.columnList.push(item)
+						groupList.push(info)
+					}
 				})
-				return groupList;
+				return groupList
 			},
     	paginationLayout() {
 				return !!this.widget.options.smallPagination ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
@@ -435,16 +422,19 @@
 				return this.widget.options.tableSize || "default"
 			},
 			// 按钮组对齐
-			buttonGroupAlignClass(){
-				return this.widget.options.buttonGroupAlign+"Class";
+			buttonGroupAlignClass() {
+				return this.widget.options.buttonGroupAlign + "-class"
 			}
 		},
     methods: {
-			xformatter(row,prop,format){
-				var cellValue=row[prop];
+			toggleSearchCard() {
+				this.searchCardFolded = !this.searchCardFolded
+			},
+
+			xformatter(row,prop,format) {
+				let cellValue = row[prop];
 				if(!!format){
-					switch(format)
-					{
+					switch(format) {
 						case 'd1':
 								return formatDate1(cellValue);
 								break;
@@ -488,23 +478,23 @@
 			},
 
 			renderHeader(h, { column, $index }) {
-				var colCount = 0;
-				if(this.widget.options.showIndex){
-					colCount++;
+				let colCount = 0
+				if (this.widget.options.showIndex) {
+					colCount++
 				}
-				if(this.widget.options.showCheckBox){
-					colCount++;
+				if (this.widget.options.showCheckBox) {
+					colCount++
 				}
 				this.$set(column, "formatS", this.widget.options.tableColumns[$index-colCount].formatS)
-			  return column.label;
+			  return column.label
 			},
 
 			formatter(row, column, cellValue) {
-			  return cellValue;
+			  return cellValue
 			},
 
 			formatterValue(row, column, cellValue) {
-				if(!!column.formatS && !!column.show) {
+				if (!!column.formatS && !!column.show) {
 					switch(column.formatS) {
 						case 'd1':
 								return formatDate1(cellValue);
@@ -568,46 +558,49 @@
 			executeEvent(funName){
 				eval(funName);
 			},
-			setBtnsDisplay(btnList,display){
-				for(var i=0;i<btnList.length;i++){
-					for(var j=0;j<this.widget.options.toolbarButtons.length;j++){
-						var item=this.widget.options.toolbarButtons[j]
-						if(item.id==btnList[i]){
-							item.display=display;
-							break;
+			setBtnsDisplay(btnList, display){
+				for (let i = 0; i < btnList.length; i++) {
+					for (let j = 0; j < this.widget.options.toolbarButtons.length; j++) {
+						let item = this.widget.options.toolbarButtons[j]
+						if (item.id === btnList[i]) {
+							item.display = display
+							break
 						}
-						if(item.bExtend){
-							var flag=false;
-							for(var k=0;k<item.extendBtns.length;k++){
-								if(item.extendBtns[k].id==btnList[i]){
-									item.extendBtns[k].display=display
-									flag=true;
-									break;
+
+						if (item.bExtend) {
+							let flag = false
+							for (let k = 0; k < item.extendBtns.length; k++) {
+								if (item.extendBtns[k].id === btnList[i]) {
+									item.extendBtns[k].display = display
+									flag = true
+									break
 								}
 							}
-							if(flag)break;
+
+							if (flag) break
 						}
 					}
 				}
 			},
-			setBtnsDisabled(btnList,disabled){
-				for(var i=0;i<btnList.length;i++){
-					for(var j=0;j<this.widget.options.toolbarButtons.length;j++){
-						var item=this.widget.options.toolbarButtons[j]
-						if(item.id==btnList[i]){
-							item.disabled=disabled;
-							break;
+			setBtnsDisabled(btnList, disabled){
+				for(let i = 0; i < btnList.length; i++){
+					for(let j = 0; j < this.widget.options.toolbarButtons.length; j++) {
+						let item = this.widget.options.toolbarButtons[j]
+						if (item.id === btnList[i]) {
+							item.disabled = disabled
+							break
 						}
-						if(item.bExtend){
-							var flag=false;
-							for(var k=0;k<item.extendBtns.length;k++){
-								if(item.extendBtns[k].id==btnList[i]){
-									item.extendBtns[k].disabled=disabled
-									flag=true;
-									break;
+						if (item.bExtend) {
+							let flag = false
+							for (let k = 0; k < item.extendBtns.length; k++) {
+								if (item.extendBtns[k].id === btnList[i]) {
+									item.extendBtns[k].disabled = disabled
+									flag = true
+									break
 								}
 							}
-							if(flag)break;
+
+							if (flag) break
 						}
 					}
 				}
@@ -616,10 +609,10 @@
 			// 查询面板相关方法
 			// =========================================================
 			resetHandler(){
-				var widgetList=this.widget.widgetList;
-				var that=this;
+				let widgetList = this.widget.widgetList
+				let that = this
 				// 应用查询默认值设置
-				traverseFieldWidgets(widgetList, (widget,_this=this) => {
+				traverseFieldWidgets(widgetList, (widget, _this = this) => {
 					that.getWidgetRef(widget.options.name).setValue("");
 				})
 				// removeStorageItem(this.getFormRef().optionData.pageID+"-"+this.widget.options.name);
@@ -718,7 +711,7 @@
 			},
 			dragSort() {
 				const el = this.$refs.singleTable.$el.querySelectorAll('.el-table__body-wrapper > table > tbody')[0]
-				var tableData = this.widget.options.tableColumns;
+				let tableData = this.widget.options.tableColumns;
 				this.sortable = Sortable.create(el, {
 					ghostClass: 'sortable-ghost',
 					setData: function (dataTransfer) {
@@ -760,23 +753,37 @@
 	}
 
 	.search-card {
-	  margin: 3px;
+	  //margin: 3px;
 
 	  .form-widget-list {
 	    min-height: 28px;
 	  }
 
 		:deep(.el-card__header) {
-			padding: 5px !important;
+			padding: 5px;
+			border-bottom-width: 0;
+		}
+
+		:deep(.el-card__body) {
+			padding: 10px;
+		}
+
+		:deep(.el-form-item) {
+			margin-bottom: 0;
 		}
 
 		.search-toolbar {
+			margin-top: 10px;
 			text-align: center;
 
 			:deep(.el-button) {
 				margin-right: 8px !important;
 			}
 		}
+	}
+
+	.folded :deep(.el-card__body) {
+		display: none;
 	}
 
 	.collapse-container.selected {

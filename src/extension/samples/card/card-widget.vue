@@ -17,12 +17,12 @@
           </i>
         </div>
       </template>
-      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
-                 handle=".drag-handler" tag="transition-group" :component-data="{name: 'fade'}"
-                 @add="(evt) => onContainerDragAdd(evt, widget.widgetList)"
-                 @update="onContainerDragUpdate" :move="checkContainerMove">
-        <template #item="{ element: subWidget, index: swIdx }">
-          <div class="form-widget-list">
+      <div class="form-widget-list">
+        <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+                   handle=".drag-handler" tag="transition-group" :component-data="{name: 'fade'}"
+                   @add="(evt) => onContainerDragAdd(evt, widget.widgetList)"
+                   @update="onContainerDragUpdate" :move="checkContainerMove">
+          <template #item="{ element: subWidget, index: swIdx }">
             <template v-if="'container' === subWidget.category">
               <component :is="subWidget.type + '-widget'" :widget="subWidget" :designer="designer" :key="subWidget.id" :parent-list="widget.widgetList"
                          :index-of-parent-list="swIdx" :parent-widget="widget"></component>
@@ -31,9 +31,9 @@
               <component :is="subWidget.type + '-widget'" :field="subWidget" :designer="designer" :key="subWidget.id" :parent-list="widget.widgetList"
                          :index-of-parent-list="swIdx" :parent-widget="widget" :design-state="true"></component>
             </template>
-          </div>
-        </template>
-      </draggable>
+          </template>
+        </draggable>
+      </div>
     </el-card>
   </container-wrapper>
 </template>

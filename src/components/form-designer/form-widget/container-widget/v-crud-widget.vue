@@ -7,12 +7,13 @@
 
 			<!-- 查询条件面板 -->
 			<el-card :key="widget.id" class="search-card" :size="widgetSize"
-			         shadow="never">
+							 :class="[!!searchCardFolded ? 'folded' : '']"
+							 shadow="never" style="width: 100%">
 			  <template #header>
 					<div class="clear-fix" >
 					  <span style="font-size: 18px;padding: 10px;">{{widget.options.label}}</span>
-						<i class="float-right" @click="toggleCard">
-							<template v-if="!widget.options.folded">
+						<i class="float-right" @click="toggleSearchCard">
+							<template v-if="searchCardFolded">
 								<el-icon><ArrowDown /></el-icon>
 							</template>
 							<template v-else>
@@ -21,23 +22,27 @@
 						</i>
 					</div>
 				</template>
-			  <draggable :list="widget.widgetList" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
-			             handle=".drag-handler" item-key="id"
-			             @add="(evt) => onContainerDragAdd(evt, widget.widgetList)"
-			             @update="onContainerDragUpdate" :move="checkContainerMove">
-			    <template #item="{ element: subWidget, index: swIdx }">
-			      <div class="form-widget-list">
-			        <template v-if="'container' === subWidget.category">
-			          <component :is="subWidget.type + '-widget'" :widget="subWidget" :designer="designer" :key="subWidget.id" :parent-list="widget.widgetList"
-			                     :index-of-parent-list="swIdx" :parent-widget="widget"></component>
-			        </template>
-			        <template v-else>
-			          <component :is="subWidget.type + '-widget'" :field="subWidget" :designer="designer" :key="subWidget.id" :parent-list="widget.widgetList"
-			                     :index-of-parent-list="swIdx" :parent-widget="widget" :design-state="true"></component>
-			        </template>
-			      </div>
-			    </template>
-			  </draggable>
+				<div class="form-widget-list">
+					<template v-if="widget.widgetList.length === 0">
+						<div class="no-widget-hint">{{i18nt('designer.setting.noSearchWidgetHint')}}</div>
+					</template>
+
+					<draggable :list="widget.widgetList" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+										 handle=".drag-handler" item-key="id" style="min-height: 32px"
+										 @add="(evt) => onContainerDragAdd(evt, widget.widgetList)"
+										 @update="onContainerDragUpdate" :move="checkContainerMove">
+						<template #item="{ element: subWidget, index: swIdx }">
+							<template v-if="'container' === subWidget.category">
+								<component :is="subWidget.type + '-widget'" :widget="subWidget" :designer="designer" :key="subWidget.id" :parent-list="widget.widgetList"
+													 :index-of-parent-list="swIdx" :parent-widget="widget"></component>
+							</template>
+							<template v-else>
+								<component :is="subWidget.type + '-widget'" :field="subWidget" :designer="designer" :key="subWidget.id" :parent-list="widget.widgetList"
+													 :index-of-parent-list="swIdx" :parent-widget="widget" :design-state="true"></component>
+							</template>
+						</template>
+					</draggable>
+				</div>
 				<div class="search-toolbar">
 					<el-button-group :size="widgetSize">
 						<el-button type="primary" icon="el-icon-search" >{{i18nt('designer.hint.search')}}</el-button>
@@ -337,9 +342,10 @@
 		},
 		data() {
 			return {
-				top:0,
-				left:0,
-				menuVisible:false,
+				top: 0,
+				left: 0,
+				menuVisible: false,
+				searchCardFolded: false,
 			}
 		},
     props: {
@@ -361,44 +367,46 @@
 		computed: {
 			// 计算表格列分组信息
 			getGroupList(){
-				var groupList=[];
-				var baseColumnItem=this.widget.options.tableColumns;
-				baseColumnItem.forEach((item,index)=>{
-					if(item.groupName==undefined){
-						item.groupName='';
+				let groupList = []
+				let baseColumnItem = this.widget.options.tableColumns
+				baseColumnItem.forEach((item,index) => {
+					if(item.groupName === undefined){
+						item.groupName = ''
 					}
 				})
-				baseColumnItem.forEach((item)=>{
-					if(item.groupName!=""){
-						var flag=false;
-						for(var i=0;i<groupList.length;i++){
-							var child=groupList[i];
-							if(child.type=='group' && child.groupName==item.groupName){
-								flag=true;
-								child.columnList.push(item);
-								break;
+
+				baseColumnItem.forEach((item) => {
+					if (item.groupName !== "") {
+						let flag = false
+						for(let i = 0; i < groupList.length; i++) {
+							let child = groupList[i]
+							if ((child.type === 'group') && (child.groupName === item.groupName)) {
+								flag = true
+								child.columnList.push(item)
+								break
 							}
 						}
-						if(!flag){
-							var info={};
-							info.type="group"
-							info.groupName=item.groupName
-							info.columnList=[];
-							info.columnList.push(item);
-							groupList.push(info);
-						}
-					}
-					else{
-						var info={};
-						info.type="column"
-						info.columnList=[];
-						info.columnList.push(item);
-						groupList.push(info);
-					}
 
+						if (!flag) {
+							let info = {};
+							info.type="group"
+							info.groupName = item.groupName
+							info.columnList = []
+							info.columnList.push(item)
+							groupList.push(info)
+						}
+					} else{
+						let info = {};
+						info.type = "column"
+						info.columnList = []
+						info.columnList.push(item)
+						groupList.push(info)
+					}
 				})
+
 				return groupList;
 			},
+
     	paginationLayout() {
 				return !!this.widget.options.smallPagination ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
 			},
@@ -414,17 +422,21 @@
 			widgetSize() {
 				return this.widget.options.tableSize || "default"
 			},
+
 			// 按钮组对齐
-			buttonGroupAlignClass(){
-				return this.widget.options.buttonGroupAlign+"Class";
+			buttonGroupAlignClass() {
+				return this.widget.options.buttonGroupAlign + "-class";
 			}
 		},
     methods: {
+			toggleSearchCard() {
+				this.searchCardFolded = !this.searchCardFolded
+			},
+
 			xformatter(row,prop,format){
-				var cellValue=row[prop];
-				if(!!format){
-					switch(format)
-					{
+				let cellValue = row[prop]
+				if (!!format) {
+					switch(format) {
 						case 'd1':
 								return formatDate1(cellValue);
 								break;
@@ -462,7 +474,7 @@
 								return formatNumber7(cellValue);
 								break;
 					}
-				}else {
+				} else {
 					return cellValue
 				}
 			},
@@ -472,12 +484,12 @@
 			},
 
 			renderHeader(h, { column, $index }) {
-				var colCount = 0;
-				if(this.widget.options.showIndex){
-					colCount++;
+				let colCount = 0
+				if (this.widget.options.showIndex) {
+					colCount++
 				}
-				if(this.widget.options.showCheckBox){
-					colCount++;
+				if (this.widget.options.showCheckBox) {
+					colCount++
 				}
 				this.$set(column, "formatS", this.widget.options.tableColumns[$index-colCount].formatS)
 			  return column.label;
@@ -526,52 +538,59 @@
 			handleCurrentPageChange(currentPage) {
 				//
 			},
+
 			// =========================================================
 			//* 按钮组方法
 			// =========================================================
 			executeEvent(funName){
 				eval(funName);
 			},
-			setBtnsDisplay(btnList,display){
-				for(var i=0;i<btnList.length;i++){
-					for(var j=0;j<this.widget.options.toolbarButtons.length;j++){
-						var item=this.widget.options.toolbarButtons[j]
-						if(item.id==btnList[i]){
-							item.display=display;
-							break;
+
+			setBtnsDisplay(btnList, display){
+				for (let i = 0; i < btnList.length; i++) {
+					for(let j = 0; j < this.widget.options.toolbarButtons.length; j++){
+						let item = this.widget.options.toolbarButtons[j]
+						if (item.id === btnList[i]) {
+							item.display = display
+							break
 						}
-						if(item.bExtend){
-							var flag=false;
-							for(var k=0;k<item.extendBtns.length;k++){
-								if(item.extendBtns[k].id==btnList[i]){
-									item.extendBtns[k].display=display
-									flag=true;
-									break;
+
+						if (item.bExtend) {
+							let flag = false;
+							for(let k = 0; k < item.extendBtns.length; k++) {
+								if (item.extendBtns[k].id === btnList[i]) {
+									item.extendBtns[k].display = display
+									flag = true
+									break
 								}
 							}
-							if(flag)break;
+
+							if (flag) break
 						}
 					}
 				}
 			},
-			setBtnsDisabled(btnList,disabled){
-				for(var i=0;i<btnList.length;i++){
-					for(var j=0;j<this.widget.options.toolbarButtons.length;j++){
-						var item=this.widget.options.toolbarButtons[j]
-						if(item.id==btnList[i]){
-							item.disabled=disabled;
-							break;
+
+			setBtnsDisabled(btnList, disabled){
+				for (let i = 0; i < btnList.length; i++) {
+					for(let j = 0; j < this.widget.options.toolbarButtons.length; j++) {
+						let item = this.widget.options.toolbarButtons[j]
+						if (item.id === btnList[i]) {
+							item.disabled = disabled
+							break
 						}
-						if(item.bExtend){
-							var flag=false;
-							for(var k=0;k<item.extendBtns.length;k++){
-								if(item.extendBtns[k].id==btnList[i]){
-									item.extendBtns[k].disabled=disabled
-									flag=true;
-									break;
+
+						if (item.bExtend) {
+							let flag = false;
+							for(let k = 0; k < item.extendBtns.length; k++){
+								if (item.extendBtns[k].id === btnList[i]) {
+									item.extendBtns[k].disabled = disabled
+									flag = true
+									break
 								}
 							}
-							if(flag)break;
+
+							if (flag) break
 						}
 					}
 				}
@@ -646,29 +665,55 @@
 	.collapse-container {
 	  margin: 2px;
 
-	  .form-widget-list {
-	    min-height: 28px;
-	  }
+	  /*.form-widget-list {*/
+	  /*  min-height: 28px;*/
+		/*	border: 1px dashed #CCCCCC;*/
+	  /*}*/
+	}
+
+	.no-widget-hint {
+		padding-top: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		font-size: 13px;
+		color: #999999;
 	}
 
 	.search-card {
-	  margin: 2px;
+	  //margin: 2px;
 
 	  .form-widget-list {
-	    min-height: 28px;
+	    //min-height: 28px;
+			border: 1px dashed #CCCCCC;
 	  }
 
 		:deep(.el-card__header) {
-			padding: 5px !important;
+			padding: 5px;
+			border-bottom-width: 0;
+		}
+
+		:deep(.el-card__body) {
+			padding: 10px;
+		}
+
+		:deep(.el-form-item) {
+			margin-bottom: 0;
 		}
 
 		.search-toolbar {
+			margin-top: 10px;
 			text-align: center;
 
 			:deep(.el-button) {
 				margin-right: 8px !important;
 			}
 		}
+	}
+
+	.folded :deep(.el-card__body) {
+		display: none;
 	}
 
 	.collapse-container.selected {
