@@ -62,7 +62,7 @@
 											:type="item.type"
 											:icon="item.icon"
 											:disabled="item.disabled"
-											v-show="item.display"
+											v-show="!item.hidden"
 											@click="executeEvent(item.onClick)">
 											</el-button>
 									</template>
@@ -72,7 +72,7 @@
 											:type="item.type"
 											:icon="item.icon"
 											:disabled="item.disabled"
-											v-show="item.display"
+											v-show="!item.hidden"
 											@click="executeEvent(item.onClick)">
 											{{item.label}}
 										</el-button>
@@ -82,7 +82,7 @@
 									<el-dropdown
 										split-button
 										:disabled="item.disabled"
-										v-show="item.display"
+										v-show="!item.hidden"
 										type="primary"
 										:size="widgetSize"
 										@click="executeEvent(item.onClick)"
@@ -94,7 +94,7 @@
 													v-for="(info,idx) in item.extendBtns"
 													:key="idx"
 													:disabled="info.disabled"
-													v-show="info.display"
+													v-show="!info.hidden"
 													@click.native="executeEvent(info.onClick)">
 													{{info.label}}
 												</el-dropdown-item>
@@ -117,7 +117,7 @@
 											:type="item.type"
 											:icon="item.icon"
 											:disabled="item.disabled"
-											v-show="item.display"
+											v-show="!item.hidden"
 											@click="executeEvent(item.onClick)">
 											</el-button>
 									</template>
@@ -127,7 +127,7 @@
 											:type="item.type"
 											:icon="item.icon"
 											:disabled="item.disabled"
-											v-show="item.display"
+											v-show="!item.hidden"
 											@click="executeEvent(item.onClick)">
 											{{item.label}}
 										</el-button>
@@ -137,7 +137,7 @@
 									<el-dropdown
 										split-button
 										:disabled="item.disabled"
-										v-show="item.display"
+										v-show="!item.hidden"
 										type="primary"
 										:size="widgetSize"
 										@click="executeEvent(item.onClick)"
@@ -149,7 +149,7 @@
 													v-for="(info,idx) in item.extendBtns"
 													:key="idx"
 													:disabled="info.disabled"
-													v-show="info.display"
+													v-show="!info.hidden"
 													@click.native="executeEvent(info.onClick)">
 													{{info.label}}
 												</el-dropdown-item>
@@ -555,15 +555,15 @@
 			// =========================================================
 			//* 按钮组方法
 			// =========================================================
-			executeEvent(funName){
+			executeEvent(funName) {
 				eval(funName);
 			},
-			setBtnsDisplay(btnList, display){
+			setBtnsDisplay(btnList, display) {
 				for (let i = 0; i < btnList.length; i++) {
 					for (let j = 0; j < this.widget.options.toolbarButtons.length; j++) {
 						let item = this.widget.options.toolbarButtons[j]
 						if (item.id === btnList[i]) {
-							item.display = display
+							item.hidden = !display
 							break
 						}
 
@@ -571,7 +571,7 @@
 							let flag = false
 							for (let k = 0; k < item.extendBtns.length; k++) {
 								if (item.extendBtns[k].id === btnList[i]) {
-									item.extendBtns[k].display = display
+									item.extendBtns[k].hidden = !display
 									flag = true
 									break
 								}
@@ -582,7 +582,7 @@
 					}
 				}
 			},
-			setBtnsDisabled(btnList, disabled){
+			setBtnsDisabled(btnList, disabled) {
 				for(let i = 0; i < btnList.length; i++){
 					for(let j = 0; j < this.widget.options.toolbarButtons.length; j++) {
 						let item = this.widget.options.toolbarButtons[j]

@@ -320,9 +320,9 @@
 							<el-input v-model="scope.row.label" size="small"></el-input>
 						</template>
 					</el-table-column>
-					<el-table-column :label="i18nt('designer.setting.btnHidden')" width="70" prop="display">
+					<el-table-column :label="i18nt('designer.setting.btnHidden')" width="70" prop="hidden">
 						<template #default="scope">
-							<el-switch v-model="scope.row.display" size="small"></el-switch>
+							<el-switch v-model="scope.row.hidden" size="small"></el-switch>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.btnDisable')" width="70" prop="disabled">
@@ -399,9 +399,9 @@
 							<el-input v-model="scope.row.label" size="small"></el-input>
 						</template>
 					</el-table-column>
-					<el-table-column :label="i18nt('designer.setting.btnHidden')" width="70" prop="display">
+					<el-table-column :label="i18nt('designer.setting.btnHidden')" width="70" prop="hidden">
 						<template #default="scope">
-							<el-switch v-model="scope.row.display" size="small"></el-switch>
+							<el-switch v-model="scope.row.hidden" size="small"></el-switch>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.btnDisable')" width="70" prop="disabled">
