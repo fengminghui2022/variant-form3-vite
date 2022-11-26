@@ -106,6 +106,12 @@
 </template>
 
 <script>
+  import { 
+    computed, getCurrentInstance, reactive,ref ,nextTick,
+    toRefs,provide , inject,watch,
+    onMounted
+  } from 'vue'
+
   import CodeEditor from '@/components/code-editor/index'
   import PropertyEditors from './property-editor/index'
   import FormSetting from './form-setting'
@@ -114,8 +120,8 @@
   import {
     addWindowResizeHandler,
   } from "@/utils/util"
-  import i18n from "@/utils/i18n"
-  import emitter from "@/utils/emitter";
+  import { useI18n } from '@/utils/i18n'
+  import { useEmitter} from "@/utils/emitter";
   import { propertyRegistered } from "@/components/form-designer/setting-panel/propertyRegister";
 
   const {COMMON_PROPERTIES, ADVANCED_PROPERTIES, EVENT_PROPERTIES} = WidgetProperties
@@ -123,7 +129,6 @@
   export default {
     name: "SettingPanel",
     componentName: "SettingPanel",
-    mixins: [i18n, emitter],
     components: {
       CodeEditor,
       FormSetting,
@@ -132,23 +137,49 @@
     },
     props: {
       designer: Object,
-      selectedWidget: Object,
+      selectedWidget:{ 
+        type: Object,
+        default:()=>{
+          return {
+            options: {}
+          }
+        }
+      },
       formConfig: Object,
       globalDsv: {
         type: Object,
         default: () => ({})
       },
     },
-    provide() {
-      return {
-        isSubFormChildWidget: () => this.subFormChildWidgetFlag,
-        getGlobalDsv: () => this.globalDsv, // 全局数据源变量
-      }
-    },
-    inject: ['getDesignerConfig'],
-    data() {
-      return {
-        designerConfig: this.getDesignerConfig(),
+    setup(props){
+      const { i18nt }=useI18n();
+      const emitter = useEmitter();
+      const { proxy } = getCurrentInstance()
+      let $current=proxy;
+
+      const getDesignerConfig=inject("getDesignerConfig");
+
+      
+      const ecEditor=ref(null)
+      onMounted(()=> {
+        if (!props.designer.selectedWidget) {
+          data.activeTab = "2"
+        } else {
+          data.activeTab = "1"
+        }
+
+        data.scrollerHeight = window.innerHeight - 56 - 48 + 'px'
+        addWindowResizeHandler(() => {
+          nextTick(() => {
+            data.scrollerHeight = window.innerHeight - 56 - 48 + 'px'
+            //console.log(this.scrollerHeight)
+          })
+        })
+
+      })
+
+      const data=reactive({
+        designerConfig: getDesignerConfig(),
 
         scrollerHeight: 0,
 
@@ -166,117 +197,81 @@
         eventHeader: '',
 
         subFormChildWidgetFlag: false,
-      }
-    },
-    computed: {
-      optionModel: {
+      })
+      
+      provide("isSubFormChildWidget",()=> data.subFormChildWidgetFlag);      
+      provide("getGlobalDsv", data.globalDsv);
+
+
+
+      const optionModel=computed({
         get() {
-          return this.selectedWidget.options
+          return props.selectedWidget.options
         },
-
         set(newValue) {
-          this.selectedWidget.options = newValue
+          props.selectedWidget.options = newValue
         }
-      },
-
-    },
-    watch: {
-      'designer.selectedWidget': {
-        handler(val) {
-          if (!!val) {
-            this.activeTab = "1"
-          }
-        }
-      },
-
-      'selectedWidget.options': {  //组件属性变动后，立即保存表单JSON！！
-        deep: true,
-        handler() {
-          this.designer.saveCurrentHistoryStep()
-        }
-      },
-
-      formConfig: {
-        deep: true,
-        handler() {
-          this.designer.saveCurrentHistoryStep()
-        }
-      },
-
-    },
-    created() {
-      this.on$('editEventHandler', (eventParams) => {
-        //debugger
-        this.editEventHandler(eventParams[0], eventParams[1])
       })
 
-      this.designer.handleEvent('form-css-updated', (cssClassList) => {
-        this.designer.setCssClassList(cssClassList)
+
+
+      /* 设置事件 */
+      emitter.on$('editEventHandler', (eventParams) => {
+        //debugger
+        $current.editEventHandler(eventParams[0], eventParams[1])
+      })
+
+      $current.designer.handleEvent('form-css-updated', (cssClassList) => {
+        $current.designer.setCssClassList(cssClassList)
       })
 
       //监听字段组件选中事件
-      this.designer.handleEvent('field-selected', (parentWidget) => {
-        this.subFormChildWidgetFlag = !!parentWidget && (parentWidget.type === 'sub-form');
+      $current.designer.handleEvent('field-selected', (parentWidget) => {
+        $current.subFormChildWidgetFlag = !!parentWidget && (parentWidget.type === 'sub-form');
       })
-    },
-    mounted() {
-      if (!this.designer.selectedWidget) {
-        this.activeTab = "2"
-      } else {
-        this.activeTab = "1"
+
+
+
+      const getEventHandled=(eventName)=> {
+        return !!optionModel[eventName] && (optionModel[eventName].length > 0)
       }
 
-      this.scrollerHeight = window.innerHeight - 56 - 48 + 'px'
-      addWindowResizeHandler(() => {
-        this.$nextTick(() => {
-          this.scrollerHeight = window.innerHeight - 56 - 48 + 'px'
-          //console.log(this.scrollerHeight)
-        })
-      })
-    },
-    methods: {
-      getEventHandled(eventName) {
-        return !!this.optionModel[eventName] && (this.optionModel[eventName].length > 0)
-      },
-
-      showEventCollapse() {
-        if (this.designerConfig['eventCollapse'] === undefined) {
+      const showEventCollapse=()=> {
+        if (data.designerConfig['eventCollapse'] === undefined) {
           return true
         }
 
-        return !!this.designerConfig['eventCollapse']
-      },
+        return !!data.designerConfig['eventCollapse']
+      }
 
-      hasPropEditor(propName, editorName) {
+      const hasPropEditor=(propName, editorName)=>{
         if (!editorName) {
           return false
         }
 
         /* alert组件注册了两个type属性编辑器，跳过第一个type属性编辑器，只显示第二个alert-type属性编辑器！！ */
         if (propName.indexOf('-') <= -1) {
-          let uniquePropName = this.selectedWidget.type + '-' + propName
+          let uniquePropName = props.selectedWidget.type + '-' + propName
           if (propertyRegistered(uniquePropName)) {
             return false
           }
         }
 
-        let originalPropName = propName.replace(this.selectedWidget.type + '-', '')  //去掉组件名称前缀-，如果有的话！！
-        return this.designer.hasConfig(this.selectedWidget, originalPropName)
-      },
-
-      getPropEditor(propName, editorName) {
-        let originalPropName = propName.replace(this.selectedWidget.type + '-', '')  //去掉组件名称前缀-，如果有的话！！
-        let ownPropEditorName = `${this.selectedWidget.type}-${originalPropName}-editor`
-        //console.log(ownPropEditorName, this.$options.components[ownPropEditorName])
-        if (!!this.$options.components[ownPropEditorName]) {  //局部注册的属性编辑器组件
+        let originalPropName = propName.replace(props.selectedWidget.type + '-', '')  //去掉组件名称前缀-，如果有的话！！
+        return props.designer.hasConfig(props.selectedWidget, originalPropName)
+      }
+      const getPropEditor=(propName, editorName)=> {
+        let originalPropName = propName.replace(props.selectedWidget.type + '-', '')  //去掉组件名称前缀-，如果有的话！！
+        let ownPropEditorName = `${props.selectedWidget.type}-${originalPropName}-editor`
+        // console.log(ownPropEditorName, this.$options.components[ownPropEditorName])
+        if (!!$current.$options.components[ownPropEditorName]) {  //局部注册的属性编辑器组件
           return ownPropEditorName
         }
-
         //return !!this.$root.$options.components[ownPropEditorName] ? ownPropEditorName : editorName  //Vue2全局注册的属性编辑器组件
-        return !!this.$root.$.appContext.components[ownPropEditorName] ? ownPropEditorName : editorName  //Vue3全局注册的属性编辑器组件
-      },
+        return !!$current.$root.$.appContext.components[ownPropEditorName] ? ownPropEditorName : editorName  //Vue3全局注册的属性编辑器组件
+      }
 
-      showCollapse(propsObj) {
+      const showCollapse=(propsObj)=> {
         let result = false
 
         for (let propName in propsObj) {
@@ -284,32 +279,32 @@
             continue
           }
 
-          if (this.hasPropEditor(propName, propsObj[propName])) {
+          if (hasPropEditor(propName, propsObj[propName])) {
             result = true
             break
           }
         }
 
         return result
-      },
+      }
 
-      editEventHandler(eventName, eventParams) {
+      const editEventHandler=(eventName, eventParams)=> {
         //debugger
 
-        this.curEventName = eventName
-        this.eventHeader = `${this.optionModel.name}.${eventName}(${eventParams.join(', ')}) {`
-        this.eventHandlerCode = this.selectedWidget.options[eventName] || ''
+        data.curEventName = eventName
+        data.eventHeader = `${optionModel.name}.${eventName}(${eventParams.join(', ')}) {`
+        data.eventHandlerCode = props.selectedWidget.options[eventName] || ''
 
         // 设置字段校验函数示例代码
-        if ((eventName === 'onValidate') && (!this.optionModel['onValidate'])) {
-          this.eventHandlerCode = "  /* sample code */\n  /*\n  if ((value > 100) || (value < 0)) {\n    callback(new Error('error message'))  //fail\n  } else {\n    callback();  //pass\n  }\n  */"
+        if ((eventName === 'onValidate') && (!optionModel['onValidate'])) {
+          data.eventHandlerCode = "  /* sample code */\n  /*\n  if ((value > 100) || (value < 0)) {\n    callback(new Error('error message'))  //fail\n  } else {\n    callback();  //pass\n  }\n  */"
         }
 
-        this.showWidgetEventDialogFlag = true
-      },
+        data.showWidgetEventDialogFlag = true
+      }
 
-      saveEventHandler() {
-        const codeHints = this.$refs.ecEditor.getEditorAnnotations()
+      const saveEventHandler=() =>{
+        const codeHints = ecEditor.getEditorAnnotations()
         let syntaxErrorFlag = false
         if (!!codeHints && (codeHints.length > 0)) {
           codeHints.forEach((chItem) => {
@@ -319,15 +314,60 @@
           })
 
           if (syntaxErrorFlag) {
-            this.$message.error(this.i18nt('designer.setting.syntaxCheckWarning'))
+            $current.$message.error(i18nt('designer.setting.syntaxCheckWarning'))
             return
           }
         }
 
-        this.selectedWidget.options[this.curEventName] = this.eventHandlerCode
-        this.showWidgetEventDialogFlag = false
-      },
+        props.selectedWidget.options[data.curEventName] = data.eventHandlerCode
+        data.showWidgetEventDialogFlag = false
+      }
 
+
+
+      console.log("props",props.selectedWidget)
+      watch(()=>props.selectedWidget, (newValue, oldValue) => {
+          if (!!newValue) {
+            data.activeTab = "1"
+
+            
+          }
+      },{deep:true})
+
+
+      watch(()=>{
+        if(props.selectedWidget) return props.selectedWidget.options
+        else return null
+      }, (newValue, oldValue) => {
+          props.designer.saveCurrentHistoryStep()
+      },{deep:true})
+
+      watch(()=>props.formConfig, (newValue, oldValue) => {
+          props.designer.saveCurrentHistoryStep()
+      },{deep:true})
+
+      return {
+        i18nt,
+
+        ...toRefs(data),
+
+        /* 组件引用 */
+        ecEditor,
+
+        /* 计算属性 */
+        optionModel,
+
+        /* 方法 */
+
+        getEventHandled,
+        showEventCollapse,
+        hasPropEditor,
+        getPropEditor,
+        showCollapse,
+        editEventHandler,
+        saveEventHandler
+      }
+      
     }
   }
 </script>

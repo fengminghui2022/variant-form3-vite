@@ -26,17 +26,19 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+
+	import { computed,toRefs,inject,reactive,nextTick } from 'vue'
+  
+  import { useI18n } from '@/utils/i18n'
   import GridColWidget from "@/components/form-designer/form-widget/container-widget/grid-col-widget"
-  import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin";
+  
+  import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin";
   import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper";
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
+  
 
   export default {
     name: "grid-widget",
     componentName: 'ContainerWidget',
-    mixins: [i18n, containerMixin, refMixinDesign],
-    inject: ['refList'],
     components: {
       ContainerWrapper,
       GridColWidget
@@ -48,28 +50,29 @@
       indexOfParentList: Number,
       designer: Object,
     },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const refList=inject('refList')
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+      const containerMixin = useContainer();
 
-    },
-    watch: {
-      //
-    },
-    created() {
-      this.initRefList()
-    },
-    mounted() {
-      //
-    },
-    methods: {
+	    const selected=computed(()=> {
+        return props.widget.id === props.designer.selectedId
+      })
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
 
+       return {
+        i18nt,
 
+        ...containerMixin,
+
+        selected,
+        customClass,
+
+      }
     }
   }
 </script>

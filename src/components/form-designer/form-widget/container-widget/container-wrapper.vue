@@ -40,13 +40,15 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n";
-  import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin";
+
+  import { computed } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
+  import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin";
   import SvgIcon from '@/components/svg-icon'
 
   export default {
     name: "container-wrapper",
-    mixins: [i18n, containerMixin],
     components: {
       SvgIcon
     },
@@ -57,11 +59,21 @@
       indexOfParentList: Number,
       designer: Object,
     },
-    computed: {
-      customClass() {
-        return !!this.widget.options.customClass ? this.widget.options.customClass.join(' ') : ''
-      },
+    setup(props){
+      const { i18nt ,i18n2t }=useI18n();
 
+      const customClass=computed(()=>{
+          return !!props.widget.options.customClass ? props.widget.options.customClass.join(' ') : ''
+      })
+
+
+      return {
+        i18nt,
+        i18n2t,
+        ...useContainer(),
+
+        customClass
+      }
     }
   }
 </script>

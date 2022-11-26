@@ -22,15 +22,15 @@
 </template>
 
 <script>
+	import { reactive,ref , toRefs, computed, onMounted, onBeforeUnmount } from 'vue'
   import FormItemWrapper from './form-item-wrapper'
-  import emitter from '@/utils/emitter'
-  import i18n, {translate} from "@/utils/i18n";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'  
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
 
   export default {
     name: "cascader-widget",
     componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
     props: {
       field: Object,
       parentWidget: Object,
@@ -60,81 +60,96 @@
     components: {
       FormItemWrapper,
     },
-    data() {
-      return {
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const emitterMixin =useEmitter();
+
+      const fieldEditor=ref(null);
+
+      const data=reactive({
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
-      }
-    },
-    computed: {
-      labelKey() {
-        return this.field.options.labelKey || 'label'
-      },
+      })
 
-      valueKey() {
-        return this.field.options.valueKey || 'value'
-      },
+      
+      const fieldMixin = useField(props,data);
 
-      childrenKey() {
-        return this.field.options.childrenKey || 'children'
-      },
+      const labelKey=computed(()=> {
+        return props.field.options.labelKey || 'label'
+      })
 
-      showFullPath() {
-        return (this.field.options.showAllLevels === undefined) || !!this.field.options.showAllLevels
-      },
+      const valueKey=computed(()=> {
+        return props.field.options.valueKey || 'value'
+      })
 
-      contentForReadMode() {
-        if (!!this.field.options.multiple) {
-          //console.log('test======', this.$refs.fieldEditor.presentTags)
-          const curTags = this.$refs.fieldEditor.presentTags
+      const childrenKey=computed(()=> {
+        return props.field.options.childrenKey || 'children'
+      })
+
+      const showFullPath=computed(()=> {
+        return (props.field.options.showAllLevels === undefined) || !!props.field.options.showAllLevels
+      })
+
+      const contentForReadMode=computed(()=> {
+        if (!!props.field.options.multiple) {
+          //console.log('test======', props.$refs.fieldEditor.presentTags)
+          const curTags = fieldEditor.presentTags
           if (!curTags || (curTags.length <= 0)) {
             return '--'
           } else {
             return curTags.map(tagItem => tagItem.text).join(', ')
           }
         } else {
-          return this.$refs.fieldEditor.presentText || '--'
+          return fieldEditor.presentText || '--'
         }
-      },
+      })
 
-    },
-    beforeCreate() {
-      /* 这里不能访问方法和属性！！ */
-    },
 
-    created() {
-      /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
-         需要在父组件created中初始化！！ */
-      this.registerToRefList()
-      this.initOptionItems()
-      this.initFieldModel()
-      this.initEventHandler()
-      this.buildFieldRules()
 
-      this.handleOnCreated()
-    },
+      fieldMixin.registerToRefList()
+      fieldMixin.initOptionItems()
+      fieldMixin.initFieldModel()
+      fieldMixin.initEventHandler()
+      fieldMixin.buildFieldRules()
 
-    mounted() {
-      this.handleOnMounted()
-    },
+      fieldMixin.handleOnCreated()
 
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
+      onMounted(()=>{
+        fieldMixin.handleOnMounted()
+      })
+      
+      onBeforeUnmount(()=>{
+        fieldMixin.unregisterFromRefList()
+      })
 
-    methods: {
-      /* 开启任意级节点可选后，点击radio隐藏下拉框 */
-      hideDropDownOnClick() {
+      const hideDropDownOnClick=()=>{
         setTimeout(() => {
           document.querySelectorAll(".el-cascader-panel .el-radio").forEach((el) => {
             el.onclick = () => {
               console.log('test====', 1111)
-              this.$refs.fieldEditor.popperVisible = false // 单选框部分点击隐藏下拉框
+              fieldEditor.popperVisible = false // 单选框部分点击隐藏下拉框
             }
           })
         }, 100)
-      },
+      }
+
+      return {
+        i18nt,
+        fieldEditor,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...fieldMixin,
+
+        labelKey,
+        valueKey,
+        childrenKey,
+        showFullPath,
+        contentForReadMode,
+
+        hideDropDownOnClick
+      }
 
     }
   }

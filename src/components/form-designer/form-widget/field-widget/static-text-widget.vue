@@ -10,7 +10,7 @@
   import StaticContentWrapper from './static-content-wrapper'
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old";
 
   export default {
     name: "static-text-widget",

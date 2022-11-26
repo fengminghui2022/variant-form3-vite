@@ -126,9 +126,12 @@
     },
     methods: {
       emitDefaultValueChange() {
+        console.log("emitDefaultValueChange");
         if (!!this.designer && !!this.designer.formWidget) {
           let fieldWidget = this.designer.formWidget.getWidgetRef(this.selectedWidget.options.name)
+          console.log("123",this.designer.formWidget)
           if (!!fieldWidget && !!fieldWidget.refreshDefaultValue) {
+            console.log("abc")
             fieldWidget.refreshDefaultValue()
           }
         }

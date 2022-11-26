@@ -55,16 +55,16 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { computed,toRefs,inject,provide ,reactive,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import SvgIcon from '@/components/svg-icon'
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
+  import { useDesignRef } from "@/components/form-designer/refMixinDesign"
 
   export default {
     name: "TableCellWidget",
     componentName: "TableCellWidget",
-    mixins: [i18n, refMixinDesign],
-    inject: ['refList'],
     components: {
       ...FieldComponents,
       SvgIcon,
@@ -83,195 +83,246 @@
 
       designer: Object,
     },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+    setup(props){
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+      const { i18nt }=useI18n();
+      const refList=inject('refList')
 
-      mergeLeftColDisabled() {
-        return (this.colIndex <= 0) || (this.colArray[this.colIndex - 1].options.rowspan !== this.widget.options.rowspan)
-      },
+      const designRefMixin = useDesignRef(refList,props.widget);
 
-      mergeRightColDisabled() {
-        let rightColIndex = this.colIndex + this.widget.options.colspan
-        return (this.colIndex >= this.colLength - 1) || (rightColIndex > this.colLength -1)
-            || (this.colArray[rightColIndex].options.rowspan !== this.widget.options.rowspan)
-      },
 
-      mergeWholeRowDisabled() {
-        return (this.colLength <= 1) || (this.colLength === this.widget.options.colspan)
-      },
 
-      mergeAboveRowDisabled() {
-        return (this.rowIndex <= 0) || (this.rowArray[this.rowIndex - 1].cols[this.colIndex].options.colspan
-            !== this.widget.options.colspan)
+      const selected=computed(() => {
+        return props.widget.id === props.designer.selectedId
+      })
 
-        //return this.rowIndex <= 0
-        //return (this.rowIndex <= 0) || (this.widget.options.colspan !== this.rowArray) //TODO
-      },
+      const customClassv=computed(() => {
+        return props.widget.options.customClass || ''
+      })
 
-      mergeBelowRowDisabled() {
-        let belowRowIndex = this.rowIndex + this.widget.options.rowspan
-        return (this.rowIndex >= this.rowLength - 1) || (belowRowIndex > this.rowLength -1)
-            || (this.rowArray[belowRowIndex].cols[this.colIndex].options.colspan !== this.widget.options.colspan)
-      },
+      const mergeLeftColDisabled=computed(() => {
+        return (props.colIndex <= 0) || (props.colArray[props.colIndex - 1].options.rowspan !== props.widget.options.rowspan)
+      })
 
-      mergeWholeColDisabled() {
-        return (this.rowLength <= 1) || (this.rowLength === this.widget.options.rowspan)
-      },
+      const mergeRightColDisabled=computed(() => {
+        let rightColIndex = props.colIndex + props.widget.options.colspan
+        return (props.colIndex >= props.colLength - 1) || (rightColIndex > props.colLength -1)
+            || (props.colArray[rightColIndex].options.rowspan !== props.widget.options.rowspan)
+      })
 
-      undoMergeColDisabled() {
-        return this.widget.merged || (this.widget.options.colspan <= 1)
-      },
+      const mergeWholeRowDisabled=computed(() => {
+        return (props.colLength <= 1) || (props.colLength === props.widget.options.colspan)
+      })
 
-      undoMergeRowDisabled() {
-        return this.widget.merged || (this.widget.options.rowspan <= 1)
-      },
+      const mergeAboveRowDisabled=computed(() => {
+        return (props.rowIndex <= 0) || (props.rowArray[props.rowIndex - 1].cols[props.colIndex].options.colspan
+            !== props.widget.options.colspan)
 
-      deleteWholeColDisabled() {
-        //return this.colLength === 1
-        return (this.colLength === 1) || (this.widget.options.colspan === this.colLength)
-      },
+        //return props.rowIndex <= 0
+        //return (props.rowIndex <= 0) || (props.widget.options.colspan !== props.rowArray) //TODO
+      })
 
-      deleteWholeRowDisabled() {
-        return (this.rowLength === 1) || (this.widget.options.rowspan === this.rowLength)
-      },
+      const mergeBelowRowDisabled=computed(() => {
+        let belowRowIndex = props.rowIndex + props.widget.options.rowspan
+        return (props.rowIndex >= props.rowLength - 1) || (belowRowIndex > props.rowLength -1)
+            || (props.rowArray[belowRowIndex].cols[props.colIndex].options.colspan !== props.widget.options.colspan)
+      })
 
-    },
-    watch: {
-      //
-    },
-    created() {
-      this.initRefList()
-    },
-    methods: {
-      selectWidget(widget) {
-        this.designer.setSelected(widget)
-      },
+      const mergeWholeColDisabled=computed(() => {
+        return (props.rowLength <= 1) || (props.rowLength === props.widget.options.rowspan)
+      })
 
-      checkContainerMove(evt) {
-        return this.designer.checkWidgetMove(evt)
-      },
+      const undoMergeColDisabled=computed(() => {
+        return props.widget.merged || (props.widget.options.colspan <= 1)
+      })
 
-      onTableDragEnd(obj, subList) {
+      const undoMergeRowDisabled=computed(() => {
+        return props.widget.merged || (props.widget.options.rowspan <= 1)
+      })
+
+      const deleteWholeColDisabled=computed(() => {
+        //return props.colLength === 1
+        return (props.colLength === 1) || (props.widget.options.colspan === props.colLength)
+      })
+
+      const deleteWholeRowDisabled=computed(() => {
+        return (props.rowLength === 1) || (props.widget.options.rowspan === props.rowLength)
+      })
+
+
+
+
+      const selectWidget=(widget)=> {
+        props.designer.setSelected(widget)
+      }
+
+      const checkContainerMove=(evt)=> {
+        return props.designer.checkWidgetMove(evt)
+      }
+
+      const onTableDragEnd=(obj, subList)=> {
         //
-      },
+      }
 
-      onTableDragAdd(evt, subList) { //重复代码，可合并
+      const onTableDragAdd=(evt, subList)=> { //重复代码，可合并
         const newIndex = evt.newIndex
         if (!!subList[newIndex]) {
-          this.designer.setSelected( subList[newIndex] )
+          props.designer.setSelected( subList[newIndex] )
         }
 
-        this.designer.emitHistoryChange()
-        this.designer.emitEvent('field-selected', this.widget)
-      },
+        props.designer.emitHistoryChange()
+        props.designer.emitEvent('field-selected', props.widget)
+      }
 
-      onTableDragUpdate() {
-        this.designer.emitHistoryChange()
-      },
+      const onTableDragUpdate=()=> {
+        props.designer.emitHistoryChange()
+      }
 
-      selectParentWidget() {
-        if (this.parentWidget) {
-          this.designer.setSelected(this.parentWidget)
+      const selectParentWidget=()=> {
+        if (props.parentWidget) {
+          props.designer.setSelected(props.parentWidget)
         } else {
-          this.designer.clearSelected()
+          props.designer.clearSelected()
         }
-      },
+      }
 
-      handleTableCellCommand(command) {
+      const handleTableCellCommand=(command) =>{
         if (command === 'insertLeftCol') {
-          this.insertLeftCol()
+          insertLeftCol()
         } else if (command === 'insertRightCol') {
-          this.insertRightCol()
+          insertRightCol()
         } else if (command === 'insertAboveRow') {
-          this.insertAboveRow()
+          insertAboveRow()
         } else if (command === 'insertBelowRow') {
-          this.insertBelowRow()
+          insertBelowRow()
         } else if (command === 'mergeLeftCol') {
-          this.mergeLeftCol()
+          mergeLeftCol()
         } else if (command === 'mergeRightCol') {
-          this.mergeRightCol()
+          mergeRightCol()
         } else if (command === 'mergeWholeCol') {
-          this.mergeWholeCol()
+          mergeWholeCol()
         } else if (command === 'mergeAboveRow') {
-          this.mergeAboveRow()
+          mergeAboveRow()
         } else if (command === 'mergeBelowRow') {
-          this.mergeBelowRow()
+          mergeBelowRow()
         } else if (command === 'mergeWholeRow') {
-          this.mergeWholeRow()
+          mergeWholeRow()
         } else if (command === 'undoMergeCol') {
-          this.undoMergeCol()
+          undoMergeCol()
         } else if (command === 'undoMergeRow') {
-          this.undoMergeRow()
+          undoMergeRow()
         } else if (command === 'deleteWholeCol') {
-          this.deleteWholeCol()
+          deleteWholeCol()
         } else if (command === 'deleteWholeRow') {
-          this.deleteWholeRow()
+          deleteWholeRow()
         }
-      },
+      }
 
-      insertLeftCol() {
-        this.designer.insertTableCol(this.parentWidget, this.colIndex, this.rowIndex, true)
-      },
+      const insertLeftCol=()=> {
+        props.designer.insertTableCol(props.parentWidget, props.colIndex, props.rowIndex, true)
+      }
 
-      insertRightCol() {
-        this.designer.insertTableCol(this.parentWidget, this.colIndex, this.rowIndex, false)
-      },
+      const insertRightCol=()=> {
+        props.designer.insertTableCol(props.parentWidget, props.colIndex, props.rowIndex, false)
+      }
 
-      insertAboveRow() {
-        this.designer.insertTableRow(this.parentWidget, this.rowIndex, this.rowIndex, this.colIndex, true)
-      },
+      const insertAboveRow=()=> {
+        props.designer.insertTableRow(props.parentWidget, props.rowIndex, props.rowIndex, props.colIndex, true)
+      }
 
-      insertBelowRow() {
-        this.designer.insertTableRow(this.parentWidget, this.rowIndex, this.rowIndex, this.colIndex, false)
-      },
+      const insertBelowRow=()=> {
+        props.designer.insertTableRow(props.parentWidget, props.rowIndex, props.rowIndex, props.colIndex, false)
+      }
 
-      mergeLeftCol() {
-        this.designer.mergeTableCol(this.rowArray, this.colArray, this.rowIndex, this.colIndex, true, this.widget)
-      },
+      const mergeLeftCol=()=> {
+        props.designer.mergeTableCol(props.rowArray, props.colArray, props.rowIndex, props.colIndex, true, props.widget)
+      }
 
-      mergeRightCol() {
-        this.designer.mergeTableCol(this.rowArray, this.colArray, this.rowIndex, this.colIndex, false, this.widget)
-      },
+      const mergeRightCol=()=> {
+        props.designer.mergeTableCol(props.rowArray, props.colArray, props.rowIndex, props.colIndex, false, props.widget)
+      }
 
-      mergeWholeRow() {
-        this.designer.mergeTableWholeRow(this.rowArray, this.colArray, this.rowIndex, this.colIndex)
-      },
+      const mergeWholeRow=()=> {
+        props.designer.mergeTableWholeRow(props.rowArray, props.colArray, props.rowIndex, props.colIndex)
+      }
 
-      mergeAboveRow() {
-        this.designer.mergeTableRow(this.rowArray, this.rowIndex, this.colIndex, true, this.widget)
-      },
+      const mergeAboveRow=()=> {
+        props.designer.mergeTableRow(props.rowArray, props.rowIndex, props.colIndex, true, props.widget)
+      }
 
-      mergeBelowRow() {
-        this.designer.mergeTableRow(this.rowArray, this.rowIndex, this.colIndex, false, this.widget)
-      },
+      const mergeBelowRow=()=> {
+        props.designer.mergeTableRow(props.rowArray, props.rowIndex, props.colIndex, false, props.widget)
+      }
 
-      mergeWholeCol() {
-        this.designer.mergeTableWholeCol(this.rowArray, this.colArray, this.rowIndex, this.colIndex)
-      },
+      const mergeWholeCol=()=> {
+        props.designer.mergeTableWholeCol(props.rowArray, props.colArray, props.rowIndex, props.colIndex)
+      }
 
-      undoMergeCol() {
-        this.designer.undoMergeTableCol(this.rowArray, this.rowIndex, this.colIndex,
-            this.widget.options.colspan, this.widget.options.rowspan)
-      },
+      const undoMergeCol=()=> {
+        props.designer.undoMergeTableCol(props.rowArray, props.rowIndex, props.colIndex,
+            props.widget.options.colspan, props.widget.options.rowspan)
+      }
 
-      undoMergeRow() {
-        this.designer.undoMergeTableRow(this.rowArray, this.rowIndex, this.colIndex,
-            this.widget.options.colspan, this.widget.options.rowspan)
-      },
+      const undoMergeRow=()=> {
+        props.designer.undoMergeTableRow(props.rowArray, props.rowIndex, props.colIndex,
+            props.widget.options.colspan, props.widget.options.rowspan)
+      }
 
-      deleteWholeCol() {
-        this.designer.deleteTableWholeCol(this.rowArray, this.colIndex)
-      },
+      const deleteWholeCol=()=> {
+        props.designer.deleteTableWholeCol(props.rowArray, props.colIndex)
+      }
 
-      deleteWholeRow() {
-        this.designer.deleteTableWholeRow(this.rowArray, this.rowIndex)
-      },
+      const deleteWholeRow=()=> {
+        props.designer.deleteTableWholeRow(props.rowArray, props.rowIndex)
+      }
+
+
+      designRefMixin.initRefList()
+
+      return {
+        i18nt,
+
+        ...designRefMixin,
+
+        selected,
+        customClassv,
+        mergeLeftColDisabled,
+        mergeRightColDisabled,
+        mergeWholeRowDisabled,
+        mergeAboveRowDisabled,
+        mergeBelowRowDisabled,
+        mergeWholeColDisabled,
+        undoMergeColDisabled,
+        undoMergeRowDisabled,
+        deleteWholeColDisabled,
+        deleteWholeRowDisabled,
+
+        selectWidget,
+        checkContainerMove,
+        onTableDragEnd,
+        onTableDragAdd,
+        onTableDragUpdate,
+
+        selectParentWidget,
+        handleTableCellCommand,
+
+
+        insertLeftCol,
+        insertRightCol,
+        insertAboveRow,
+        insertBelowRow,
+        mergeLeftCol,
+        mergeRightCol,
+        mergeWholeRow,
+        mergeAboveRow,
+        mergeBelowRow,
+        mergeWholeCol,
+        undoMergeCol,
+        undoMergeRow,
+        deleteWholeCol,
+        deleteWholeRow
+
+      }
 
     }
   }

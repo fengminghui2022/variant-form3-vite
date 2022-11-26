@@ -67,209 +67,229 @@
 </template>
 
 <script>
+	import { computed,toRefs,inject,reactive,nextTick } from 'vue'
+
 	import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
 	import emitter from '@/utils/emitter'
-  import i18n from "@/utils/i18n"
+
+  	import { useI18n } from '@/utils/i18n'
 	import {formatDate1, formatDate2, formatDate3, formatDate4, formatDate5,
 					formatNumber1, formatNumber2, formatNumber3, formatNumber4,
 					formatNumber5, formatNumber6, formatNumber7} from "@/utils/format"
 	import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
-	import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
-	import refMixinDesign from "@/components/form-designer/refMixinDesign"
+	
+  	import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin";
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
 
   export default {
     name: "DataTableWidget",
-    componentName: 'DataTableWidget',
-    mixins: [i18n, containerMixin, refMixinDesign],
-		inject: ['refList'],
-		components: {
-		  ContainerWrapper,
-		  ...FieldComponents,
+    componentName: 'DataTableWidget',	
+	components: {
+		ContainerWrapper,
+		...FieldComponents,
+	},
+	props: {
+		widget: Object,
+		parentWidget: Object,
+		parentList: Array,
+		indexOfParentList: Number,
+		designer: Object,
+		subFormRowIndex: { /* 子表单组件行索引，从0开始计数 */
+			type: Number,
+			default: -1
 		},
-		data() {
-			return {
-				selectAllFlag: false,
+		subFormColIndex: { /* 子表单组件列索引，从0开始计数 */
+			type: Number,
+			default: -1
+		},
+		subFormRowId: { /* 子表单组件行Id，唯一id且不可变 */
+			type: String,
+			default: ''
+		}
+    },
+	setup(props){
+		
+      	const { i18nt }=useI18n();
+		const refList=inject('refList')
+
+		const containerMixin = useContainer();
+		const designRefMixin = useDesignRef(refList,props.widget);
+
+		const data=reactive({
+			selectAllFlag: false
+		})
+
+
+		const dataTable=ref(null)
+
+
+		const paginationLayout=computed(()=> {
+			return !!props.widget.options.smallPagination ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
+		})
+		const selected=computed(()=> {
+			return props.widget.id === props.designer.selectedId
+		})
+		const customClass=computed(()=> {
+			return props.widget.options.customClass || ''
+		})
+		const widgetSizev=computed(()=> {
+			return props.widget.options.tableSize || "default"
+		})
+		const buttonsColumnFixed=computed(()=> {
+			if (props.widget.options.buttonsColumnFixed === undefined) {
+				return 'right'
 			}
-		},
-    props: {
-			widget: Object,
-			parentWidget: Object,
-			parentList: Array,
-			indexOfParentList: Number,
-			designer: Object,
 
-      subFormRowIndex: { /* 子表单组件行索引，从0开始计数 */
-        type: Number,
-        default: -1
-      },
-      subFormColIndex: { /* 子表单组件列索引，从0开始计数 */
-        type: Number,
-        default: -1
-      },
-      subFormRowId: { /* 子表单组件行Id，唯一id且不可变 */
-        type: String,
-        default: ''
-      },
+			return !props.widget.options.buttonsColumnFixed ? false : props.widget.options.buttonsColumnFixed
+		})
+		const tableHeight=computed(()=> {
+			return props.widget.options.tableHeight || undefined
+		})
+		const selectionWidth=computed(()=> {
+			return !props.widget.options.showSummary ? (!props.widget.options.treeDataEnabled ? 42 : 70): 53
+		})
 
-    },
-    created() {
-			this.initRefList()
-    },
-		mounted() {
-		  //
-		},
-    beforeDestroy() {
-      //
-    },
-		computed: {
-    	paginationLayout() {
-				return !!this.widget.options.smallPagination ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
-			},
 
-			selected() {
-			  return this.widget.id === this.designer.selectedId
-			},
 
-			customClass() {
-			  return this.widget.options.customClass || ''
-			},
 
-			widgetSize() {
-				return this.widget.options.tableSize || "default"
-			},
+		const selectWidget=(widget)=>{
+			props.designer.setSelected(widget)
+		}
+		const renderHeader=(h, { column, $index })=> {//debugger
+			//console.log('column=====', column)
 
-			buttonsColumnFixed() {
-    		if (this.widget.options.buttonsColumnFixed === undefined) {
-    			return 'right'
-				}
+			let colCount = 0;
+			if(props.widget.options.showIndex){
+				colCount++;
+			}
+			if(props.widget.options.showCheckBox){
+				colCount++;
+			}
 
-				return !this.widget.options.buttonsColumnFixed ? false : this.widget.options.buttonsColumnFixed
-			},
-
-			tableHeight() {
-				return this.widget.options.tableHeight || undefined
-			},
-
-			selectionWidth() {
-				return !this.widget.options.showSummary ? (!this.widget.options.treeDataEnabled ? 42 : 70): 53
-			},
-
-		},
-    methods: {
-			selectWidget(widget) {
-				this.designer.setSelected(widget)
-			},
-
-			renderHeader(h, { column, $index }) {//debugger
-				//console.log('column=====', column)
-
-				let colCount = 0;
-				if(this.widget.options.showIndex){
-					colCount++;
-				}
-				if(this.widget.options.showCheckBox){
-					colCount++;
-				}
-
-				column.formatS = this.widget.options.tableColumns[$index-colCount].formatS
-			  return column.label;
-			},
-
-			formatter(row, column, cellValue) {
+			column.formatS = props.widget.options.tableColumns[$index-colCount].formatS
+			return column.label;
+		}
+		const formatter=(row, column, cellValue)=> {
 			  return cellValue;
-			},
-
-			formatterValue(row, column, cellValue) {
-				if(!!column.formatS && !!column.show) {
-					switch(column.formatS) {
-						case 'd1':
-								return formatDate1(cellValue);
-						case 'd2':
-								return formatDate2(cellValue);
-						case 'd3':
-								return formatDate3(cellValue);
-						case 'd4':
-								return formatDate4(cellValue);
-						case 'd5':
-								return formatDate5(cellValue);
-						case 'n1':
-								return formatNumber1(cellValue);
-						case 'n2':
-								return formatNumber2(cellValue);
-						case 'n3':
-								return formatNumber3(cellValue);
-						case 'n4':
-								return formatNumber4(cellValue);
-						case 'n5':
-								return formatNumber5(cellValue);
-						case 'n6':
-								return formatNumber6(cellValue);
-						case 'n7':
-								return formatNumber7(cellValue);
-					}
+		}
+		const formatterValue=(row, column, cellValue)=>{
+			if(!!column.formatS && !!column.show) {
+				switch(column.formatS) {
+					case 'd1':
+							return formatDate1(cellValue);
+					case 'd2':
+							return formatDate2(cellValue);
+					case 'd3':
+							return formatDate3(cellValue);
+					case 'd4':
+							return formatDate4(cellValue);
+					case 'd5':
+							return formatDate5(cellValue);
+					case 'n1':
+							return formatNumber1(cellValue);
+					case 'n2':
+							return formatNumber2(cellValue);
+					case 'n3':
+							return formatNumber3(cellValue);
+					case 'n4':
+							return formatNumber4(cellValue);
+					case 'n5':
+							return formatNumber5(cellValue);
+					case 'n6':
+							return formatNumber6(cellValue);
+					case 'n7':
+							return formatNumber7(cellValue);
 				}
-			  return cellValue;
-			},
-
-			handlePageSizeChange(pageSize) {
+			}
+			return cellValue;
+		}
+		const handlePageSizeChange=(pageSize)=>{
 				//
-			},
-
-			handleCurrentPageChange(currentPage) {
+		}
+		const handleCurrentPageChange=(currentPage)=>{
 				//
-			},
-
-			getTableColumns() {
-				return this.widget.options.tableColumns
-			},
-
-			setChildrenSelected(children, flag) {
-				let childrenKey = this.widget.options.childrenKey
-				children.map(child => {
-					this.toggleSelection(child, flag)
-					if (child[childrenKey]) {
-						this.setChildrenSelected(child[childrenKey], flag)
-					}
-				})
-			},
-
-			toggleSelection(row, flag) {
-				if (row) {
-					this.$nextTick(() => {
-						this.$refs.dataTable.toggleRowSelection(row, flag)
-					})
+		}
+		const getTableColumns=()=>{
+			return props.widget.options.tableColumns
+		}
+		const setChildrenSelected=(children, flag)=>{
+			let childrenKey = props.widget.options.childrenKey
+			children.map(child => {
+				toggleSelection(child, flag)
+				if (child[childrenKey]) {
+					setChildrenSelected(child[childrenKey], flag)
 				}
-			},
-
-			handleRowSelect(selection, row) {
-				let childrenKey = this.widget.options.childrenKey
-				if (selection.some(el => { return row.id === el.id })) {
-					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], true)
-					}
-				} else {
-					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], false)
-					}
-				}
-			},
-
-			setSelectedFlag(data, flag) {
-				let childrenKey = this.widget.options.childrenKey
-				data.forEach(row => {
-					this.$refs.dataTable.toggleRowSelection(row, flag)
-					if (row[childrenKey]) {
-						this.setSelectedFlag(row[childrenKey], flag)
-					}
+			})
+		}
+		const toggleSelection=(row, flag)=>{
+			if (row) {
+				nextTick(() => {
+					dataTable.toggleRowSelection(row, flag)
 				})
-			},
+			}
+		}
+		const handleRowSelect=(selection, row)=>{
+			let childrenKey = props.widget.options.childrenKey
+			if (selection.some(el => { return row.id === el.id })) {
+				if (row[childrenKey]) {
+					setChildrenSelected(row[childrenKey], true)
+				}
+			} else {
+				if (row[childrenKey]) {
+					setChildrenSelected(row[childrenKey], false)
+				}
+			}
+		}
+		const setSelectedFlag=(data, flag)=>{
+			let childrenKey = props.widget.options.childrenKey
+			data.forEach(row => {
+				dataTable.toggleRowSelection(row, flag)
+				if (row[childrenKey]) {
+					setSelectedFlag(row[childrenKey], flag)
+				}
+			})
+		}
+		const handleAllSelect=(selection)=>{
+			data.selectAllFlag = !data.selectAllFlag
+			setSelectedFlag(props.widget.options.tableData, data.selectAllFlag)
+		}
 
-			handleAllSelect(selection) {
-				this.selectAllFlag = !this.selectAllFlag
-				this.setSelectedFlag(this.widget.options.tableData, this.selectAllFlag)
-			},
+		designRefMixin.initRefList()
 
-    }
+		return {
+	
+			i18nt,
+
+			dataTable,
+			...toRefs(data),
+
+			...containerMixin,
+			...designRefMixin,
+
+			/* 计算属性 */
+			paginationLayout,
+			selected,
+			customClass,
+			widgetSizev,
+			buttonsColumnFixed,
+			tableHeight,
+			selectionWidth,
+
+			/* 方法 */
+			selectWidget,
+			renderHeader,
+			formatter,
+			formatterValue,
+			handlePageSizeChange,
+			handleCurrentPageChange,
+			getTableColumns,
+			setChildrenSelected,
+			toggleSelection,
+			handleRowSelect,
+			setSelectedFlag,
+			handleAllSelect
+		}
+	}
   }
 </script>
 

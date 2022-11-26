@@ -64,3 +64,23 @@ export default {
 
   }
 }
+
+
+export function useChangeLocale(langName) {
+  i18n.setLang(langName)
+  localStorage.setItem('v_form_locale', langName)
+}
+
+export function useI18n(){
+  
+  const i18nt=(key)=>{
+    return i18n.$st(key)
+  }
+
+  /* 如果key1不存在，则查找key2 */
+  const i18n2t=(key1, key2)=>{
+    return i18n.$st2(key1, key2)
+  }
+
+  return { i18nt, i18n2t }
+}

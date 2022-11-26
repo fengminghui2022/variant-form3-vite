@@ -36,7 +36,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import {deepClone} from "@/utils/util";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old";
 
   export default {
     name: "picture-upload-widget",

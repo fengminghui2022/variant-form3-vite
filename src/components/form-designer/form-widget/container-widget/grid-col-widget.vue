@@ -43,16 +43,18 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n";
+
+	import { computed,watch,toRefs,inject,reactive,nextTick } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import SvgIcon from '@/components/svg-icon'
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
-
+  
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
+  
   export default {
     name: "GridColWidget",
     componentName: "GridColWidget",
-    mixins: [i18n, refMixinDesign],
-    inject: ['refList'],
     components: {
       ...FieldComponents,
       SvgIcon,
@@ -70,201 +72,219 @@
       },
 
     },
-    data() {
-      return {
-        layoutProps: {
-          span: this.widget.options.span || 12,
-          // md: this.widget.options.md || 12,
-          // sm: this.widget.options.sm || 12,
-          // xs: this.widget.options.xs || 12,
-          offset: this.widget.options.offset || 0,
-          push: this.widget.options.push || 0,
-          pull: this.widget.options.pull || 0,
-        }
-      }
-    },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+    setup(props){
+      
+		  const refList=inject('refList')
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+      const { i18nt }=useI18n();
+		  const designRefMixin = useDesignRef(refList,props.widget);
 
-      colHeightStyle() {
-        return !!this.colHeight ? {height: this.colHeight + 'px'} : {}
-      },
+      
 
-    },
-    watch: {
-      'designer.formConfig.layoutType': {
-        handler(val) {
-          if (!!this.widget.options.responsive) {
+      const data=reactive({
+          layoutProps: {
+            span: props.widget.options.span || 12,
+            // md: this.widget.options.md || 12,
+            // sm: this.widget.options.sm || 12,
+            // xs: this.widget.options.xs || 12,
+            offset: props.widget.options.offset || 0,
+            push: props.widget.options.push || 0,
+            pull: props.widget.options.pull || 0,
+          }
+      })
+
+      const selected=computed(()=> {
+        return props.widget.id === props.designer.selectedId
+      })
+
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
+
+      const colHeightStyle=computed(()=> {
+        return !!props.colHeight ? {height: props.colHeight + 'px'} : {}
+      })
+
+
+
+      watch(()=>props.designer.formConfig.layoutType,(val)=> {
+          if (!!props.widget.options.responsive) {
             if (val === 'H5') {
-              this.layoutProps.span = this.widget.options.xs || 12
+              data.layoutProps.span = props.widget.options.xs || 12
             } else if (val === 'Pad') {
-              this.layoutProps.span = this.widget.options.sm || 12
+              data.layoutProps.span = props.widget.options.sm || 12
             } else {
-              this.layoutProps.span = this.widget.options.md || 12
+              data.layoutProps.span = props.widget.options.md || 12
             }
           } else {
-            this.layoutProps.span = this.widget.options.span || 12
+            data.layoutProps.span = props.widget.options.span || 12
           }
-        }
-      },
+      })
 
-      'widget.options.responsive': {
-        handler(val) {
-          let lyType = this.designer.formConfig.layoutType
+      watch(()=>props.widget.options.responsive,(val)=> {
+          let lyType = props.designer.formConfig.layoutType
           if (!!val) {
             if (lyType === 'H5') {
-              this.layoutProps.span = this.widget.options.xs || 12
+              data.layoutProps.span = props.widget.options.xs || 12
             } else if (lyType === 'Pad') {
-              this.layoutProps.span = this.widget.options.sm || 12
+              data.layoutProps.span = props.widget.options.sm || 12
             } else {
-              this.layoutProps.span = this.widget.options.md || 12
+              data.layoutProps.span = props.widget.options.md || 12
             }
           } else {
-            this.layoutProps.span = this.widget.options.span || 12
+            data.layoutProps.span = props.widget.options.span || 12
           }
-        }
-      },
+      })
 
-      'widget.options.span': {
-        handler(val) {
-          this.layoutProps.span = val
-        }
-      },
+      watch(()=>props.widget.options.span,(val)=>{
+          data.layoutProps.span = val
+      })
 
-      'widget.options.md': {
-        handler(val) {
-          this.layoutProps.span = val
-        }
-      },
+      watch(()=>props.widget.options.md,(val)=> {
+          data.layoutProps.span = val
+      })
 
-      'widget.options.sm': {
-        handler(val) {
-          this.layoutProps.span = val
-        }
-      },
+      watch(()=>props.widget.options.sm,(val)=> {
+          data.layoutProps.span = val
+      })
 
-      'widget.options.xs': {
-        handler(val) {
-          this.layoutProps.span = val
-        }
-      },
+      watch(()=>props.widget.options.xs,(val)=> {
+          data.layoutProps.span = val
+      })
 
-      'widget.options.offset': {
-        handler(val) {
-          this.layoutProps.offset = val
-        }
-      },
+      watch(()=>props.widget.options.offset,(val)=> {
+          data.layoutProps.offset = val
+      })
 
-      'widget.options.push': {
-        handler(val) {
-          this.layoutProps.push = val
-        }
-      },
+      watch(()=>props.widget.options.push,(val)=> {      
+          data.layoutProps.push = val
+      })
 
-      'widget.options.pull': {
-        handler(val) {
-          this.layoutProps.pull = val
-        }
-      },
+      watch(()=>props.widget.options.pull,(val)=> {  
+          data.layoutProps.pull = val
+      })
 
-    },
-    created() {
-      this.initRefList()
-      this.initLayoutProps()
-    },
-    methods: {
-      initLayoutProps() {
-        if (!!this.widget.options.responsive) {
-          let lyType = this.designer.formConfig.layoutType
+
+
+
+      const initLayoutProps=()=>{
+        if (!!props.widget.options.responsive) {
+          let lyType = props.designer.formConfig.layoutType
           if (lyType === 'H5') {
-            this.layoutProps.span = this.widget.options.xs || 12
+            data.layoutProps.span = props.widget.options.xs || 12
           } else if (lyType === 'Pad') {
-            this.layoutProps.span = this.widget.options.sm || 12
+            data.layoutProps.span = props.widget.options.sm || 12
           } else {
-            this.layoutProps.span = this.widget.options.md || 12
+            data.layoutProps.span = props.widget.options.md || 12
           }
         } else {
-          this.layoutProps.spn = this.widget.options.span
+          data.layoutProps.spn = props.widget.options.span
         }
-      },
+      }
 
-      onGridDragEnd(evt, subList) {
+      const onGridDragEnd=(evt, subList)=> {
         //
-      },
+      }
 
-      onGridDragAdd(evt, subList) {
+      const onGridDragAdd=(evt, subList)=> {
         const newIndex = evt.newIndex
         if (!!subList[newIndex]) {
-          this.designer.setSelected( subList[newIndex] )
+          props.designer.setSelected( subList[newIndex] )
         }
 
-        this.designer.emitHistoryChange()
-        this.designer.emitEvent('field-selected', this.widget)
-      },
+        props.designer.emitHistoryChange()
+        props.designer.emitEvent('field-selected', props.widget)
+      }
 
-      onGridDragUpdate() {
-        this.designer.emitHistoryChange()
-      },
+      const onGridDragUpdate=()=> {
+        props.designer.emitHistoryChange()
+      }
 
-      selectWidget(widget) {
+      const selectWidget=(widget)=> {
         console.log('id: ' + widget.id)
-        this.designer.setSelected(widget)
-      },
+        props.designer.setSelected(widget)
+      }
 
-      checkContainerMove(evt) {
-        return this.designer.checkWidgetMove(evt)
-      },
+      const checkContainerMove=(evt)=> {
+        return props.designer.checkWidgetMove(evt)
+      }
 
-      selectParentWidget() {
-        if (this.parentWidget) {
-          this.designer.setSelected(this.parentWidget)
+      const selectParentWidget=()=> {
+        if (props.parentWidget) {
+          props.designer.setSelected(props.parentWidget)
         } else {
-          this.designer.clearSelected()
+          props.designer.clearSelected()
         }
-      },
+      }
 
-      moveUpWidget() {
-        this.designer.moveUpWidget(this.parentList, this.indexOfParentList)
-      },
+      const moveUpWidget=()=> {
+        props.designer.moveUpWidget(props.parentList, props.indexOfParentList)
+      }
 
-      moveDownWidget() {
-        this.designer.moveDownWidget(this.parentList, this.indexOfParentList)
-      },
+      const moveDownWidget=()=> {
+        props.designer.moveDownWidget(props.parentList, props.indexOfParentList)
+      }
 
-      cloneGridCol(widget) {
-        this.designer.cloneGridCol(widget, this.parentWidget)
-      },
+      const cloneGridCol=(widget)=> {
+        props.designer.cloneGridCol(widget, props.parentWidget)
+      }
 
-      removeWidget() {
-        if (!!this.parentList) {
+      const removeWidget=()=> {
+        if (!!props.parentList) {
           let nextSelected = null
-          if (this.parentList.length === 1) {
-            if (!!this.parentWidget) {
-              nextSelected = this.parentWidget
+          if (props.parentList.length === 1) {
+            if (!!props.parentWidget) {
+              nextSelected = props.parentWidget
             }
-          } else if (this.parentList.length === (1 + this.indexOfParentList)) {
-            nextSelected = this.parentList[this.indexOfParentList - 1]
+          } else if (props.parentList.length === (1 + props.indexOfParentList)) {
+            nextSelected = props.parentList[props.indexOfParentList - 1]
           } else {
-            nextSelected = this.parentList[this.indexOfParentList + 1]
+            nextSelected = props.parentList[props.indexOfParentList + 1]
           }
 
-          this.$nextTick(() => {
-            this.parentList.splice(this.indexOfParentList, 1)
+          nextTick(() => {
+            props.parentList.splice(props.indexOfParentList, 1)
             //if (!!nextSelected) {
-            this.designer.setSelected(nextSelected)
+            props.designer.setSelected(nextSelected)
             //}
 
-            this.designer.emitHistoryChange()
+            props.designer.emitHistoryChange()
           })
         }
-      },
+      }
 
+
+      designRefMixin.initRefList()
+      initLayoutProps()
+  
+      return {
+        i18nt,
+        ...toRefs(data),
+        
+        ...designRefMixin,
+
+        selected,
+        customClass,
+        colHeightStyle,
+
+        initLayoutProps,
+
+        selectWidget,
+        selectParentWidget,
+
+
+        checkContainerMove,
+        onGridDragEnd,
+        onGridDragUpdate,
+        onGridDragAdd,
+
+        moveUpWidget,
+        moveDownWidget,
+
+        cloneGridCol,
+        removeWidget,
+
+      }
     }
   }
 </script>

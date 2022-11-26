@@ -188,6 +188,14 @@
 </template>
 
 <script>
+
+  import { 
+    getCurrentInstance, nextTick,
+    ref,toRefs,reactive,
+    inject,computed,
+    onMounted
+  } from 'vue'
+
   import VFormRender from '@/components/form-render/index'
   import CodeEditor from '@/components/code-editor/index'
   import SvgIcon from '@/components/svg-icon'
@@ -199,7 +207,7 @@
     getQueryParam,
     traverseAllWidgets, addWindowResizeHandler
   } from "@/utils/util"
-  import i18n from '@/utils/i18n'
+  import { useI18n } from '@/utils/i18n'
   import {generateCode} from "@/utils/code-generator"
   import {genSFC} from "@/utils/sfc-generator"
   import loadBeautifier from "@/utils/beautifierLoader"
@@ -207,7 +215,6 @@
 
   export default {
     name: "ToolbarPanel",
-    mixins: [i18n],
     components: {
       VFormRender,
       CodeEditor,
@@ -222,9 +229,22 @@
       },
     },
     inject: ['getDesignerConfig'],
-    data() {
-      return {
-        designerConfig: this.getDesignerConfig(),
+    setup(props){
+      const { i18nt }=useI18n();
+      
+      const { proxy } = getCurrentInstance()
+      let $current=proxy;
+
+
+      const getDesignerConfig=inject("getDesignerConfig");
+
+      /* 页面组件 */
+      const nodeTree=ref(null)
+      const preForm=ref(null)
+
+
+      const data=reactive({
+        designerConfig: getDesignerConfig(),
 
         toolbarWidth: 420,
         showPreviewDialogFlag: false,
@@ -272,194 +292,183 @@
 
         },
 
-      }
-    },
-    computed: {
-      formJson() {
-        return {
-          // widgetList: this.designer.widgetList,
-          // formConfig: this.designer.formConfig
-
-          widgetList: deepClone(this.designer.widgetList),
-          formConfig: deepClone(this.designer.formConfig)
-        }
-      },
-
-      undoDisabled() {
-        return !this.designer.undoEnabled()
-      },
-
-      redoDisabled() {
-        return !this.designer.redoEnabled()
-      },
-
-      layoutType() {
-        return this.designer.getLayoutType()
-      },
-
-      designerDsv() {
-        return this.globalDsv
-      }
-
-    },
-    watch: {
-      'designer.widgetList': {
-        deep: true,
-        handler(val) {
-          //console.log('test-----', val)
-          //this.refreshNodeTree()
-        }
-      },
-
-    },
-    mounted() {
-      let maxTBWidth = this.designerConfig.toolbarMaxWidth || 420
-      let minTBWidth = this.designerConfig.toolbarMinWidth || 300
-      let newTBWidth = window.innerWidth - 260 - 300 - 320 - 80
-      this.toolbarWidth = newTBWidth >= maxTBWidth ? maxTBWidth : (newTBWidth <= minTBWidth ? minTBWidth : newTBWidth)
-      addWindowResizeHandler(() => {
-        this.$nextTick(() => {
-          let newTBWidth2 = window.innerWidth - 260 - 300 - 320 - 80
-          this.toolbarWidth = newTBWidth2 >= maxTBWidth ? maxTBWidth : (newTBWidth2 <= minTBWidth ? minTBWidth : newTBWidth2)
-        })
       })
-    },
-    methods: {
-      showToolButton(configName) {
-        if (this.designerConfig[configName] === undefined) {
+
+      onMounted(()=>{
+          let maxTBWidth = data.designerConfig.toolbarMaxWidth || 420
+          let minTBWidth = data.designerConfig.toolbarMinWidth || 300
+          let newTBWidth = window.innerWidth - 260 - 300 - 320 - 80
+          data.toolbarWidth = newTBWidth >= maxTBWidth ? maxTBWidth : (newTBWidth <= minTBWidth ? minTBWidth : newTBWidth)
+          addWindowResizeHandler(() => {
+            nextTick(() => {
+              let newTBWidth2 = window.innerWidth - 260 - 300 - 320 - 80
+              data.toolbarWidth = newTBWidth2 >= maxTBWidth ? maxTBWidth : (newTBWidth2 <= minTBWidth ? minTBWidth : newTBWidth2)
+            })
+          })
+      })
+
+
+      const formJson=computed(()=> {
+        return {
+
+          widgetList: deepClone(props.designer.widgetList),
+          formConfig: deepClone(props.designer.formConfig)
+        }
+      })
+
+      const undoDisabled=computed(()=> {
+        return !props.designer.undoEnabled()
+      })
+
+      const redoDisabled=computed(()=> {
+        return !props.designer.redoEnabled()
+      })
+
+      const layoutType=computed(()=> {
+        return props.designer.getLayoutType()
+      })
+
+      const designerDsv=computed(()=> {
+        return props.globalDsv
+      })
+
+    
+
+      const showToolButton=(configName)=> {
+        if (data.designerConfig[configName] === undefined) {
           return true
         }
 
-        return !!this.designerConfig[configName]
-      },
+        return !!props.designerConfig[configName]
+      }
 
-      buildTreeNodeOfWidget(widget, treeNode) {
-        let curNode = {
-          id: widget.id,
-          label: widget.options.label || widget.type,
-          //selectable: true,
-        }
-        treeNode.push(curNode)
+      const buildTreeNodeOfWidget=(widget, treeNode)=> {
+          let curNode = {
+            id: widget.id,
+            label: widget.options.label || widget.type,
+            //selectable: true,
+          }
+          treeNode.push(curNode)
 
-        if (widget.category === undefined) {
-          return
-        }
+          if (widget.category === undefined) {
+            return
+          }
 
-        curNode.children = []
-        if (widget.type === 'grid') {
-          widget.cols.map(col => {
-            let colNode = {
-              id: col.id,
-              label: col.options.name || widget.type,
-              children: []
-            }
-            curNode.children.push(colNode)
-            col.widgetList.map(wChild => {
-              this.buildTreeNodeOfWidget(wChild, colNode.children)
-            })
-          })
-        } else if (widget.type === 'table') {
-          //TODO: 需要考虑合并单元格！！
-          widget.rows.map(row => {
-            let rowNode = {
-              id: row.id,
-              label: 'table-row',
-              selectable: false,
-              children: [],
-            }
-            curNode.children.push(rowNode)
-
-            row.cols.map(cell => {
-              if (!!cell.merged) {  //跳过合并单元格！！
-                return
-              }
-
-              let rowChildren = rowNode.children
-              let cellNode = {
-                id: cell.id,
-                label: 'table-cell',
+          curNode.children = []
+          if (widget.type === 'grid') {
+            widget.cols.map(col => {
+              let colNode = {
+                id: col.id,
+                label: col.options.name || widget.type,
                 children: []
               }
-              rowChildren.push(cellNode)
-
-              cell.widgetList.map(wChild => {
-                this.buildTreeNodeOfWidget(wChild, cellNode.children)
+              curNode.children.push(colNode)
+              col.widgetList.map(wChild => {
+                buildTreeNodeOfWidget(wChild, colNode.children)
               })
             })
-          })
-        } else if (widget.type === 'tab') {
-          widget.tabs.map(tab => {
-            let tabNode = {
-              id: tab.id,
-              label: tab.options.name || widget.type,
-              selectable: false,
-              children: []
-            }
-            curNode.children.push(tabNode)
-            tab.widgetList.map(wChild => {
-              this.buildTreeNodeOfWidget(wChild, tabNode.children)
+          } else if (widget.type === 'table') {
+            //TODO: 需要考虑合并单元格！！
+            widget.rows.map(row => {
+              let rowNode = {
+                id: row.id,
+                label: 'table-row',
+                selectable: false,
+                children: [],
+              }
+              curNode.children.push(rowNode)
+
+              row.cols.map(cell => {
+                if (!!cell.merged) {  //跳过合并单元格！！
+                  return
+                }
+
+                let rowChildren = rowNode.children
+                let cellNode = {
+                  id: cell.id,
+                  label: 'table-cell',
+                  children: []
+                }
+                rowChildren.push(cellNode)
+
+                cell.widgetList.map(wChild => {
+                  buildTreeNodeOfWidget(wChild, cellNode.children)
+                })
+              })
             })
-          })
-        } else if (widget.type === 'sub-form') {
-          widget.widgetList.map(wChild => {
-            this.buildTreeNodeOfWidget(wChild, curNode.children)
-          })
-        } else if (widget.category === 'container') {  //自定义容器
-          widget.widgetList.map(wChild => {
-            this.buildTreeNodeOfWidget(wChild, curNode.children)
-          })
-        }
-      },
+          } else if (widget.type === 'tab') {
+            widget.tabs.map(tab => {
+              let tabNode = {
+                id: tab.id,
+                label: tab.options.name || widget.type,
+                selectable: false,
+                children: []
+              }
+              curNode.children.push(tabNode)
+              tab.widgetList.map(wChild => {
+                buildTreeNodeOfWidget(wChild, tabNode.children)
+              })
+            })
+          } else if (widget.type === 'sub-form') {
+            widget.widgetList.map(wChild => {
+              buildTreeNodeOfWidget(wChild, curNode.children)
+            })
+          } else if (widget.category === 'container') {  //自定义容器
+            widget.widgetList.map(wChild => {
+              buildTreeNodeOfWidget(wChild, curNode.children)
+            })
+          }
+      }
 
-      refreshNodeTree() {
-        this.nodeTreeData.length = 0
-        this.designer.widgetList.forEach(wItem => {
-          this.buildTreeNodeOfWidget(wItem, this.nodeTreeData)
+      const refreshNodeTree=()=>{
+        data.nodeTreeData.length = 0
+        props.designer.widgetList.forEach(wItem => {
+          buildTreeNodeOfWidget(wItem, data.nodeTreeData)
         })
-      },
+      }
 
-      showNodeTreeDrawer() {
-        this.refreshNodeTree()
-        this.showNodeTreeDrawerFlag = true
-        this.$nextTick(() => {
-          if (!!this.designer.selectedId) {  //同步当前选中组件到节点树！！！
-            this.$refs.nodeTree.setCurrentKey(this.designer.selectedId)
+      const showNodeTreeDrawer=()=> {
+        refreshNodeTree()
+        data.showNodeTreeDrawerFlag = true
+        nextTick(() => {
+          if (!!props.designer.selectedId) {  //同步当前选中组件到节点树！！！
+            nodeTree.value.setCurrentKey(props.designer.selectedId)
           }
         })
-      },
+      }
 
-      undoHistory() {
-        this.designer.undoHistoryStep()
-      },
+      const undoHistory=()=> {
+        props.designer.undoHistoryStep()
+      }
 
-      redoHistory() {
-        this.designer.redoHistoryStep()
-      },
+      const redoHistory=()=> {
+        props.designer.redoHistoryStep()
+      }
 
-      changeLayoutType(newType) {
-        this.designer.changeLayoutType(newType)
-      },
+      const changeLayoutType=(newType)=> {
+        props.designer.changeLayoutType(newType)
+      }
 
-      clearFormWidget() {
-        this.designer.clearDesigner()
-      },
+      const clearFormWidget=()=> {
+        props.designer.clearDesigner()
+      }
 
-      previewForm() {
-        this.showPreviewDialogFlag = true
-      },
+      const previewForm=()=> {
+        data.showPreviewDialogFlag = true
+      }
 
-      saveAsFile(fileContent, defaultFileName) {
-        this.$prompt(this.i18nt('designer.hint.fileNameForSave'), this.i18nt('designer.hint.saveFileTitle'), {
+      const saveAsFile=(fileContent, defaultFileName)=>{
+        $current.$prompt(i18nt('designer.hint.fileNameForSave'), i18nt('designer.hint.saveFileTitle'), {
           inputValue: defaultFileName,
           closeOnClickModal: false,
-          inputPlaceholder: this.i18nt('designer.hint.fileNameInputPlaceholder')
+          inputPlaceholder: i18nt('designer.hint.fileNameInputPlaceholder')
         }).then(({ value }) => {
           if (!value) {
             value = defaultFileName
           }
 
           if (getQueryParam('vscode') == 1) {
-            this.vsSaveFile(value, fileContent)
+            vsSaveFile(value, fileContent)
             return
           }
 
@@ -468,9 +477,9 @@
         }).catch(() => {
           //
         })
-      },
+      }
 
-      vsSaveFile(fileName, fileContent) {
+      const vsSaveFile=(fileName, fileContent)=> {
         const msgObj = {
           cmd: 'writeFile',
           data: {
@@ -479,173 +488,174 @@
           }
         }
         window.parent.postMessage(msgObj, '*')
-      },
+      }
 
-      importJson() {
-        this.importTemplate = JSON.stringify(this.designer.getImportTemplate(), null, '  ')
-        this.showImportJsonDialogFlag = true
-      },
+      const importJson=()=> {
+        data.importTemplate = JSON.stringify(props.designer.getImportTemplate(), null, '  ')
+        data.showImportJsonDialogFlag = true
+      }
 
-      doJsonImport() {
+      const doJsonImport=()=> {
         try {
-          let importObj = JSON.parse(this.importTemplate)
+          let importObj = JSON.parse(data.importTemplate)
           //console.log('test import', this.importTemplate)
           if (!importObj || !importObj.formConfig) {
-            throw new Error( this.i18nt('designer.hint.invalidJsonFormat') )
+            throw new Error( i18nt('designer.hint.invalidJsonFormat') )
           }
 
           let fJsonVer = importObj.formConfig.jsonVersion
           if (!fJsonVer || (fJsonVer !== 3)) {
-            throw new Error( this.i18nt('designer.hint.jsonVersionMismatch') )
+            throw new Error( i18nt('designer.hint.jsonVersionMismatch') )
           }
 
-          this.designer.loadFormJson(importObj)
+          props.designer.loadFormJson(importObj)
 
-          this.showImportJsonDialogFlag = false
-          this.$message.success(this.i18nt('designer.hint.importJsonSuccess'))
+          data.showImportJsonDialogFlag = false
+          $current.$message.success(i18nt('designer.hint.importJsonSuccess'))
 
-          this.designer.emitHistoryChange()
+          props.designer.emitHistoryChange()
 
-          this.designer.emitEvent('form-json-imported', [])
+          props.designer.emitEvent('form-json-imported', [])
         } catch(ex) {
-          this.$message.error(ex + '')
+          $current.$message.error(ex + '')
         }
-      },
+      }
 
-      exportJson() {
-        let widgetList = deepClone(this.designer.widgetList)
-        let formConfig = deepClone(this.designer.formConfig)
-        this.jsonContent = JSON.stringify({widgetList, formConfig}, null, '  ')
-        this.jsonRawContent = JSON.stringify({widgetList, formConfig})
-        this.showExportJsonDialogFlag = true
-      },
+      const exportJson=()=>{
+          let widgetList = deepClone(props.designer.widgetList)
+          let formConfig = deepClone(props.designer.formConfig)
+          data.jsonContent = JSON.stringify({widgetList, formConfig}, null, '  ')
+          data.jsonRawContent = JSON.stringify({widgetList, formConfig})
+          data.showExportJsonDialogFlag = true
+      }
 
-      copyFormJson(e) {
-        copyToClipboard(this.jsonRawContent, e,
-            this.$message,
-            this.i18nt('designer.hint.copyJsonSuccess'),
-            this.i18nt('designer.hint.copyJsonFail')
+      const copyFormJson=(e)=>{
+        copyToClipboard(data.jsonRawContent, e,
+            $current.$message,
+            i18nt('designer.hint.copyJsonSuccess'),
+            i18nt('designer.hint.copyJsonFail')
         )
-      },
+      }
 
-      saveFormJson() {
-        this.saveAsFile(this.jsonContent, `vform${generateId()}.json`)
-      },
+      const saveFormJson=()=> {
+          saveAsFile(data.jsonContent, `vform${generateId()}.json`)
+      }
 
-      exportCode() {
-        this.vueCode = generateCode(this.formJson)
-        this.htmlCode = generateCode(this.formJson, 'html')
-        this.showExportCodeDialogFlag = true
-      },
+      const exportCode=()=> {
+        data.vueCode = generateCode(data.formJson)
+        data.htmlCode = generateCode(data.formJson, 'html')
+        data.showExportCodeDialogFlag = true
+      }
 
-      copyVueCode(e) {
-        copyToClipboard(this.vueCode, e,
-            this.$message,
-            this.i18nt('designer.hint.copyVueCodeSuccess'),
-            this.i18nt('designer.hint.copyVueCodeFail')
+      const copyVueCode=(e)=> {
+        copyToClipboard(data.vueCode, e,
+            $current.$message,
+            i18nt('designer.hint.copyVueCodeSuccess'),
+            i18nt('designer.hint.copyVueCodeFail')
         )
-      },
+      }
 
-      copyHtmlCode(e) {
-        copyToClipboard(this.htmlCode, e,
-            this.$message,
-            this.i18nt('designer.hint.copyHtmlCodeSuccess'),
-            this.i18nt('designer.hint.copyHtmlCodeFail')
+      const copyHtmlCode=(e)=> {
+        copyToClipboard(data.htmlCode, e,
+            $current.$message,
+            i18nt('designer.hint.copyHtmlCodeSuccess'),
+            i18nt('designer.hint.copyHtmlCodeFail')
         )
-      },
+      }
 
-      saveVueCode() {
-        this.saveAsFile(this.vueCode, `vform${generateId()}.vue`)
-      },
+      const saveVueCode=()=> {
+        saveAsFile(data.vueCode, `vform${generateId()}.vue`)
+      }
 
-      saveHtmlCode() {
-        this.saveAsFile(this.htmlCode, `vform${generateId()}.html`)
-      },
+      const saveHtmlCode=()=> {
+        saveAsFile(data.htmlCode, `vform${generateId()}.html`)
+      }
 
-      generateSFC() {
+      const generateSFC=()=> {
         loadBeautifier(beautifier => {
-          this.sfcCode = genSFC(this.designer.formConfig, this.designer.widgetList, beautifier)
-          this.sfcCodeV3 = genSFC(this.designer.formConfig, this.designer.widgetList, beautifier, true)
-          this.showExportSFCDialogFlag = true
+          data.sfcCode = genSFC(props.designer.formConfig, props.designer.widgetList, beautifier)
+          data.sfcCodeV3 = genSFC(props.designer.formConfig, props.designer.widgetList, beautifier, true)
+          data.showExportSFCDialogFlag = true
         })
-      },
+      }
 
-      copyV2SFC(e) {
-        copyToClipboard(this.sfcCode, e,
-            this.$message,
-            this.i18nt('designer.hint.copySFCSuccess'),
-            this.i18nt('designer.hint.copySFCFail')
+      const copyV2SFC=(e)=>{
+        copyToClipboard(data.sfcCode, e,
+            $current.$message,
+            i18nt('designer.hint.copySFCSuccess'),
+            i18nt('designer.hint.copySFCFail')
         )
-      },
+      }
 
-      copyV3SFC(e) {
-        copyToClipboard(this.sfcCodeV3, e,
-            this.$message,
-            this.i18nt('designer.hint.copySFCSuccess'),
-            this.i18nt('designer.hint.copySFCFail')
+      const copyV3SFC=(e)=>{
+        copyToClipboard(data.sfcCodeV3, e,
+            $current.$message,
+            i18nt('designer.hint.copySFCSuccess'),
+            i18nt('designer.hint.copySFCFail')
         )
-      },
+      }
 
-      saveV2SFC() {
-        this.saveAsFile(this.sfcCode, `vformV2-${generateId()}.vue`)
-      },
+      const saveV2SFC=()=>{
+        saveAsFile(data.sfcCode, `vformV2-${generateId()}.vue`)
+      }
 
-      saveV3SFC() {
-        this.saveAsFile(this.sfcCodeV3, `vformV3-${generateId()}.vue`)
-      },
+      const saveV3SFC=()=>{
+        saveAsFile(data.sfcCodeV3, `vformV3-${generateId()}.vue`)
+      }
 
-      getFormData() {
-        this.$refs['preForm'].getFormData().then(formData => {
-          this.formDataJson = JSON.stringify(formData, null, '  ')
-          this.formDataRawJson = JSON.stringify(formData)
+      const getFormData=()=>{
+        preForm.value.getFormData().then(formData => {
+          data.formDataJson = JSON.stringify(formData, null, '  ')
+          data.formDataRawJson = JSON.stringify(formData)
 
-          this.showFormDataDialogFlag = true
+          data.showFormDataDialogFlag = true
         }).catch(error => {
-          this.$message.error(error)
+          console.log(error)
+          $current.$message.error(error)
         })
-      },
+      }
 
-      copyFormDataJson(e) {
-        copyToClipboard(this.formDataRawJson, e,
-            this.$message,
-            this.i18nt('designer.hint.copyJsonSuccess'),
-            this.i18nt('designer.hint.copyJsonFail')
+      const copyFormDataJson=(e)=>{
+        copyToClipboard(data.formDataRawJson, e,
+            $current.$message,
+            i18nt('designer.hint.copyJsonSuccess'),
+            i18nt('designer.hint.copyJsonFail')
         )
-      },
+      }
 
-      saveFormData() {
-        this.saveAsFile(this.htmlCode, `formData${generateId()}.json`)
-      },
+      const saveFormData=()=>{
+        saveAsFile(data.htmlCode, `formData${generateId()}.json`)
+      }
 
-      resetForm() {
-        this.$refs['preForm'].resetForm()
-      },
+      const resetForm=()=>{
+        preForm.value.resetForm()
+      }
 
-      setFormDisabled() {
-        this.$refs['preForm'].disableForm()
-      },
+      const setFormDisabled=()=>{
+        preForm.value.disableForm()
+      }
 
-      setFormEnabled() {
-        this.$refs['preForm'].enableForm()
-      },
+      const setFormEnabled=()=>{
+        preForm.value.enableForm()
+      }
 
-      switchReadMode() {
-        this.formReadonlyFlag = !this.formReadonlyFlag
-        this.$refs['preForm'].setReadMode(this.formReadonlyFlag)
-      },
+      const switchReadMode=()=>{
+        data.formReadonlyFlag = !data.formReadonlyFlag
+        preForm.value.setReadMode(data.formReadonlyFlag)
+      }
 
-      testSetFormJson() {
+      const testSetFormJson=()=>{
         //let newJson = {"widgetList":[{"key":106933,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input40302","label":"input-new","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input40302"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":120,"labelPosition":"left","size":"","labelAlign":"label-left-align","cssCode":"","customClass":[],"functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
         let newJson = {"widgetList":[{"key":75094,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input30696","label":"input","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input30696"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":120,"labelPosition":"left","size":"","labelAlign":"label-left-align","cssCode":"","customClass":"","functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
         //let newJson = {"widgetList":[{"key":70118,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input37241","label":"input","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input37241"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":150,"labelPosition":"left","size":"","labelAlign":"label-right-align","cssCode":"","customClass":"","functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
-        this.$refs['preForm'].setFormJson(newJson)
-      },
+        preForm.setFormJson(newJson)
+      }
 
-      testSubFormHide() {
-        this.$refs['preForm'].hideWidgets('input73220')
-      },
+      const testSubFormHide=()=>{
+        preForm.hideWidgets('input73220')
+      }
 
-      testSetFormData() {
+      const testSetFormData=()=>{
         let testFormData = {
           "picTest01": [
             {
@@ -668,10 +678,10 @@
             }
           ]
         }
-        this.$refs['preForm'].setFormData(testFormData)
-      },
+        preForm.setFormData(testFormData)
+      }
 
-      handleFormChange(fieldName, newValue, oldValue, formModel) {
+      const handleFormChange=(fieldName, newValue, oldValue, formModel)=>{
         /*
         console.log('---formChange start---')
         console.log('fieldName', fieldName)
@@ -680,56 +690,133 @@
         console.log('formModel', formModel)
         console.log('---formChange end---')
         */
-      },
+      }
 
-      testOnAppendButtonClick(clickedWidget) {
+      const testOnAppendButtonClick=(clickedWidget) => {
         console.log('test', clickedWidget)
-      },
+      }
 
-      testOnButtonClick(button) {
+      const testOnButtonClick=(button)=> {
         console.log('test', button)
-      },
+      }
 
-      testDTSC(dt, s1, s2) {
+      const testDTSC=(dt, s1, s2)=> {
         console.log('test dt', dt)
         console.log('test s1', s1)
         console.log('test s2', s2)
-      },
+      }
 
-      testOBC(aa) {
+      const testOBC=(aa)=> {
         console.log('test=====', aa)
-      },
+      }
 
-      onMyEmitTest(aaa) {
+      const onMyEmitTest=(aaa)=> {
         console.log('test emit', aaa)
-      },
+      }
 
-      findWidgetById(wId) {
+      const findWidgetById=(wId)=> {
         let foundW = null
-        traverseAllWidgets(this.designer.widgetList, (w) => {
+        traverseAllWidgets(props.designer.widgetList, (w) => {
           if (w.id === wId) {
             foundW = w
           }
         })
 
         return foundW
-      },
+      }
 
-      onNodeTreeClick(nodeData, node, nodeEl) {
+      const onNodeTreeClick=(nodeData, node, nodeEl)=> {
         //console.log('test', JSON.stringify(nodeData))
 
         if ((nodeData.selectable !== undefined) && !nodeData.selectable) {
-          this.$message.info(this.i18nt('designer.hint.currentNodeCannotBeSelected'))
+          $current.$message.info(i18nt('designer.hint.currentNodeCannotBeSelected'))
         } else {
           const selectedId = nodeData.id
-          const foundW = this.findWidgetById(selectedId)
+          const foundW = findWidgetById(selectedId)
           if (!!foundW) {
-            this.designer.setSelected(foundW)
+            props.designer.setSelected(foundW)
           }
         }
-      },
+      
+      }
 
+
+      return {
+        i18nt,
+
+        ...toRefs(data),
+        /* 页面组件 */
+        nodeTree,
+        preForm,
+
+        /* 计算属性 */
+        formJson,
+        undoDisabled,
+        redoDisabled,
+        layoutType,
+        designerDsv,
+
+
+        
+        /* 方法 */
+        showToolButton,
+        buildTreeNodeOfWidget,
+        refreshNodeTree,
+        showNodeTreeDrawer,
+
+        undoHistory,
+        redoHistory,
+
+        changeLayoutType,
+        clearFormWidget,
+        previewForm,
+
+        saveAsFile,
+
+        importJson,
+        doJsonImport,
+        exportJson,
+        copyFormJson,
+        saveFormJson,
+        exportCode,
+        copyVueCode,
+        copyHtmlCode,
+        saveVueCode,
+        saveHtmlCode,
+        generateSFC,
+        copyV2SFC,
+        copyV3SFC,
+        saveV2SFC,
+        saveV3SFC,
+
+        copyFormDataJson,
+        saveFormData,
+        resetForm,
+        setFormDisabled,
+        setFormEnabled,
+        switchReadMode,
+
+        getFormData,
+        handleFormChange,
+        findWidgetById,
+        onNodeTreeClick,
+
+
+        //测试的方法
+        testSetFormJson,
+        testSubFormHide,
+        testSetFormData,
+        testOnAppendButtonClick,
+        testOnButtonClick,
+        testDTSC,
+        testOBC,
+        onMyEmitTest
+
+
+
+      }
     }
+    
   }
 </script>
 

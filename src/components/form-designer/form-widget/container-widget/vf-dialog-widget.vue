@@ -27,15 +27,17 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n";
-  import refMixinDesign from "@/components/form-designer/refMixinDesign";
-  import FieldComponents from "@/components/form-designer/form-widget/field-widget";
+	import { computed,toRefs,inject,provide ,reactive,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+
+   import FieldComponents from "@/components/form-designer/form-widget/field-widget";
   import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper";
 
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
+ 
   export default {
     name: "vf-dialog-widget",
     componentName: 'VfDialogWidget',
-    mixins: [i18n, refMixinDesign],
     inject: ['refList'],
     components: {
       ContainerWrapper,
@@ -48,92 +50,119 @@
       indexOfParentList: Number,
       designer: Object,
     },
+    setup(props){
+
+      const { i18nt }=useI18n();
+      const refList=inject('refList')
+
+      const designRefMixin = useDesignRef(refList,props.widget);
+
+
+      const selected=computed(()=> {
+        return props.widget.id === props.designer.selectedId
+      })
+
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
+
+      designRefMixin.initRefList()
+
+
+      const onDialogDragEnd=(evt, subList) =>{
+        //console.log('onDialogDragEnd', evt)
+      }
+
+      const onDialogDragAdd=(evt, subList)=> {
+        const newIndex = evt.newIndex
+        if (!!subList[newIndex]) {
+          props.designer.setSelected( subList[newIndex] )
+        }
+
+        props.designer.emitHistoryChange()
+        props.designer.emitEvent('field-selected', props.widget)
+      }
+
+      const onDialogDragUpdate=() =>{
+        props.designer.emitHistoryChange()
+      }
+
+      const selectWidget=(widget)=> {
+        console.log('id: ' + widget.id)
+        props.designer.setSelected(widget)
+      }
+
+      const checkContainerMove=(evt)=> {
+        //弹窗、抽屉不能嵌套！！
+        return props.designer.checkWidgetMove(evt)
+      }
+
+      const selectParentWidget=() =>{
+        if (props.parentWidget) {
+          props.designer.setSelected(props.parentWidget)
+        } else {
+          props.designer.clearSelected()
+        }
+      }
+
+      const moveUpWidget=()=> {
+        props.designer.moveUpWidget(props.parentList, props.indexOfParentList)
+      }
+
+      const moveDownWidget=()=> {
+        props.designer.moveDownWidget(props.parentList, props.indexOfParentList)
+      }
+
+      const removeWidget=()=> {
+        if (!!props.parentList) {
+          let nextSelected = null
+          if (props.parentList.length === 1) {
+            if (!!props.parentWidget) {
+              nextSelected = props.parentWidget
+            }
+          } else if (props.parentList.length === (1 + props.indexOfParentList)) {
+            nextSelected = props.parentList[props.indexOfParentList - 1]
+          } else {
+            nextSelected = props.parentList[props.indexOfParentList + 1]
+          }
+
+          nextTick(() => {
+            props.parentList.splice(props.indexOfParentList, 1)
+            //if (!!nextSelected) {
+            props.designer.setSelected(nextSelected)
+            //}
+
+            props.designer.emitHistoryChange()
+          })
+        }
+      }
+
+      return{
+        i18nt,
+        ...designRefMixin,
+
+        selected,
+        customClass,
+
+        onDialogDragEnd,
+        onDialogDragAdd,
+        onDialogDragUpdate,
+        selectWidget,
+        checkContainerMove,
+        selectParentWidget,
+
+        moveUpWidget,
+        moveDownWidget,
+        removeWidget
+      }
+    },
     data() {
       return {
         //
       }
     },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
-
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
-
-    },
-    created() {
-      this.initRefList()
-    },
     methods: {
-      onDialogDragEnd(evt, subList) {
-        //console.log('onDialogDragEnd', evt)
-      },
-
-      onDialogDragAdd(evt, subList) {
-        const newIndex = evt.newIndex
-        if (!!subList[newIndex]) {
-          this.designer.setSelected( subList[newIndex] )
-        }
-
-        this.designer.emitHistoryChange()
-        this.designer.emitEvent('field-selected', this.widget)
-      },
-
-      onDialogDragUpdate() {
-        this.designer.emitHistoryChange()
-      },
-
-      selectWidget(widget) {
-        console.log('id: ' + widget.id)
-        this.designer.setSelected(widget)
-      },
-
-      checkContainerMove(evt) {
-        //弹窗、抽屉不能嵌套！！
-        return this.designer.checkWidgetMove(evt)
-      },
-
-      selectParentWidget() {
-        if (this.parentWidget) {
-          this.designer.setSelected(this.parentWidget)
-        } else {
-          this.designer.clearSelected()
-        }
-      },
-
-      moveUpWidget() {
-        this.designer.moveUpWidget(this.parentList, this.indexOfParentList)
-      },
-
-      moveDownWidget() {
-        this.designer.moveDownWidget(this.parentList, this.indexOfParentList)
-      },
-
-      removeWidget() {
-        if (!!this.parentList) {
-          let nextSelected = null
-          if (this.parentList.length === 1) {
-            if (!!this.parentWidget) {
-              nextSelected = this.parentWidget
-            }
-          } else if (this.parentList.length === (1 + this.indexOfParentList)) {
-            nextSelected = this.parentList[this.indexOfParentList - 1]
-          } else {
-            nextSelected = this.parentList[this.indexOfParentList + 1]
-          }
-
-          this.$nextTick(() => {
-            this.parentList.splice(this.indexOfParentList, 1)
-            //if (!!nextSelected) {
-            this.designer.setSelected(nextSelected)
-            //}
-
-            this.designer.emitHistoryChange()
-          })
-        }
-      },
+      
 
     }
   }

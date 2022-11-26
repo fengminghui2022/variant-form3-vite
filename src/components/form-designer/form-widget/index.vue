@@ -33,14 +33,19 @@
 </template>
 
 <script>
+  import { 
+    computed, getCurrentInstance, reactive,ref ,nextTick,
+    toRefs,provide,inject,watch,
+    onMounted
+  } from 'vue'
+
   import '@/components/form-designer/form-widget/container-widget/index'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
-  import i18n from "@/utils/i18n"
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "VFormWidget",
     componentName: "VFormWidget",
-    mixins: [i18n],
     components: {
       ...FieldComponents,
     },
@@ -56,90 +61,76 @@
         default: () => ({})
       },
     },
-    provide() {
-      return {
-        refList: this.widgetRefList,
-        getFormConfig: () => this.formConfig,  /* 解决provide传递formConfig属性的响应式更新问题！！ */
-        getGlobalDsv: () => this.globalDsv, // 全局数据源变量
-        globalOptionData: this.optionData,
-        getOptionData: () => this.optionData,
-        getReadMode: () => false,
-        globalModel: {
-          formModel: this.formModel,
-        },
-        getSubFormFieldFlag: () => false,
-        getSubFormName: () => '',
-        getDSResultCache: () => this.dsResultCache,
-      }
-    },
-    inject: ['getDesignerConfig'],
-    data() {
-      return {
+    setup(props){
+      const { i18nt }=useI18n();
+      
+      const { proxy } = getCurrentInstance()
+      let $current=proxy;
+
+      const getDesignerConfig=inject("getDesignerConfig");
+      
+      const data=reactive({
         formModel: {},
         widgetRefList: {},
         dsResultCache: {},
-      }
-    },
-    computed: {
-      labelPosition() {
-        if (!!this.designer.formConfig && !!this.designer.formConfig.labelPosition) {
-          return this.designer.formConfig.labelPosition
+      });
+
+
+      provide('refList',data.widgetRefList)
+      provide('getFormConfig', () => props.formConfig)  /* 解决provide传递formConfig属性的响应式更新问题！！ */
+      provide('getGlobalDsv', () => props.globalDsv) // 全局数据源变量
+      provide('globalOptionData', props.optionData)
+      provide('getOptionData', () => props.optionData)
+      provide('getReadMode', () => false)
+      provide('globalModel', { formModel: data.formModel })
+      provide('getSubFormFieldFlag', () => false)
+      provide('getSubFormName', () => '')
+      provide('getDSResultCache', () => data.dsResultCache)
+
+
+
+      const labelPosition=computed(()=> {
+        if (!!props.designer.formConfig && !!props.designer.formConfig.labelPosition) {
+          return props.designer.formConfig.labelPosition
         }
 
         return 'left'
-      },
+      })
 
-      size() {
-        if (!!this.designer.formConfig && !!this.designer.formConfig.size) {
-          return this.designer.formConfig.size
+      const size=computed(()=> {
+        if (!!props.designer.formConfig && !!props.designer.formConfig.size) {
+          return props.designer.formConfig.size
         }
 
         return 'default'
-      },
+      })
 
-      customClass() {
-        return this.designer.formConfig.customClass || ''
-      },
+      const customClass=computed(()=> {
+        return props.designer.formConfig.customClass || ''
+      })
 
-      layoutType() {
-        return this.designer.getLayoutType()
-      },
+      const layoutType=computed(()=> {
+        return props.designer.getLayoutType()
+      })
 
-      canvasMinHeight() {
-        return (this.getDesignerConfig().logoHeader !== false) ? 'calc(100vh - 56px - 68px)' : 'calc(100vh - 56px - 68px + 48px)'
+      const canvasMinHeight=computed(()=> {
+        return (getDesignerConfig().logoHeader !== false) ? 'calc(100vh - 56px - 68px)' : 'calc(100vh - 56px - 68px + 48px)'
+      })
+
+
+
+      onMounted(()=> {
+        disableFirefoxDefaultDrop()  /* 禁用Firefox默认拖拽搜索功能!! */
+        props.designer.registerFormWidget($current)
+      })
+
+
+
+      const getWidgetName=(widget)=> {
+        return widget.type + '-widget'
       }
 
-    },
-    watch: {
-      'designer.widgetList': {
-        deep: true,
-        handler(val) {
-          //
-        }
-      },
-
-      'designer.formConfig': {
-        deep: true,
-        handler(val) {
-          //
-        }
-      },
-
-    },
-    created() {
-      //this.designer.initDesigner( !!this.getDesignerConfig().resetFormJson )  //此行代码已移动到form-designer，以便提前赋值formConfig！！
-      this.designer.loadPresetCssCode( this.getDesignerConfig().presetCssCode )
-    },
-    mounted() {
-      this.disableFirefoxDefaultDrop()  /* 禁用Firefox默认拖拽搜索功能!! */
-      this.designer.registerFormWidget(this)
-    },
-    methods: {
-      getWidgetName(widget) {
-        return widget.type + '-widget'
-      },
-
-      disableFirefoxDefaultDrop() {
+      const  disableFirefoxDefaultDrop=()=> {
         let isFirefox = (navigator.userAgent.toLowerCase().indexOf("firefox") !== -1)
         if (isFirefox) {
           document.body.ondrop = function (event) {
@@ -147,48 +138,74 @@
             event.preventDefault();
           }
         }
-      },
+      }
 
-      onDragEnd(evt) {
+      const onDragEnd=(evt)=> {
         //console.log('drag end000', evt)
-      },
+      }
 
-      onDragAdd(evt) {
+      const onDragAdd=(evt)=> {
         const newIndex = evt.newIndex
-        if (!!this.designer.widgetList[newIndex]) {
-          this.designer.setSelected( this.designer.widgetList[newIndex] )
+        if (!!props.designer.widgetList[newIndex]) {
+          props.designer.setSelected( props.designer.widgetList[newIndex] )
         }
 
-        this.designer.emitHistoryChange()
-        this.designer.emitEvent('field-selected', null)
-      },
+        props.designer.emitHistoryChange()
+        props.designer.emitEvent('field-selected', null)
+      }
 
-      onDragUpdate() {  /* 在VueDraggable内拖拽组件发生位置变化时会触发update，未发生组件位置变化不会触发！！ */
-        this.designer.emitHistoryChange()
-      },
+      const onDragUpdate=()=> {  /* 在VueDraggable内拖拽组件发生位置变化时会触发update，未发生组件位置变化不会触发！！ */
+        props.designer.emitHistoryChange()
+      }
 
-      checkMove(evt) {
-        return this.designer.checkWidgetMove(evt)
-      },
+      const checkMove=(evt)=> {
+        return props.designer.checkWidgetMove(evt)
+      }
 
-      getFormData() {
-        return this.formModel
-      },
+      const getFormData=()=> {
+        return data.formModel
+      }
 
-      getWidgetRef(widgetName, showError = false) {
-        let foundRef = this.widgetRefList[widgetName]
+      const getWidgetRef=(widgetName, showError = false)=>{
+        let foundRef = data.widgetRefList[widgetName]
         if (!foundRef && !!showError) {
-          this.$message.error(this.i18nt('designer.hint.refNotFound') + widgetName)
+          $current.$message.error(this.i18nt('designer.hint.refNotFound') + widgetName)
         }
         return foundRef
-      },
+      }
 
-      getSelectedWidgetRef() {
+      const getSelectedWidgetRef=()=> {
         let wName = this.designer.selectedWidgetName
-        return this.getWidgetRef(wName)
-      },
+        return getWidgetRef(wName)
+      }
 
-    }
+
+      props.designer.loadPresetCssCode( getDesignerConfig().presetCssCode )
+      return {
+        i18nt,
+
+        ...toRefs(data),
+
+        labelPosition,
+        size,
+        customClass,
+        layoutType,
+        canvasMinHeight,
+
+        getWidgetName, 
+        disableFirefoxDefaultDrop,
+
+        checkMove,
+        onDragEnd,
+        onDragAdd,
+        onDragUpdate,
+
+        getFormData,
+        getWidgetRef,
+        getSelectedWidgetRef
+      }
+    }   
+      
   }
 </script>
 

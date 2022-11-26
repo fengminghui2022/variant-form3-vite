@@ -91,11 +91,17 @@
 </template>
 
 <script>
+  import { 
+    getCurrentInstance, reactive,nextTick,
+    toRefs,inject,
+    onMounted
+  } from 'vue'
+
   import SvgIcon from '@/components/svg-icon'
   import {containers as CONS, basicFields as BFS, advancedFields as AFS, customFields as CFS} from "./widgetsConfig"
   import {formTemplates} from './templatesConfig'
   import {addWindowResizeHandler, generateId} from "@/utils/util"
-  import i18n from "@/utils/i18n"
+  import { useI18n } from '@/utils/i18n'
   import axios from 'axios'
 
   import ftImg1 from '@/assets/ft-images/t1.png'
@@ -109,17 +115,33 @@
 
   export default {
     name: "FieldPanel",
-    mixins: [i18n],
     components: {
       SvgIcon
     },
     props: {
       designer: Object,
     },
-    inject: ['getBannedWidgets', 'getDesignerConfig'],
-    data() {
-      return {
-        designerConfig: this.getDesignerConfig(),
+    setup(props){
+      const { i18nt,i18n2t }=useI18n();
+      const { proxy } = getCurrentInstance()
+      let $current=proxy;
+
+      const getBannedWidgets=inject("getBannedWidgets");
+      const getDesignerConfig=inject("getDesignerConfig");
+
+      /* 声明周期事件定义 */
+      onMounted(()=>{
+          data.scrollerHeight = window.innerHeight - 56 + 'px'
+          addWindowResizeHandler(() => {
+            nextTick(() => {
+              data.scrollerHeight = window.innerHeight - 56 + 'px'
+              //console.log(this.scrollerHeight)
+            })
+          })
+      })
+
+      const data=reactive({
+        designerConfig: getDesignerConfig(),
 
         firstTab: 'componentLib',
 
@@ -143,146 +165,151 @@
           {imgUrl: ftImg7},
           {imgUrl: ftImg8},
         ]
-      }
-    },
-    computed: {
-      //
-    },
-    created() {
-      this.loadWidgets()
-    },
-    mounted() {
-      //this.loadWidgets()
-
-      this.scrollerHeight = window.innerHeight - 56 + 'px'
-      addWindowResizeHandler(() => {
-        this.$nextTick(() => {
-          this.scrollerHeight = window.innerHeight - 56 + 'px'
-          //console.log(this.scrollerHeight)
-        })
       })
-    },
-    methods: {
-      getWidgetLabel(widget) {
-        if (!!widget.alias) {  //优先显示组件别名
-          return this.i18n2t(`designer.widgetLabel.${widget.alias}`, `extension.widgetLabel.${widget.alias}`)
-        }
 
-        return this.i18n2t(`designer.widgetLabel.${widget.type}`, `extension.widgetLabel.${widget.type}`)
-      },
 
-      isBanned(wName) {
-        return this.getBannedWidgets().indexOf(wName) > -1
-      },
-
-      showFormTemplates() {
-        if (this.designerConfig['formTemplates'] === undefined) {
-          return true
-        }
-
-        return !!this.designerConfig['formTemplates']
-      },
-
-      loadWidgets() {
-        this.containers = CONS.map(con => {
+      /* 组件加载 */
+      const loadWidgets=()=> {
+        data.containers = CONS.map(con => {
           return {
             key: generateId(),
             ...con,
-            displayName: this.i18n2t(`designer.widgetLabel.${con.type}`, `extension.widgetLabel.${con.type}`)
+            displayName: i18n2t(`designer.widgetLabel.${con.type}`, `extension.widgetLabel.${con.type}`)
           }
         }).filter(con => {
-          return !con.internal && !this.isBanned(con.type)
+          return !con.internal && !isBanned(con.type)
         })
 
-        this.basicFields = BFS.map(fld => {
+        data.basicFields = BFS.map(fld => {
           return {
             key: generateId(),
             ...fld,
-            displayName: this.i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
+            displayName: i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
           }
         }).filter(fld => {
-          return !this.isBanned(fld.type)
+          return !isBanned(fld.type)
         })
 
-        this.advancedFields = AFS.map(fld => {
+        data.advancedFields = AFS.map(fld => {
           return {
             key: generateId(),
             ...fld,
-            displayName: this.i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
+            displayName: i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
           }
         }).filter(fld => {
-          return !this.isBanned(fld.type)
+          return !isBanned(fld.type)
         })
 
-        this.customFields = CFS.map(fld => {
+        data.customFields = CFS.map(fld => {
           return {
             key: generateId(),
             ...fld,
-            displayName: this.i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
+            displayName: i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
           }
         }).filter(fld => {
-          return !this.isBanned(fld.type)
-        })
-      },
-
-      handleContainerWidgetClone(origin) {
-        return this.designer.copyNewContainerWidget(origin)
-      },
-
-      handleFieldWidgetClone(origin) {
-        return this.designer.copyNewFieldWidget(origin)
-      },
-
-      /* draggable组件的move钩子是在内部子组件被拖放到其他draggable组件时触发！！ */
-      checkContainerMove(evt) {
-        return this.designer.checkWidgetMove(evt)
-      },
-
-      /* draggable组件的move钩子是在内部子组件被拖放到其他draggable组件时触发！！ */
-      checkFieldMove(evt) {
-        return this.designer.checkFieldMove(evt)
-      },
-
-      onContainerDragEnd(evt) {
-        //console.log('Drag end of container: ')
-        //console.log(evt)
-      },
-
-      addContainerByDbClick(container) {
-        this.designer.addContainerByDbClick(container)
-      },
-
-      addFieldByDbClick(widget) {
-        this.designer.addFieldByDbClick(widget)
-      },
-
-      loadFormTemplate(jsonUrl) {
-        this.$confirm(this.i18nt('designer.hint.loadFormTemplateHint'), this.i18nt('render.hint.prompt'), {
-          confirmButtonText: this.i18nt('render.hint.confirm'),
-          cancelButtonText: this.i18nt('render.hint.cancel')
-        }).then(() => {
-          axios.get(jsonUrl).then(res => {
-            let modifiedFlag = false
-            if (typeof res.data === 'string') {
-              modifiedFlag = this.designer.loadFormJson( JSON.parse(res.data) )
-            } else if (res.data.constructor === Object) {
-              modifiedFlag = this.designer.loadFormJson(res.data)
-            }
-            if (modifiedFlag) {
-              this.designer.emitHistoryChange()
-            }
-
-            this.$message.success(this.i18nt('designer.hint.loadFormTemplateSuccess'))
-          }).catch(error => {
-            this.$message.error(this.i18nt('designer.hint.loadFormTemplateFailed') + ':' + error)
-          })
-        }).catch(error => {
-          console.error(error)
+          return !isBanned(fld.type)
         })
       }
 
-    }
+      const isBanned=(wName)=>{
+        return getBannedWidgets().indexOf(wName) > -1
+      }
 
+      const getWidgetLabel=(widget)=> {
+        if (!!widget.alias) {  //优先显示组件别名
+          return i18n2t(`designer.widgetLabel.${widget.alias}`, `extension.widgetLabel.${widget.alias}`)
+        }
+
+        return i18n2t(`designer.widgetLabel.${widget.type}`, `extension.widgetLabel.${widget.type}`)
+      }
+
+     
+
+      const showFormTemplates=()=> {
+        if (data.designerConfig['formTemplates'] === undefined) {
+          return true
+        }
+
+        return !!data.designerConfig['formTemplates']
+      }
+
+      
+
+      const handleContainerWidgetClone=(origin)=> {
+        return props.designer.copyNewContainerWidget(origin)
+      }
+
+      const handleFieldWidgetClone=(origin)=> {
+        return props.designer.copyNewFieldWidget(origin)
+      }
+
+      /* draggable组件的move钩子是在内部子组件被拖放到其他draggable组件时触发！！ */
+      const checkContainerMove=(evt)=> {
+        return props.designer.checkWidgetMove(evt)
+      }
+
+      /* draggable组件的move钩子是在内部子组件被拖放到其他draggable组件时触发！！ */
+      const checkFieldMove=(evt)=> {
+        return props.designer.checkFieldMove(evt)
+      }
+
+      const onContainerDragEnd=(evt)=> {
+        //console.log('Drag end of container: ')
+        //console.log(evt)
+      }
+
+      const addContainerByDbClick=(container)=> {
+        props.designer.addContainerByDbClick(container)
+      }
+
+      const addFieldByDbClick=(widget)=> {
+        props.designer.addFieldByDbClick(widget)
+      }
+
+      const loadFormTemplate=(jsonUrl)=> {
+          $current.$confirm(i18nt('designer.hint.loadFormTemplateHint'), i18nt('render.hint.prompt'), {
+            confirmButtonText: i18nt('render.hint.confirm'),
+            cancelButtonText: i18nt('render.hint.cancel')
+          }).then(() => {
+            axios.get(jsonUrl).then(res => {
+              let modifiedFlag = false
+              if (typeof res.data === 'string') {
+                modifiedFlag = props.designer.loadFormJson( JSON.parse(res.data) )
+              } else if (res.data.constructor === Object) {
+                modifiedFlag = props.designer.loadFormJson(res.data)
+              }
+              if (modifiedFlag) {
+                props.designer.emitHistoryChange()
+              }
+
+              $current.$message.success(i18nt('designer.hint.loadFormTemplateSuccess'))
+            }).catch(error => {
+              $current.$message.error(i18nt('designer.hint.loadFormTemplateFailed') + ':' + error)
+            })
+          }).catch(error => {
+            console.error(error)
+          })
+      }
+
+
+      loadWidgets();
+      return {
+        ...toRefs(data),
+
+        i18nt,
+
+        getWidgetLabel,
+        showFormTemplates,
+        handleContainerWidgetClone,
+        handleFieldWidgetClone,
+        checkContainerMove,
+        checkFieldMove,
+        onContainerDragEnd,
+        addContainerByDbClick,
+        addFieldByDbClick,
+        loadFormTemplate
+      }
+    }
   }
 </script>
 

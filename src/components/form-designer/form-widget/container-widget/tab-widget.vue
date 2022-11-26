@@ -44,17 +44,20 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
+	import { computed,toRefs,inject,provide ,reactive,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+
+  
   import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
+  
+  import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin";
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
+
 
   export default {
     name: "tab-widget",
     componentName: 'ContainerWidget',
-    mixins: [i18n, containerMixin, refMixinDesign],
-    inject: ['refList'],
     components: {
       ContainerWrapper,
       ...FieldComponents,
@@ -66,40 +69,46 @@
       indexOfParentList: Number,
       designer: Object,
     },
-    data() {
-      return {
-        activeTab: 'tab1',
-        //
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const refList=inject('refList')
+
+      const containerMixin = useContainer();
+      const designRefMixin = useDesignRef(refList,props.widget);
+
+      const data=reactive({
+          activeTab: 'tab1',
+      })
+
+      const selected=computed(()=> {
+        return props.widget.id === props.designer.selectedId
+      })
+
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
+      
+
+      designRefMixin.initRefList()
+
+      const onTabClick=(evt)=>{
+            let paneName = evt.name
+            props.widget.tabs.forEach((tp) => {
+              tp.options.active = tp.options.name === paneName;
+            })
       }
-    },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+      
+      return{
+        i18nt,
+        ...designRefMixin,
+        ...containerMixin,
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+        selected,
+        customClass,
 
-    },
-    watch: {
-      //
-    },
-    created() {
-      this.initRefList()
-    },
-    mounted() {
-      //
-    },
-    methods: {
-      onTabClick(evt) {
-        console.log('onTabClick', evt)
-        let paneName = evt.name
-        this.widget.tabs.forEach((tp) => {
-          tp.options.active = tp.options.name === paneName;
-        })
-      },
-
+        onTabClick
+      }
     }
   }
 </script>

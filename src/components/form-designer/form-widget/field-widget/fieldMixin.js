@@ -1,57 +1,75 @@
 import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
+import { inject ,ref,toRefs,computed,getCurrentInstance  } from "vue"
 
-export default {
-  inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData',
-    'getGlobalDsv', 'getReadMode', 'getSubFormFieldFlag', 'getSubFormName', 'getDSResultCache'],
-  data() {
-    return {
-      fieldReadonlyFlag: false
+import { useEmitter } from '@/utils/emitter'
+import { useI18n,translate } from '@/utils/i18n'
+
+
+
+export function useField(props,data){
+  
+  const { i18nt }=useI18n();
+  const emitter =useEmitter();
+  const { proxy } = getCurrentInstance()
+
+  const refList=inject('refList')
+  const getFormConfig=inject('getFormConfig') 
+  const globalOptionData=inject('globalOptionData') 
+  const globalModel=inject('globalModel') 
+  const getOptionData=inject('getOptionData')
+  const getGlobalDsv=inject('getGlobalDsv') 
+  const getReadMode=inject('getReadMode') 
+  const getSubFormFieldFlag=inject('getSubFormFieldFlag') 
+  const getSubFormName=inject('getSubFormName') 
+  const getDSResultCache=inject('getDSResultCache')
+
+
+  data.fieldReadonlyFlag=ref(false)
+
+  const formConfig=computed(()=> {
+    return getFormConfig()
+  })
+
+  const subFormName=computed(()=> {
+    return !!getSubFormName ? getSubFormName() : ''
+  })
+
+  const subFormItemFlag=computed(()=> {
+    return !!getSubFormFieldFlag ? getSubFormFieldFlag() : false
+  })
+
+  const formModel=computed({
+    cache: false,
+    get() {
+      console.log("globalModel",globalModel)
+      return globalModel.formModel
     }
-  },
-  computed: {
-    formConfig() {
-      return this.getFormConfig()
-    },
+  })
 
-    subFormName() {
-      return !!this.getSubFormName ? this.getSubFormName() : ''
-    },
+  const isReadMode=computed(()=> {
+    //return getReadMode() || data.fieldReadonlyFlag
+    return !!getReadMode() ? true : data.fieldReadonlyFlag
+  })
 
-    subFormItemFlag() {
-      return !!this.getSubFormFieldFlag ? this.getSubFormFieldFlag() : false
-    },
+  const optionLabel=computed(()=> {
+    if (data.fieldModel === null) {
+      return '--'
+    } else {
+      let resultContent = '--'
+      props.field.options.optionItems.forEach(oItem => {
+        if ((oItem.value === data.fieldModel) || (methods.findInArray(data.fieldModel, oItem.value)) !== -1) {
+          resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
+        }
+      })
 
-    formModel: {
-      cache: false,
-      get() {
-        return this.globalModel.formModel
-      }
-    },
+      return resultContent
+    }
+  })
 
-    isReadMode() {
-      //return this.getReadMode() || this.fieldReadonlyFlag
-      return !!this.getReadMode() ? true : this.fieldReadonlyFlag
-    },
 
-    optionLabel() {
-      if (this.fieldModel === null) {
-        return '--'
-      } else {
-        let resultContent = '--'
-        this.field.options.optionItems.forEach(oItem => {
-          if ((oItem.value === this.fieldModel) || (this.findInArray(this.fieldModel, oItem.value)) !== -1) {
-            resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
-          }
-        })
 
-        return resultContent
-      }
-    },
-
-  },
-
-  methods: {
+  const methods= {
     findInArray(arrayObject, element) {
       if (!Array.isArray(arrayObject)) {
         return -1
@@ -69,175 +87,176 @@ export default {
 
     //--------------------- 组件内部方法 begin ------------------//
     getPropName() {
-      if (this.subFormItemFlag && !this.designState) {
-        return this.subFormName + "." + this.subFormRowIndex + "." + this.field.options.name + ""
+      if (subFormItemFlag.value && !props.designState) {
+        return subFormName.value + "." + props.subFormRowIndex + "." + props.field.options.name + ""
       } else {
-        return this.field.options.name
+        return props.field.options.name
       }
     },
 
     initFieldModel() {
-      if (!this.field.formItemFlag) {
+      if (!props.field.formItemFlag) {
         return
       }
 
-      if (!!this.subFormItemFlag && !this.designState) {  //SubForm子表单组件需要特殊处理！！
-        let subFormData = this.formModel[this.subFormName]
-        if (((subFormData === undefined) || (subFormData[this.subFormRowIndex] === undefined) ||
-            (subFormData[this.subFormRowIndex][this.field.options.name] === undefined)) &&
-            (this.field.options.defaultValue !== undefined)) {
-          this.fieldModel = this.field.options.defaultValue
-          subFormData[this.subFormRowIndex][this.field.options.name] = this.field.options.defaultValue
-        } else if (subFormData[this.subFormRowIndex][this.field.options.name] === undefined) {
-          this.fieldModel = null
-          subFormData[this.subFormRowIndex][this.field.options.name] = null
+
+      if (!!subFormItemFlag.value && !props.designState) {  //SubForm子表单组件需要特殊处理！！
+        let subFormData = formModel.value[subFormName.value]
+        if (((subFormData === undefined) || (subFormData[props.subFormRowIndex] === undefined) ||
+            (subFormData[props.subFormRowIndex][props.field.options.name] === undefined)) &&
+            (props.field.options.defaultValue !== undefined)) {
+          data.fieldModel = props.field.options.defaultValue
+          subFormData[props.subFormRowIndex][props.field.options.name] = props.field.options.defaultValue
+        } else if (subFormData[props.subFormRowIndex][props.field.options.name] === undefined) {
+          data.fieldModel = null
+          subFormData[props.subFormRowIndex][props.field.options.name] = null
         } else {
-          this.fieldModel = subFormData[this.subFormRowIndex][this.field.options.name]
+          data.fieldModel = subFormData[props.subFormRowIndex][props.field.options.name]
         }
 
         /* 主动触发子表单内field-widget的onChange事件！！ */
         setTimeout(() => {  //延时触发onChange事件, 便于更新计算字段！！
-          this.handleOnChangeForSubForm(this.fieldModel, this.oldFieldValue, subFormData, this.subFormRowId)
+          methods.handleOnChangeForSubForm(data.fieldModel, props.oldFieldValue, subFormData, props.subFormRowId)
         }, 800)
-        this.oldFieldValue = deepClone(this.fieldModel)
+        props.oldFieldValue = deepClone(data.fieldModel)
 
-        this.initFileList()  //处理图片上传、文件上传字段
+        methods.initFileList()  //处理图片上传、文件上传字段
 
         return
       }
-
-      if ((this.formModel[this.field.options.name] === undefined) &&
-          (this.field.options.defaultValue !== undefined)) {
-        this.fieldModel = this.field.options.defaultValue
-      } else if (this.formModel[this.field.options.name] === undefined) {  //如果formModel为空对象，则初始化字段值为null!!
-        this.formModel[this.field.options.name] = null
+      
+      if ((formModel.value&&formModel.value[props.field.options.name] === undefined) &&
+          (props.field.options.defaultValue !== undefined)) {
+        data.fieldModel = props.field.options.defaultValue
+      } else if (!!formModel.value&&formModel.value[props.field.options.name] === undefined) {  //如果formModel为空对象，则初始化字段值为null!!      
+        formModel.value[props.field.options.name] = null
       } else {
-        this.fieldModel = this.formModel[this.field.options.name]
+        data.fieldModel = formModel.value[props.field.options.name]
       }
-      this.oldFieldValue = deepClone(this.fieldModel)
-      this.initFileList()  //处理图片上传、文件上传字段
+      props.oldFieldValue = deepClone(data.fieldModel)
+      methods.initFileList()  //处理图片上传、文件上传字段
     },
 
     initFileList() { //初始化上传组件的已上传文件列表
-      if ( ((this.field.type !== 'picture-upload') && (this.field.type !== 'file-upload')) || (this.designState === true) ) {
+      if ( ((props.field.type !== 'picture-upload') && (props.field.type !== 'file-upload')) || (props.designState === true) ) {
         return
       }
 
-      if (!!this.fieldModel) {
-        if (Array.isArray(this.fieldModel)) {
-          this.fileList = deepClone(this.fieldModel)
-          this.uploadBtnHidden = this.fileList.length >= this.field.options.limit
+      if (!!data.fieldModel) {
+        if (Array.isArray(data.fieldModel)) {
+          data.fileList = deepClone(data.fieldModel)
+          data.uploadBtnHidden = data.fileList.length >= props.field.options.limit
         } else {
-          this.fileList.splice(0, 0, deepClone(this.fieldModel))
-          this.uploadBtnHidden = this.field.options.limit <= 1
+          data.fileList.splice(0, 0, deepClone(data.fieldModel))
+          data.uploadBtnHidden = props.field.options.limit <= 1
         }
       }
     },
 
     initEventHandler() {
-      this.on$('setFormData', (newFormData) => {
-        //console.log('formModel of globalModel----------', this.globalModel.formModel)
-        if (!this.subFormItemFlag) {
-          this.setValue(newFormData[this.field.options.name])
+      emitter.on$('setFormData', (newFormData) => {
+        //console.log('formModel of globalModel----------', globalModel.formModel)
+        if (!subFormItemFlag.value) {
+          methods.setValue(newFormData[props.field.options.name])
         }
       })
 
-      this.on$('field-value-changed', (values) => {
-        if (!!this.subFormItemFlag) {
-          let subFormData = this.formModel[this.subFormName]
-          this.handleOnChangeForSubForm(values[0], values[1], subFormData, this.subFormRowId)
+      emitter.on$('field-value-changed', (values) => {
+        if (!!subFormItemFlag.value) {
+          let subFormData = formModel.value[subFormName.value]
+          methods.handleOnChangeForSubForm(values[0], values[1], subFormData, props.subFormRowId)
         } else {
-          this.handleOnChange(values[0], values[1])
+          methods.handleOnChange(values[0], values[1])
         }
       })
 
       /* 监听从数据集加载选项事件 */
-      this.on$('loadOptionItemsFromDataSet', (dsName) => {
-        this.loadOptionItemsFromDataSet(dsName)
+      emitter.on$('loadOptionItemsFromDataSet', (dsName) => {
+        methods.loadOptionItemsFromDataSet(dsName)
       })
 
-      this.on$('reloadOptionItems', (widgetNames) => {
-        if ((widgetNames.length === 0) || (widgetNames.indexOf(this.field.options.name) > -1)) {
-          this.initOptionItems(true)
+      emitter.on$('reloadOptionItems', (widgetNames) => {
+        if ((widgetNames.length === 0) || (widgetNames.indexOf(props.field.options.name) > -1)) {
+          methods.initOptionItems(true)
         }
       })
 
     },
 
     handleOnCreated() {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      if (!!this.field.options.onCreated) {
-        let customFunc = new Function(this.field.options.onCreated)
-        customFunc.call(this)
+      if (!!props.field.options.onCreated) {
+        let customFunc = new Function(props.field.options.onCreated)
+        customFunc.call(proxy)
       }
     },
 
     handleOnMounted() {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      if (!!this.field.options.onMounted) {
-        let mountFunc = new Function(this.field.options.onMounted)
-        mountFunc.call(this)
+      if (!!props.field.options.onMounted) {
+        let mountFunc = new Function(props.field.options.onMounted)
+        mountFunc.call(proxy)
       }
     },
 
     registerToRefList(oldRefName) {
-      if ((this.refList !== null) && !!this.field.options.name) {
-        if (this.subFormItemFlag && !this.designState) { //处理子表单元素（且非设计状态）
+      if ((refList !== null) && !!props.field.options.name) {
+        if (subFormItemFlag.value && !props.designState) { //处理子表单元素（且非设计状态）
           if (!!oldRefName) {
-            delete this.refList[oldRefName + '@row' + this.subFormRowId]
+            delete refList[oldRefName + '@row' + props.subFormRowId]
           }
-          this.refList[this.field.options.name + '@row' + this.subFormRowId] = this
+          refList[props.field.options.name + '@row' + props.subFormRowId] = proxy
         } else {
           if (!!oldRefName) {
-            delete this.refList[oldRefName]
+            delete refList[oldRefName]
           }
-          this.refList[this.field.options.name] = this
+          refList[props.field.options.name] = proxy
         }
       }
     },
 
     unregisterFromRefList() {  //销毁组件时注销组件ref
-      if ((this.refList !== null) && !!this.field.options.name) {
-        let oldRefName = this.field.options.name
-        if (this.subFormItemFlag && !this.designState) { //处理子表单元素（且非设计状态）
-          delete this.refList[oldRefName + '@row' + this.subFormRowId]
+      if ((refList !== null) && !!props.field.options.name) {
+        let oldRefName = props.field.options.name
+        if (subFormItemFlag.value && !props.designState) { //处理子表单元素（且非设计状态）
+          delete refList[oldRefName + '@row' + props.subFormRowId]
         } else {
-          delete this.refList[oldRefName]
+          delete refList[oldRefName]
         }
       }
     },
 
     async initOptionItems(keepSelected) {
-      if (this.designState) {
+      if (props.designState) {
         return
       }
 
-      if ((this.field.type === 'radio') || (this.field.type === 'checkbox')
-          || (this.field.type === 'select') || (this.field.type === 'cascader')) {
+      if ((props.field.type === 'radio') || (props.field.type === 'checkbox')
+          || (props.field.type === 'select') || (props.field.type === 'cascader')) {
         /* 首先处理数据源选项加载 */
-        if (!!this.field.options.dsEnabled) {
-          this.field.options.optionItems.splice(0, this.field.options.optionItems.length) // 清空原有选项
-          let curDSName = this.field.options.dsName
-          let curDSetName = this.field.options.dataSetName
-          let curDS = getDSByName(this.formConfig, curDSName)
+        if (!!props.field.options.dsEnabled) {
+          props.field.options.optionItems.splice(0, props.field.options.optionItems.length) // 清空原有选项
+          let curDSName = props.field.options.dsName
+          let curDSetName = props.field.options.dataSetName
+          let curDS = getDSByName(formConfig.value, curDSName)
           if (!!curDS && !curDSetName) {
-            let gDsv = this.getGlobalDsv() || {}
+            let gDsv = getGlobalDsv() || {}
             //console.log('Global DSV is: ', gDsv)
             let localDsv = new Object({})
             overwriteObj(localDsv, gDsv)
-            localDsv['widgetName'] = this.field.options.name
+            localDsv['widgetName'] = props.field.options.name
             let dsResult = null
             try {
-              dsResult = await runDataSourceRequest(curDS, localDsv, this.getFormRef(), false, this.$message)
-              this.loadOptions(dsResult)
+              dsResult = await runDataSourceRequest(curDS, localDsv, methods.getFormRef(), false, proxy.$message)
+              methods.loadOptions(dsResult)
             } catch(err) {
-              this.$message.error(err.message)
+              proxy.$message.error(err.message)
             }
           }
 
@@ -245,99 +264,99 @@ export default {
         }
 
         /* 异步更新option-data之后globalOptionData不能获取到最新值，改用provide的getOptionData()方法 */
-        const newOptionItems = this.getOptionData()
-        if (!!newOptionItems && newOptionItems.hasOwnProperty(this.field.options.name)) {
+        const newOptionItems = getOptionData()
+        if (!!newOptionItems && newOptionItems.hasOwnProperty(props.field.options.name)) {
           if (!!keepSelected) {
-            this.reloadOptions(newOptionItems[this.field.options.name])
+            methods.reloadOptions(newOptionItems[props.field.options.name])
           } else {
-            this.loadOptions(newOptionItems[this.field.options.name])
+            methods.loadOptions(newOptionItems[props.field.options.name])
           }
         }
       }
     },
 
     loadOptionItemsFromDataSet(dsName) {
-      if (this.designState) {
+      if (props.designState) {
         return
       }
 
-      if ((this.field.type !== 'radio') && (this.field.type !== 'checkbox')
-          && (this.field.type !== 'select') && (this.field.type !== 'cascader')) {
+      if ((props.field.type !== 'radio') && (props.field.type !== 'checkbox')
+          && (props.field.type !== 'select') && (props.field.type !== 'cascader')) {
         return
       }
 
-      if (!this.field.options.dsEnabled || !this.field.options.dsName || !this.field.options.dataSetName
-          || (this.field.options.dsName !== dsName)) {
+      if (!props.field.options.dsEnabled || !props.field.options.dsName || !props.field.options.dataSetName
+          || (props.field.options.dsName !== dsName)) {
         return
       }
 
-      const dataCache = this.getDSResultCache()
-      const dSetName = this.field.options.dataSetName
+      const dataCache = getDSResultCache()
+      const dSetName = props.field.options.dataSetName
       if (!!dataCache && !!dataCache[dsName] && !!dataCache[dsName][dSetName]) {
-        this.field.options.optionItems.splice(0, this.field.options.optionItems.length) // 清空原有选项
-        this.loadOptions( dataCache[dsName][dSetName] )
+        props.field.options.optionItems.splice(0, props.field.options.optionItems.length) // 清空原有选项
+        methods.loadOptions( dataCache[dsName][dSetName] )
       }
     },
 
     refreshDefaultValue() {
-      if ((this.designState === true) && (this.field.options.defaultValue !== undefined)) {
-        this.fieldModel = this.field.options.defaultValue
+      if ((props.designState === true) && (props.field.options.defaultValue !== undefined)) {
+        data.fieldModel = props.field.options.defaultValue
       }
     },
 
     clearFieldRules() {
-      if (!this.field.formItemFlag) {
+      if (!props.field.formItemFlag) {
         return
       }
 
-      this.rules.splice(0, this.rules.length)  //清空已有
+      data.rules.splice(0, data.rules.length)  //清空已有
     },
 
     buildFieldRules() {
-      if (!this.field.formItemFlag) {
+      if (!props.field.formItemFlag) {
         return
       }
 
-      this.rules.splice(0, this.rules.length)  //清空已有
-      if (!!this.field.options.required) {
-        this.rules.push({
+      data.rules.splice(0, data.rules.length)  //清空已有
+      if (!!props.field.options.required) {
+        data.rules.push({
           required: true,
           //trigger: ['blur', 'change'],
           trigger: ['blur'],  /* 去掉change事件触发校验，change事件触发时formModel数据尚未更新，导致radio/checkbox必填校验出错！！ */
-          message: this.field.options.requiredHint || this.i18nt('render.hint.fieldRequired'),
+          message: props.field.options.requiredHint || i18nt('render.hint.fieldRequired'),
         })
       }
 
-      if (!!this.field.options.validation) {
-        let vldName = this.field.options.validation
+      if (!!props.field.options.validation) {
+        let vldName = props.field.options.validation
         if (!!FormValidators[vldName]) {
-          this.rules.push({
+          data.rules.push({
             validator: FormValidators[vldName],
             trigger: ['blur', 'change'],
-            label: this.field.options.label,
-            errorMsg: this.field.options.validationHint
+            label: props.field.options.label,
+            errorMsg: props.field.options.validationHint
           })
         } else {
-          this.rules.push({
+          data.rules.push({
             validator: FormValidators['regExp'],
             trigger: ['blur', 'change'],
             regExp: vldName,
-            label: this.field.options.label,
-            errorMsg: this.field.options.validationHint
+            label: props.field.options.label,
+            errorMsg: props.field.options.validationHint
           })
         }
       }
 
-      if (!!this.field.options.onValidate) {
-        //let customFn = new Function('rule', 'value', 'callback', this.field.options.onValidate)
+      if (!!props.field.options.onValidate) {
+        //let customFn = new Function('rule', 'value', 'callback', props.field.options.onValidate)
         let customFn = (rule, value, callback) => {
-          let tmpFunc =  new Function('rule', 'value', 'callback', this.field.options.onValidate)
-          return tmpFunc.call(this, rule, value, callback)
+          let tmpFunc =  new Function('rule', 'value', 'callback', props.field.options.onValidate)
+          return tmpFunc.call(proxy, rule, value, callback)
         }
-        this.rules.push({
+        data.rules.push({
           validator: customFn,
           trigger: ['blur', 'change'],
-          label: this.field.options.label
+          label: props.field.options.label
         })
       }
     },
@@ -346,11 +365,11 @@ export default {
      * 禁用字段值变动触发表单校验
      */
     disableChangeValidate() {
-      if (!this.rules) {
+      if (!data.rules) {
         return
       }
 
-      this.rules.forEach(rule => {
+      data.rules.forEach(rule => {
         if (!!rule.trigger) {
           rule.trigger.splice(0, rule.trigger.length)
         }
@@ -361,11 +380,11 @@ export default {
      * 启用字段值变动触发表单校验
      */
     enableChangeValidate() {
-      if (!this.rules) {
+      if (!data.rules) {
         return
       }
 
-      this.rules.forEach(rule => {
+      data.rules.forEach(rule => {
         if (!!rule.trigger) {
           rule.trigger.push('blur')
           rule.trigger.push('change')
@@ -398,141 +417,140 @@ export default {
     //--------------------- 事件处理 begin ------------------//
 
     emitFieldDataChange(newValue, oldValue) {
-      this.emit$('field-value-changed', [newValue, oldValue])
+      emitter.emit$('field-value-changed', [newValue, oldValue])
 
       /* 必须用dispatch向指定父组件派发消息！！ */
-      this.dispatch('VFormRender', 'fieldChange',
-          [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
+      emitter.dispatch('VFormRender', 'fieldChange',
+          [props.field.options.name, newValue, oldValue, subFormName.value, props.subFormRowIndex])
     },
 
     syncUpdateFormModel(value) {
-      if (!!this.designState) {
+      if (!!props.designState) {
         return
       }
-
-      if (!!this.subFormItemFlag) {
-        let subFormData = this.formModel[this.subFormName] || [{}]
-        let subFormDataRow = subFormData[this.subFormRowIndex]
+      if (!!subFormItemFlag.value) {
+        let subFormData = formModel.value[subFormName.value] || [{}]
+        let subFormDataRow = subFormData[props.subFormRowIndex]
         if (!!subFormDataRow) { // 重置表单后subFormDataRow为undefined，应跳过！！
-          subFormDataRow[this.field.options.name] = value
+          subFormDataRow[props.field.options.name] = value
         }
       } else {
-        this.formModel[this.field.options.name] = value
+        formModel.value[props.field.options.name] = value
       }
     },
 
     handleChangeEvent(value) {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      this.syncUpdateFormModel(value)
-      this.emitFieldDataChange(value, this.oldFieldValue)
+      methods.syncUpdateFormModel(value)
+      methods.emitFieldDataChange(value, props.oldFieldValue)
 
       //number组件一般不会触发focus事件，故此处需要手工赋值oldFieldValue！！
-      this.oldFieldValue = deepClone(value)  /* oldFieldValue需要在initFieldModel()方法中赋初值!! */
+      props.oldFieldValue = deepClone(value)  /* oldFieldValue需要在initFieldModel()方法中赋初值!! */
 
       /* 主动触发表单的单个字段校验，用于清除字段可能存在的校验错误提示 */
-      this.dispatch('VFormRender', 'fieldValidation', [this.getPropName()])
+      emitter.dispatch('VFormRender', 'fieldValidation', [methods.getPropName()])
     },
 
     handleFocusCustomEvent(event) {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      this.oldFieldValue = deepClone(this.fieldModel)  //保存修改change之前的值
+      props.oldFieldValue = deepClone(data.fieldModel)  //保存修改change之前的值
 
-      if (!!this.field.options.onFocus) {
-        let customFn = new Function('event', this.field.options.onFocus)
-        customFn.call(this, event)
+      if (!!props.field.options.onFocus) {
+        let customFn = new Function('event', props.field.options.onFocus)
+        customFn.call(proxy, event)
       }
     },
 
     handleBlurCustomEvent(event) {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      if (!!this.field.options.onBlur) {
-        let customFn = new Function('event', this.field.options.onBlur)
-        customFn.call(this, event)
+      if (!!props.field.options.onBlur) {
+        let customFn = new Function('event', props.field.options.onBlur)
+        customFn.call(proxy, event)
       }
     },
 
     handleInputCustomEvent(value) {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      this.syncUpdateFormModel(value)
+      methods.syncUpdateFormModel(value)
 
       /* 主动触发表单的单个字段校验，用于清除字段可能存在的校验错误提示 */
-      this.dispatch('VFormRender', 'fieldValidation', [this.getPropName()])
+      emitter.dispatch('VFormRender', 'fieldValidation', [methods.getPropName()])
 
-      if (!!this.field.options.onInput) {
-        let customFn = new Function('value', this.field.options.onInput)
-        customFn.call(this, value)
+      if (!!props.field.options.onInput) {
+        let customFn = new Function('value', props.field.options.onInput)
+        customFn.call(proxy, value)
       }
     },
 
     emitAppendButtonClick() {
-      if (!!this.designState) { //设计状态不触发点击事件
+      if (!!props.designState) { //设计状态不触发点击事件
         return
       }
 
-      if (!!this.field.options.onAppendButtonClick) {
-        let customFn = new Function(this.field.options.onAppendButtonClick)
-        customFn.call(this)
+      if (!!props.field.options.onAppendButtonClick) {
+        let customFn = new Function(props.field.options.onAppendButtonClick)
+        customFn.call(proxy)
       } else {
         /* 必须调用mixins中的dispatch方法逐级向父组件发送消息！！ */
-        this.dispatch('VFormRender', 'appendButtonClick', [this])
+        emitter.dispatch('VFormRender', 'appendButtonClick', [proxy])
       }
     },
 
     handleOnChange(val, oldVal) {  //自定义onChange事件
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      if (!!this.field.options.onChange) {
-        let changeFn = new Function('value', 'oldValue', this.field.options.onChange)
-        changeFn.call(this, val, oldVal)
+      if (!!props.field.options.onChange) {
+        let changeFn = new Function('value', 'oldValue', props.field.options.onChange)
+        changeFn.call(proxy, val, oldVal)
       }
     },
 
     handleOnChangeForSubForm(val, oldVal, subFormData, rowId) {  //子表单自定义onChange事件
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      if (!!this.field.options.onChange) {
-        let changeFn = new Function('value', 'oldValue', 'subFormData', 'rowId', this.field.options.onChange)
-        changeFn.call(this, val, oldVal, subFormData, rowId)
+      if (!!props.field.options.onChange) {
+        let changeFn = new Function('value', 'oldValue', 'subFormData', 'rowId', props.field.options.onChange)
+        changeFn.call(proxy, val, oldVal, subFormData, rowId)
       }
     },
 
     handleButtonWidgetClick() {
-      if (!!this.designState) { //设计状态不触发点击事件
+      if (!!props.designState) { //设计状态不触发点击事件
         return
       }
 
-      if (!!this.field.options.onClick) {
-        let customFn = new Function(this.field.options.onClick)
-        customFn.call(this)
+      if (!!props.field.options.onClick) {
+        let customFn = new Function(props.field.options.onClick)
+        customFn.call(proxy)
       } else {
-        this.dispatch('VFormRender', 'buttonClick', [this]);
+        emitter.dispatch('VFormRender', 'buttonClick', [proxy]);
       }
     },
 
     remoteQuery(keyword) {
-      if (!!this.designState) { //设计状态不触发事件
+      if (!!props.designState) { //设计状态不触发事件
         return
       }
 
-      if (!!this.field.options.onRemoteQuery) {
-        let remoteFn = new Function('keyword', this.field.options.onRemoteQuery)
-        remoteFn.call(this, keyword)
+      if (!!props.field.options.onRemoteQuery) {
+        let remoteFn = new Function('keyword', props.field.options.onRemoteQuery)
+        remoteFn.call(proxy, keyword)
       }
     },
 
@@ -542,13 +560,13 @@ export default {
     /* 提示：用户可自行扩充这些方法！！！ */
 
     getFormRef() { /* 获取VFrom引用，必须在VForm组件created之后方可调用 */
-      return this.refList['v_form_ref']
+      return refList['v_form_ref']
     },
 
     getWidgetRef(widgetName, showError) {
-      let foundRef = this.refList[widgetName]
+      let foundRef = refList[widgetName]
       if (!foundRef && !!showError) {
-        this.$message.error(this.i18nt('render.hint.refNotFound') + widgetName)
+        proxy.$message.error(i18nt('render.hint.refNotFound') + widgetName)
       }
       return foundRef
     },
@@ -562,79 +580,79 @@ export default {
       因为setFormData方法调用后，子表单内所有field-widget组件已被清空，接收不到setFormData事件！！
     * */
     setValue(newValue) {
-      /* if ((this.field.type === 'picture-upload') || (this.field.type === 'file-upload')) {
-        this.fileList = newValue
-      } else */ if (!!this.field.formItemFlag) {
-        let oldValue = deepClone(this.fieldModel)
-        this.fieldModel = newValue
-        this.initFileList()
+      /* if ((props.field.type === 'picture-upload') || (props.field.type === 'file-upload')) {
+        data.fileList = newValue
+      } else */ if (!!props.field.formItemFlag) {
+        let oldValue = deepClone(data.fieldModel)
+        data.fieldModel = newValue
+        methods.initFileList()
 
-        this.syncUpdateFormModel(newValue)
-        this.emitFieldDataChange(newValue, oldValue)
+        methods.syncUpdateFormModel(newValue)
+        methods.emitFieldDataChange(newValue, oldValue)
       }
     },
 
     getValue() {
-      /* if ((this.field.type === 'picture-upload') || (this.field.type === 'file-upload')) {
-        return this.fileList
+      /* if ((props.field.type === 'picture-upload') || (props.field.type === 'file-upload')) {
+        return data.fileList
       } else */ {
-        return this.fieldModel
+        return data.fieldModel
       }
     },
 
     resetField() {
-      let defaultValue = this.field.options.defaultValue
-      this.setValue(defaultValue)
-      this.$nextTick(() => {
+      let defaultValue = props.field.options.defaultValue
+      methods.setValue(defaultValue)
+      nextTick(() => {
         //
       })
 
       //清空上传组件文件列表
-      if ((this.field.type === 'picture-upload') || (this.field.type === 'file-upload')) {
+      if ((props.field.type === 'picture-upload') || (props.field.type === 'file-upload')) {
         this.$refs['fieldEditor'].clearFiles()
-        this.fileList.splice(0, this.fileList.length)
+        data.fileList.splice(0, data.fileList.length)
       }
     },
 
     setWidgetOption(optionName, optionValue) { //通用组件选项修改API
-      if (this.field.options.hasOwnProperty(optionName)) {
-        this.field.options[optionName] = optionValue
+      if (props.field.options.hasOwnProperty(optionName)) {
+        props.field.options[optionName] = optionValue
         //TODO: 是否重新构建组件？？有些属性修改后必须重新构建组件才能生效，比如字段校验规则。
       }
     },
 
     setReadonly(flag) {
-      this.field.options.readonly = flag
+      props.field.options.readonly = flag
     },
 
     setDisabled(flag) {
-      this.field.options.disabled = flag
+      props.field.options.disabled = flag
     },
 
     setAppendButtonVisible(flag) {
-      this.field.options.appendButton = flag
+      props.field.options.appendButton = flag
     },
 
     setAppendButtonDisabled(flag) {
-      this.field.options.appendButtonDisabled = flag
+      props.field.options.appendButtonDisabled = flag
     },
 
     setHidden(flag) {
-      this.field.options.hidden = flag
+      props.field.options.hidden = flag
 
       if (!!flag) {  //清除组件校验规则
-        this.clearFieldRules()
+        methods.clearFieldRules()
       } else {  //重建组件校验规则
-        this.buildFieldRules()
+        methods.buildFieldRules()
       }
     },
 
     setRequired(flag) {
-      this.field.options.required = flag
-      this.buildFieldRules()
+      props.field.options.required = flag
+      methods.buildFieldRules()
 
-      if (!this.designState && !flag) {  //清除必填校验提示
-        this.clearValidate()
+      if (!props.designState && !flag) {  //清除必填校验提示
+        methods.clearValidate()
       }
     },
 
@@ -642,33 +660,33 @@ export default {
      * 清除字段校验提示
      */
     clearValidate() {
-      if (!!this.designState) {
+      if (!!props.designState) {
         return
       }
 
-      this.getFormRef().getNativeForm().clearValidate(this.getPropName())
+      methods.getFormRef().getNativeForm().clearValidate(methods.getPropName())
     },
 
     setLabel(newLabel) {
-      this.field.options.label = newLabel
+      props.field.options.label = newLabel
     },
 
     focus() {
-      if (!!this.getFieldEditor() && !!this.getFieldEditor().focus) {
-        this.getFieldEditor().focus()
+      if (!!methods.getFieldEditor() && !!methods.getFieldEditor().focus) {
+        methods.getFieldEditor().focus()
       }
     },
 
     clearSelectedOptions() {  //清空已选选项
-      if ((this.field.type !== 'checkbox') && (this.field.type !== 'radio') && (this.field.type !== 'select')) {
+      if ((props.field.type !== 'checkbox') && (props.field.type !== 'radio') && (props.field.type !== 'select')) {
         return
       }
 
-      if ((this.field.type === 'checkbox') ||
-          ((this.field.type === 'select') && this.field.options.multiple)) {
-        this.fieldModel = []
+      if ((props.field.type === 'checkbox') ||
+          ((props.field.type === 'select') && props.field.options.multiple)) {
+        data.fieldModel = []
       } else {
-        this.fieldModel = ''
+        data.fieldModel = ''
       }
     },
 
@@ -678,13 +696,13 @@ export default {
      */
     loadOptions(options) {
       /*
-      this.field.options.optionItems = deepClone(options)
-      //this.clearSelectedOptions()  //清空已选选项
-       */
+      props.field.options.optionItems = deepClone(options)
+      //methods.clearSelectedOptions()  //清空已选选项
+      */
 
-      this.field.options.optionItems = translateOptionItems(options, this.field.type,
-          this.field.options.labelKey || 'label',
-          this.field.options.valueKey || 'value')
+      props.field.options.optionItems = translateOptionItems(options, props.field.type,
+          props.field.options.labelKey || 'label',
+          props.field.options.valueKey || 'value')
     },
 
     /**
@@ -692,19 +710,19 @@ export default {
      * @param options
      */
     reloadOptions(options) {
-      //this.field.options.optionItems = deepClone(options)
+      //props.field.options.optionItems = deepClone(options)
 
-      this.field.options.optionItems = translateOptionItems(options, this.field.type,
-          this.field.options.labelKey || 'label',
-          this.field.options.valueKey || 'value')
+      props.field.options.optionItems = translateOptionItems(options, props.field.type,
+          props.field.options.labelKey || 'label',
+          props.field.options.valueKey || 'value')
     },
 
     disableOption(optionValue) {
-      this.disableOptionOfList(this.field.options.optionItems, optionValue)
+      methods.disableOptionOfList(props.field.options.optionItems, optionValue)
     },
 
     enableOption(optionValue) {
-      this.enableOptionOfList(this.field.options.optionItems, optionValue)
+      methods.enableOptionOfList(props.field.options.optionItems, optionValue)
     },
 
     /**
@@ -712,19 +730,19 @@ export default {
      * @returns {*}
      */
     getOptionItems() {
-      return this.field.options.optionItems
+      return props.field.options.optionItems
     },
 
     setUploadHeader(name, value) {
-      this.uploadHeaders[name] = value
+      data.uploadHeaders[name] = value
     },
 
     setUploadData(name, value) {
-      this.uploadData[name] = value
+      data.uploadData[name] = value
     },
 
     setToolbar(customToolbar) {
-      this.customToolbar = customToolbar
+      data.customToolbar = customToolbar
     },
 
     /**
@@ -732,7 +750,7 @@ export default {
      * @returns {boolean}
      */
     isSubFormItem() {
-      return this.subFormItemFlag
+      return subFormItemFlag.value
     },
 
     /**
@@ -740,7 +758,7 @@ export default {
      * @returns {boolean}
      */
     isSubFormField() {
-      return this.subFormItemFlag
+      return subFormItemFlag.value
     },
 
     /**
@@ -748,7 +766,7 @@ export default {
      * @param readonlyFlag
      */
     setReadMode(readonlyFlag = true) {
-      this.fieldReadonlyFlag = readonlyFlag
+      data.fieldReadonlyFlag = readonlyFlag
     },
 
     /**
@@ -756,10 +774,10 @@ export default {
      * @param className
      */
     addCssClass(className) {
-      if (!this.field.options.customClass) {
-        this.field.options.customClass = [className]
+      if (!props.field.options.customClass) {
+        props.field.options.customClass = [className]
       } else {
-        this.field.options.customClass.push(className)
+        props.field.options.customClass.push(className)
       }
     },
 
@@ -768,22 +786,50 @@ export default {
      * @param className
      */
     removeCssClass(className) {
-      if (!this.field.options.customClass) {
+      if (!props.field.options.customClass) {
         return
       }
 
       let foundIdx = -1
-      this.field.options.customClass.map((cc, idx) => {
+      props.field.options.customClass.map((cc, idx) => {
         if (cc === className) {
           foundIdx = idx
         }
       })
       if (foundIdx > -1) {
-        this.field.options.customClass.splice(foundIdx, 1)
+        props.field.options.customClass.splice(foundIdx, 1)
       }
-    },
-
-    //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
+    }
 
   }
+
+  //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
+
+  return {
+    refList,
+    getFormConfig,
+    globalOptionData,
+    globalModel,
+    getOptionData,
+    getGlobalDsv,
+    getReadMode,
+    getSubFormFieldFlag,
+    getSubFormName,
+    getDSResultCache,
+
+    ...toRefs(data),
+
+
+    // computed 计算函数
+    formConfig,
+    subFormName,
+    subFormItemFlag,
+    formModel,
+    isReadMode,
+    optionLabel,
+
+    ...methods
+
+  }
+
 }

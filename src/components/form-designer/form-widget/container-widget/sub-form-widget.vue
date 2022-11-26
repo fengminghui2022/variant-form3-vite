@@ -38,17 +38,19 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
+
+	import { computed,toRefs,inject,provide ,reactive,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+
   import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
+  
+  import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin";
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
 
   export default {
     name: "sub-form-widget",
     componentName: 'ContainerWidget',
-    mixins: [i18n, containerMixin, refMixinDesign],
-    inject: ['refList'],
     components: {
       ContainerWrapper,
       ...FieldComponents,
@@ -59,48 +61,55 @@
       parentList: Array,
       indexOfParentList: Number,
       designer: Object,
-    },
-    provide() {
-      return {
-        getSubFormFieldFlag: () => true,
-        getSubFormName: () => this.widget.options.name,
-      }
-    },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+    },  
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const refList=inject('refList')
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+      const containerMixin = useContainer();
+      const designRefMixin = useDesignRef(refList,props.widget);
 
-    },
-    watch: {
-      //
-    },
-    created() {
-      this.initRefList()
-    },
-    mounted() {
-      //
-    },
-    methods: {
 
-      onSubFormDragAdd(evt, subList) {
+      provide("getSubFormFieldFlag",() => true);
+      provide("getSubFormName", () => props.widget.options.name);
+
+
+      const selected=computed(()=> {
+        return props.widget.id === props.designer.selectedId
+      })
+
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
+
+      const onSubFormDragAdd=(evt, subList)=>{
         const newIndex = evt.newIndex
         if (!!subList[newIndex]) {
-          this.designer.setSelected( subList[newIndex] )
+          props.designer.setSelected( subList[newIndex] )
         }
 
-        this.designer.emitHistoryChange()
+        props.designer.emitHistoryChange()
         console.log('test', 'onSubFormDragAdd')
-        this.designer.emitEvent('field-selected', this.widget)
-      },
+        props.designer.emitEvent('field-selected', props.widget)
+      }
 
-      onSubFormDragEnd(evt) {
+      const onSubFormDragEnd=(evt)=> {
         console.log('sub form drag end: ', evt)
-      },
+      }
+
+      designRefMixin.initRefList()
+      return {
+        i18nt,
+        ...designRefMixin,
+        ...containerMixin,
+
+        selected,
+        customClass,
+
+        onSubFormDragAdd,
+        onSubFormDragEnd
+      }
 
     }
   }

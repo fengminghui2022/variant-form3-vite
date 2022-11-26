@@ -3,7 +3,8 @@
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <!-- el-upload增加:name="field.options.name"后，会导致又拍云上传失败！故删除之！！ -->
-    <el-upload ref="fieldEditor" :disabled="field.options.disabled || isReadMode"
+        <el-upload ref="fieldEditor"
+               :disabled="field.options.disabled || isReadMode"
                :style="styleVariables" class="dynamicPseudoAfter"
                :action="realUploadURL" :headers="uploadHeaders" :data="uploadData"
                :with-credentials="field.options.withCredentials"
@@ -35,11 +36,15 @@
 </template>
 
 <script>
+	import { toRefs ,reactive,inject, getCurrentInstance, computed, onMounted, onBeforeUnmount } from 'vue'
   import FormItemWrapper from './form-item-wrapper'
-  import emitter from '@/utils/emitter'
-  import i18n, {translate} from "@/utils/i18n";
+  
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n,translate } from '@/utils/i18n'
+  
   import {deepClone} from "@/utils/util";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+
   import SvgIcon from "@/components/svg-icon/index";
 
   let selectFileText = "'" + translate('render.hint.selectFile') + "'"
@@ -47,7 +52,6 @@
   export default {
     name: "file-upload-widget",
     componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
     props: {
       field: Object,
       parentWidget: Object,
@@ -78,8 +82,14 @@
       SvgIcon,
       FormItemWrapper,
     },
-    data() {
-      return {
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const emitterMixin =useEmitter();
+      
+      
+      const { proxy } = getCurrentInstance()
+      const data=reactive({
         oldFieldValue: null, //field组件change之前的值
         fieldModel: [],
         rules: [],
@@ -98,54 +108,48 @@
         styleVariables: {
           '--select-file-action': selectFileText,
         },
-      }
-    },
-    computed: {
-      realUploadURL() {
-        let uploadURL = this.field.options.uploadURL
+      })
+      
+      const fieldMixin = useField(props,data);
+
+      const realUploadURL=computed(()=> {
+        let uploadURL = props.field.options.uploadURL
         if (!!uploadURL && ((uploadURL.indexOf('DSV.') > -1) || (uploadURL.indexOf('DSV[') > -1))) {
-          let DSV = this.getGlobalDsv()
-          return eval(this.field.options.uploadURL)
+          let DSV = fieldMixin.getGlobalDsv()
+          return eval(props.field.options.uploadURL)
         }
 
-        return this.field.options.uploadURL
-      },
+        return props.field.options.uploadURL
+      })
+      
+      onMounted(()=>{
+        fieldMixin.handleOnMounted()
+      })
 
-    },
-    beforeCreate() {
-      /* 这里不能访问方法和属性！！ */
-    },
+      onBeforeUnmount(()=>{
+        fieldMixin.unregisterFromRefList()
+      })
 
-    created() {
       /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
          需要在父组件created中初始化！！ */
-      this.registerToRefList()
-      this.initFieldModel()
-      this.initEventHandler()
-      this.buildFieldRules()
+      fieldMixin.registerToRefList()
+      fieldMixin.initFieldModel()
+      fieldMixin.initEventHandler()
+      fieldMixin.buildFieldRules()
 
-      this.handleOnCreated()
-    },
+      fieldMixin.handleOnCreated()
 
-    mounted() {
-      this.handleOnMounted()
-    },
 
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
+      const handleFileExceed=()=> {
+        let uploadLimit = props.field.options.limit
+        proxy.$message.warning( i18nt('render.hint.uploadExceed').replace('${uploadLimit}', uploadLimit) )
+      }
 
-    methods: {
-      handleFileExceed() {
-        let uploadLimit = this.field.options.limit
-        this.$message.warning( this.i18nt('render.hint.uploadExceed').replace('${uploadLimit}', uploadLimit) )
-      },
-
-      beforeFileUpload(file) {
+      const beforeFileUpload=(file)=> {
         let fileTypeCheckResult = false
         let extFileName = file.name.substring(file.name.lastIndexOf('.') + 1)
-        if (!!this.field.options && !!this.field.options.fileTypes) {
-          let uploadFileTypes = this.field.options.fileTypes
+        if (!!props.field.options && !!props.field.options.fileTypes) {
+          let uploadFileTypes = props.field.options.fileTypes
           if (uploadFileTypes.length > 0) {
             fileTypeCheckResult = uploadFileTypes.some( (ft) => {
               return extFileName.toLowerCase() === ft.toLowerCase()
@@ -153,29 +157,29 @@
           }
         }
         if (!fileTypeCheckResult) {
-          this.$message.error(this.i18nt('render.hint.unsupportedFileType') + extFileName)
+          proxy.$message.error(i18nt('render.hint.unsupportedFileType') + extFileName)
           return false;
         }
 
         let fileSizeCheckResult = false
         let uploadFileMaxSize = 5  //5MB
-        if (!!this.field.options && !!this.field.options.fileMaxSize) {
-          uploadFileMaxSize = this.field.options.fileMaxSize
+        if (!!props.field.options && !!props.field.options.fileMaxSize) {
+          uploadFileMaxSize = props.field.options.fileMaxSize
         }
         fileSizeCheckResult = file.size / 1024 / 1024 <= uploadFileMaxSize
         if (!fileSizeCheckResult) {
-          this.$message.error(this.i18nt('render.hint.fileSizeExceed') + uploadFileMaxSize + 'MB')
+          proxy.$message.error(i18nt('render.hint.fileSizeExceed') + uploadFileMaxSize + 'MB')
           return false;
         }
 
-        this.uploadData.key = file.name
-        return this.handleOnBeforeUpload(file)
-      },
+        data.uploadData.key = file.name
+        return handleOnBeforeUpload(file)
+      }
 
-      handleOnBeforeUpload(file) {
-        if (!!this.field.options.onBeforeUpload) {
-          let bfFunc = new Function('file', this.field.options.onBeforeUpload)
-          let result = bfFunc.call(this, file)
+      const handleOnBeforeUpload=(file)=> {
+        if (!!props.field.options.onBeforeUpload) {
+          let bfFunc = new Function('file', props.field.options.onBeforeUpload)
+          let result = bfFunc.call(proxy, file)
           if (typeof result === 'boolean') {
             return result
           } else {
@@ -184,60 +188,59 @@
         }
 
         return true
-      },
+      }
 
-      updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, defaultResult) {
-        this.fieldModel = this.fieldModel || []
-        let oldValue = deepClone(this.fieldModel)
+      const updateFieldModelAndEmitDataChangeForUpload=(fileList, customResult, defaultResult)=> {
+        data.fieldModel = data.fieldModel || []
+        let oldValue = deepClone(data.fieldModel)
         if (!!customResult && !!customResult.name && !!customResult.url) {
-          this.fieldModel.push({
+          data.fieldModel.push({
             name: customResult.name,
             url: customResult.url
           })
         } else if (!!defaultResult && !!defaultResult.name && !!defaultResult.url) {
-          this.fieldModel.push({
+          data.fieldModel.push({
             name: defaultResult.name,
             url: defaultResult.url
           })
         } else {
-          this.fieldModel = deepClone(fileList)
+          data.fieldModel = deepClone(fileList)
         }
+        fieldMixin.syncUpdateFormModel(data.fieldModel)
+        fieldMixin.emitFieldDataChange(data.fieldModel, oldValue)
+      }
 
-        this.syncUpdateFormModel(this.fieldModel)
-        this.emitFieldDataChange(this.fieldModel, oldValue)
-      },
-
-      handleFileUpload(res, file, fileList) {
+      const handleFileUpload=(res, file, fileList)=> {
         if (file.status === 'success') {
           let customResult = null
-          if (!!this.field.options.onUploadSuccess) {
-            let mountFunc = new Function('result', 'file', 'fileList', this.field.options.onUploadSuccess)
-            customResult = mountFunc.call(this, res, file, fileList)
+          if (!!props.field.options.onUploadSuccess) {
+            let mountFunc = new Function('result', 'file', 'fileList', props.field.options.onUploadSuccess)
+            customResult = mountFunc.call(proxy, res, file, fileList)
           }
-
-          this.updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
+          file.url=res.url
+          updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
           if (!!customResult && !!customResult.name) {
             file.name = customResult.name
           }
           if (!!customResult && !!customResult.url) {
             file.url = customResult.url
           }
-          this.fileList = deepClone(fileList)
-          this.uploadBtnHidden = fileList.length >= this.field.options.limit
+          data.fileList = deepClone(fileList)
+          data.uploadBtnHidden = fileList.length >= props.field.options.limit
         }
-      },
+      }
 
-      updateFieldModelAndEmitDataChangeForRemove(deletedFileIdx, fileList) {
-        let oldValue = deepClone(this.fieldModel)
-        this.fieldModel.splice(deletedFileIdx, 1)
-        this.syncUpdateFormModel(this.fieldModel)
-        this.emitFieldDataChange(this.fieldModel, oldValue)
-      },
+      const updateFieldModelAndEmitDataChangeForRemove=(deletedFileIdx, fileList)=> {
+        let oldValue = deepClone(data.fieldModel)
+        data.fieldModel.splice(deletedFileIdx, 1)
+        fieldMixin.syncUpdateFormModel(data.fieldModel)
+        fieldMixin.emitFieldDataChange(data.fieldModel, oldValue)
+      }
 
-      removeUploadFile(fileName, fileUrl, fileUid) {
+      const removeUploadFile=(fileName, fileUrl, fileUid)=> {
         let foundIdx = -1
         let foundFile = null
-        this.fileList.forEach((file, idx) => {
+        data.fileList.forEach((file, idx) => {
           if ((file.name === fileName) && ((file.url === fileUrl) || (!!fileUid && file.uid === fileUid))) {
             foundIdx = idx
             foundFile = file
@@ -245,29 +248,50 @@
         })
 
         if (foundIdx >= 0) {
-          this.fileList.splice(foundIdx, 1)
-          this.updateFieldModelAndEmitDataChangeForRemove(foundIdx, this.fileList)
-          this.uploadBtnHidden = this.fileList.length >= this.field.options.limit
+          data.fileList.splice(foundIdx, 1)
+          updateFieldModelAndEmitDataChangeForRemove(foundIdx, data.fileList)
+          data.uploadBtnHidden = data.fileList.length >= props.field.options.limit
 
-          if (!!this.field.options.onFileRemove) {
-            let customFn = new Function('file', 'fileList', this.field.options.onFileRemove)
-            customFn.call(this, foundFile, this.fileList)
+          if (!!props.field.options.onFileRemove) {
+            let customFn = new Function('file', 'fileList', props.field.options.onFileRemove)
+            customFn.call(proxy, foundFile, data.fileList)
           }
         }
-      },
+      }
 
-      handleUploadError(err, file, fileList) {
-        if (!!this.field.options.onUploadError) {
-          let customFn = new Function('error', 'file', 'fileList', this.field.options.onUploadError)
-          customFn.call(this, err, file, fileList)
+      const handleUploadError=(err, file, fileList)=> {
+        if (!!props.field.options.onUploadError) {
+          let customFn = new Function('error', 'file', 'fileList', props.field.options.onUploadError)
+          customFn.call(proxy, err, file, fileList)
         } else {
-          this.$message({
-            message: this.i18nt('render.hint.uploadError') + err,
+          proxy.$message({
+            message: i18nt('render.hint.uploadError') + err,
             duration: 3000,
             type: 'error',
           })
         }
-      },
+      }
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...fieldMixin,
+
+        realUploadURL,
+
+        handleFileExceed,
+        beforeFileUpload,
+        removeUploadFile,
+
+
+        handleOnBeforeUpload,
+        handleFileUpload,
+        handleUploadError,
+
+
+        updateFieldModelAndEmitDataChangeForUpload,
+        updateFieldModelAndEmitDataChangeForRemove,
+      }
 
     }
   }

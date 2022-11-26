@@ -24,24 +24,24 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        
+        <!--
         <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, gitUrl)" target="_blank"><svg-icon icon-class="github" />{{i18nt('application.github')}}</a>
         <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, docUrl)" target="_blank"><svg-icon icon-class="document" />{{i18nt('application.document')}}</a>
         <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, chatUrl)" target="_blank">{{i18nt('application.qqGroup')}}</a>
         <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, subScribeUrl)" target="_blank">
           {{i18nt('application.subscription')}}<i class="el-icon-top-right"></i></a>
-       
+        -->
         <a href="javascript:void(0)">&nbsp;</a>
       </div>
     </el-header>
 
     <el-container>
       <el-aside class="side-panel">
-       <widget-panel :designer="designer" />
+        <widget-panel :designer="designer" />
       </el-aside>
 
       <el-container class="center-layout-container">
-       <el-header class="toolbar-header">
+        <el-header class="toolbar-header">
           <toolbar-panel :designer="designer" :global-dsv="globalDsv" ref="toolbarRef">
             <template v-for="(idx, slotName) in $slots" #[slotName]>
               <slot :name="slotName"></slot>
@@ -66,31 +66,25 @@
 </template>
 
 <script>
-  import { 
-    computed, getCurrentInstance, reactive,ref ,nextTick,
-    toRefs,provide,
-    onMounted
-  } from 'vue'
-
-
   import WidgetPanel from './widget-panel/index'
   import ToolbarPanel from './toolbar-panel/index'
   import SettingPanel from './setting-panel/index'
   import VFormWidget from './form-widget/index'
+  import {createDesigner} from "@/components/form-designer/designer"
   import {
     addWindowResizeHandler, deepClone, getQueryParam, getAllContainerWidgets,
     getAllFieldWidgets, traverseAllWidgets
   } from "@/utils/util"
-  import {MOCK_CASE_URL, VARIANT_FORM_VERSION} from "@/utils/config"  
-  import { useI18n,useChangeLocale } from '@/utils/i18n'
-
-  import { createDesigner } from "@/components/form-designer/designer3"
-
-
+  import {MOCK_CASE_URL, VARIANT_FORM_VERSION} from "@/utils/config"
+  import i18n, { changeLocale } from "@/utils/i18n"
+  import axios from 'axios'
   import SvgIcon from "@/components/svg-icon/index"
-  export default{
+
+  export default {
     name: "VFormDesigner",
-    components:{
+    componentName: "VFormDesigner",
+    mixins: [i18n],
+    components: {
       SvgIcon,
       WidgetPanel,
       ToolbarPanel,
@@ -142,6 +136,7 @@
           }
         }
       },
+
       /* 全局数据源变量 */
       globalDsv: {
         type: Object,
@@ -149,36 +144,14 @@
       },
 
     },
-    setup(props,context){
-      const { i18nt }=useI18n();
-      const { proxy } = getCurrentInstance()
-      let $current=proxy;
-
-      /* 页面组件 */
-      const toolbarRef= ref(null);
-      const formRef= ref(null);
-
-
-      /* 声明周期事件定义 */
-      onMounted(()=>{
-          initLocale()
-
-          let logoHeaderHeight = (props.designerConfig.logoHeader !== false) ? 48 : 0
-          data.scrollerHeight = window.innerHeight - logoHeaderHeight - 42 + 'px'
-          addWindowResizeHandler(() => {
-            nextTick(() => {
-              data.scrollerHeight = window.innerHeight - logoHeaderHeight - 42 + 'px'
-            })
-          })
-
-          loadCase()
-          loadFieldListFromServer()
-      })
-
-      const data = reactive({ 
+    data() {
+      return {
         vFormVersion: VARIANT_FORM_VERSION,
-        curLangName: ref(''),
+        curLangName: '',
         curLocale: '',
+
+        vsCodeFlag: false,
+        caseName: '',
 
         docUrl: 'https://www.vform666.com/document3.html',
         gitUrl: 'https://github.com/vform666/variant-form3-vite',
@@ -187,109 +160,66 @@
 
         scrollerHeight: 0,
 
-        designer: createDesigner(proxy),
+        designer: createDesigner(this),
 
         fieldList: [],
 
-        externalComponents:  {},  //外部组件实例集合 
-      })
+        externalComponents:  {},  //外部组件实例集合
+      }
+    },
+    provide() {
+      return {
+        serverFieldList: this.fieldList,
+        getDesignerConfig: () => this.designerConfig,
+        getBannedWidgets: () => this.bannedWidgets,
+      }
+    },
+    computed: {
+      vfProductName() {
+        return (this.designerConfig && this.designerConfig.productName) || 'VForm Pro'
+      },
 
-      provide("serverFieldList", data.fieldList);
-      provide("getBannedWidgets",  () =>{return props.bannedWidgets });
-      provide("getDesignerConfig",() =>{return props.designerConfig });
-
-
-      /* 初始化设计器参数 */ 
-      data.vsCodeFlag = getQueryParam('vscode') == 1
-      data.caseName = getQueryParam('case')
-      
-      const vfProductName = computed(() =>  {
-        return (data.designerConfig && data.designerConfig.productName) || 'VForm Pro'
-      });
-      const vfProductTitle = computed(() =>  {
-        return (data.designerConfig && data.designerConfig.productTitle) ||
-            i18nt('application.productTitle')
-       });
-      
-
-      const testEEH=(eventName, eventParams)=>{
-        console.log('test', eventName)
-        console.log('test222222', eventParams)
+      vfProductTitle() {
+        return (this.designerConfig && this.designerConfig.productTitle) ||
+            this.i18nt('application.productTitle')
       }
 
-      const showLink=(configName) =>{
-        if (props.designerConfig[configName] === undefined) {
+    },
+    created() {
+      this.designer.initDesigner( !!this.designerConfig.resetFormJson )
+      this.vsCodeFlag = getQueryParam('vscode') == 1
+      this.caseName = getQueryParam('case')
+    },
+    mounted() {
+      this.initLocale()
+
+      let logoHeaderHeight = (this.designerConfig.logoHeader !== false) ? 48 : 0
+      this.scrollerHeight = window.innerHeight - logoHeaderHeight - 42 + 'px'
+      addWindowResizeHandler(() => {
+        this.$nextTick(() => {
+          this.scrollerHeight = window.innerHeight - logoHeaderHeight - 42 + 'px'
+        })
+      })
+
+      this.loadCase()
+      this.loadFieldListFromServer()
+    },
+    methods: {
+      testEEH(eventName, eventParams) {
+        console.log('test', eventName)
+        console.log('test222222', eventParams)
+      },
+
+      showLink(configName) {
+        if (this.designerConfig[configName] === undefined) {
           return true
         }
 
-        return !!props.designerConfig[configName]
-      }
+        return !!this.designerConfig[configName]
+      },
 
-      /* 国际化相关 */
-      const initLocale=()=>{
-          data.curLocale = localStorage.getItem('v_form_locale')
-          if (!!data.vsCodeFlag) {
-            data.curLocale = data.curLocale || 'en-US'
-          } else {
-            data.curLocale = data.curLocale || 'zh-CN'
-          }
-
-          data.curLangName = i18nt('application.' + data.curLocale)
-          changeLanguage(data.curLocale)
-      }
-      const changeLanguage=(langName)=>{
-        useChangeLocale(langName)
-      }
-      const handleLanguageChanged=(command)=>{
-        changeLanguage(command)
-        data.curLangName = i18nt('application.' + command)
-      }
-
-
-
-      /* 加载示例 */
-      const loadCase=()=>{
-        if (!data.caseName) {
-          return
-        }
-
-        axios.get(MOCK_CASE_URL + data.caseName + '.txt').then(res => {
-          if (!!res.data.code) {
-            $current.$message.error(i18nt('designer.hint.sampleLoadedFail'))
-            return
-          }
-
-          this.setFormJson(res.data)
-          $current.$message.success(i18nt('designer.hint.sampleLoadedSuccess'))
-        }).catch(error => {
-          $current.$message.error(i18nt('designer.hint.sampleLoadedFail') + ':' + error)
-        })
-      }      
-      const loadFieldListFromServer=()=>{
-        if (!props.fieldListApi) {
-          return
-        }
-
-        let headers = props.fieldListApi.headers || {}
-        axios.get(props.fieldListApi.URL, {'headers': headers}).then(res => {
-          let labelKey = props.fieldListApi.labelKey || 'label'
-          let nameKey = props.fieldListApi.nameKey || 'name'
-
-          props.fieldList.splice(0, props.fieldList.length)  //清空已有
-          res.data.forEach(fieldItem => {
-            props.fieldList.push({
-              label: fieldItem[labelKey],
-              name: fieldItem[nameKey]
-            })
-          })
-        }).catch(error => {
-          $current.$message.error(error)
-        })
-      }
-
-      /* 其他方法 */
-      const openHome=()=>{
-        if (!!data.vsCodeFlag) {
+      openHome() {
+        if (!!this.vsCodeFlag) {
           const msgObj = {
             cmd: 'openUrl',
             data: {
@@ -298,9 +228,10 @@
           }
           window.parent.postMessage(msgObj, '*')
         }
-      }
-      const openUrl=(event, url)=>{
-        if (!!data.vsCodeFlag) {
+      },
+
+      openUrl(event, url) {
+        if (!!this.vsCodeFlag) {
           const msgObj = {
             cmd: 'openUrl',
             data: {
@@ -313,83 +244,140 @@
           aDom.href = url
           //window.open(url, '_blank') //直接打开新窗口，会被浏览器拦截
         }
-      }
+      },
 
+      loadCase() {
+        if (!this.caseName) {
+          return
+        }
 
+        axios.get(MOCK_CASE_URL + this.caseName + '.txt').then(res => {
+          if (!!res.data.code) {
+            this.$message.error(this.i18nt('designer.hint.sampleLoadedFail'))
+            return
+          }
 
-      /* 对外暴露方法 */
-      
-      const setFormJson=(formJson)=>{
+          this.setFormJson(res.data)
+          this.$message.success(this.i18nt('designer.hint.sampleLoadedSuccess'))
+        }).catch(error => {
+          this.$message.error(this.i18nt('designer.hint.sampleLoadedFail') + ':' + error)
+        })
+      },
+
+      initLocale() {
+        this.curLocale = localStorage.getItem('v_form_locale')
+        if (!!this.vsCodeFlag) {
+          this.curLocale = this.curLocale || 'en-US'
+        } else {
+          this.curLocale = this.curLocale || 'zh-CN'
+        }
+        this.curLangName = this.i18nt('application.' + this.curLocale)
+        this.changeLanguage(this.curLocale)
+      },
+
+      loadFieldListFromServer() {
+        if (!this.fieldListApi) {
+          return
+        }
+
+        let headers = this.fieldListApi.headers || {}
+        axios.get(this.fieldListApi.URL, {'headers': headers}).then(res => {
+          let labelKey = this.fieldListApi.labelKey || 'label'
+          let nameKey = this.fieldListApi.nameKey || 'name'
+
+          this.fieldList.splice(0, this.fieldList.length)  //清空已有
+          res.data.forEach(fieldItem => {
+            this.fieldList.push({
+              label: fieldItem[labelKey],
+              name: fieldItem[nameKey]
+            })
+          })
+        }).catch(error => {
+          this.$message.error(error)
+        })
+      },
+
+      handleLanguageChanged(command) {
+        this.changeLanguage(command)
+        this.curLangName = this.i18nt('application.' + command)
+      },
+
+      changeLanguage(langName) {
+        changeLocale(langName)
+      },
+
+      setFormJson(formJson) {
         let modifiedFlag = false
         if (!!formJson) {
           if (typeof formJson === 'string') {
-            modifiedFlag = data.designer.loadFormJson( JSON.parse(formJson) )
+            modifiedFlag = this.designer.loadFormJson( JSON.parse(formJson) )
           } else if (formJson.constructor === Object) {
-            modifiedFlag = data.designer.loadFormJson(formJson)
+            modifiedFlag = this.designer.loadFormJson(formJson)
           }
 
           if (modifiedFlag) {
-            data.designer.emitHistoryChange()
+            this.designer.emitHistoryChange()
           }
         }
-      }
+      },
 
-      const getFormJson=()=> {
+      getFormJson() {
         return {
-          widgetList: deepClone(data.designer.widgetList),
-          formConfig: deepClone(data.designer.formConfig)
+          widgetList: deepClone(this.designer.widgetList),
+          formConfig: deepClone(this.designer.formConfig)
         }
-      }
+      },
 
-      const clearDesigner=()=> {
-        toolbarRef.value.clearFormWidget()
-      }
+      clearDesigner() {
+        this.$refs.toolbarRef.clearFormWidget()
+      },
 
 
       /**
        * 刷新表单设计器
        */
-      const refreshDesigner=()=> {
+      refreshDesigner() {
         //this.designer.loadFormJson( this.getFormJson() )  //只有第一次调用生效？？
-        let fJson = getFormJson()
-        data.designer.clearDesigner(true)  //不触发历史记录变更
-        data.designer.loadFormJson(fJson)
-      }
+
+        let fJson = this.getFormJson()
+        this.designer.clearDesigner(true)  //不触发历史记录变更
+        this.designer.loadFormJson(fJson)
+      },
 
       /**
        * 预览表单
        */
-      const previewForm=()=> {
-        toolbarRef.value.previewForm()
-      }
+      previewForm() {
+        this.$refs.toolbarRef.previewForm()
+      },
 
       /**
        * 导入表单JSON
        */
-      const importJson=()=> {
-        toolbarRef.value.importJson()
-      }
+      importJson() {
+        this.$refs.toolbarRef.importJson()
+      },
 
       /**
        * 导出表单JSON
        */
-      const exportJson=()=> {
-        toolbarRef.value.exportJson()
-      }
+      exportJson() {
+        this.$refs.toolbarRef.exportJson()
+      },
 
       /**
        * 导出Vue/HTML代码
        */
-      const exportCode=()=> {
-        toolbarRef.value.exportCode()
-      }
+      exportCode() {
+        this.$refs.toolbarRef.exportCode()
+      },
 
       /**
        * 生成SFC代码
        */
-      const generateSFC=()=> {
-        toolbarRef.value.generateSFC()
-      }
+      generateSFC() {
+        this.$refs.toolbarRef.generateSFC()
+      },
 
       /**
        * 获取所有字段组件
@@ -397,129 +385,83 @@
        * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认不包含
        * @returns {*[]}
        */
-      const getFieldWidgets=(widgetList = null, staticWidgetsIncluded = false)=> {
+      getFieldWidgets(widgetList = null, staticWidgetsIncluded = false) {
         return !!widgetList ? getAllFieldWidgets(widgetList, staticWidgetsIncluded) :
             getAllFieldWidgets(this.designer.widgetList, staticWidgetsIncluded)
-      }
+      },
 
       /**
        * 获取所有容器组件
        * @param widgetList 默认为null，代表取当前表单json组件列表
        * @returns {*[]}
        */
-      const getContainerWidgets=(widgetList = null)=> {
+      getContainerWidgets(widgetList = null) {
         return !!widgetList ? getAllContainerWidgets(widgetList) : getAllContainerWidgets(this.designer.widgetList)
-      }
+      },
 
       /**
        * 升级表单json，以补充最新的组件属性
        * @param formJson
        */
-      const upgradeFormJson=(formJson)=> {
+      upgradeFormJson(formJson) {
         if (!formJson.widgetList || !formJson.formConfig) {
-          data.$message.error('Invalid form json!')
+          this.$message.error('Invalid form json!')
           return
         }
 
         traverseAllWidgets(formJson.widgetList, (w) => {
-          data.designer.upgradeWidgetConfig(w)
+          this.designer.upgradeWidgetConfig(w)
         })
-        data.designer.upgradeFormConfig(formJson.formConfig)
+        this.designer.upgradeFormConfig(formJson.formConfig)
 
         return formJson
-      }
+      },
 
-      const getWidgetRef=(widgetName, showError = false)=> {
-        return formRef.value.getWidgetRef(widgetName, showError)
-      }
+      getWidgetRef(widgetName, showError = false) {
+        return this.$refs['formRef'].getWidgetRef(widgetName, showError)
+      },
 
-      const getSelectedWidgetRef=()=> {
-        return formRef.value.getSelectedWidgetRef()
-      }
+      getSelectedWidgetRef() {
+        return this.$refs['formRef'].getSelectedWidgetRef()
+      },
 
       /**
        * 添加数据源对象
        * @param dsObj
        */
-      const addDataSource=(dsObj)=> {
-        data.designer.formConfig.dataSources.push(dsObj)
-      }
+      addDataSource(dsObj) {
+        this.designer.formConfig.dataSources.push(dsObj)
+      },
 
       /**
        * 增加外部组件引用，可通过getEC()方法获取外部组件，以便在VForm内部调用外部组件方法
        * @param componentName 外部组件名称
        * @param externalComponent 外部组件实例
        */
-      const addEC=(componentName, externalComponent)=> {
-        data.externalComponents[componentName] = externalComponent
-      }
+      addEC(componentName, externalComponent) {
+        this.externalComponents[componentName] = externalComponent
+      },
 
       /**
        * 判断外部组件是否可获取
        * @param componentName 外部组件名称
        * @returns {boolean}
        */
-      const hasEC=(componentName)=> {
-        return data.externalComponents.hasOwnProperty(componentName)
-      }
+      hasEC(componentName) {
+        return this.externalComponents.hasOwnProperty(componentName)
+      },
 
       /**
        * 获取外部组件实例
        * @param componentName
        * @returns {*}
        */
-      const getEC=(componentName)=> {
-        return data.externalComponents[componentName]
-      }
+      getEC(componentName) {
+        return this.externalComponents[componentName]
+      },
 
+      //TODO: 增加更多方法！！
 
-      //初始化设计器
-      data.designer.initDesigner(!!data.designer.resetFormJson);
-      data.designer.loadFormContentFromStorage();
-
-      return {
-        /* 页面组件引用 */
-        toolbarRef,
-        formRef,
-
-        /* 属性 */
-        ...toRefs(data),
-        ...props,
-
-        /* 计算属性 */
-        vfProductName,
-        vfProductTitle,
-
-        /* 方法 */
-        i18nt,
-        showLink,
-        openHome,
-        openUrl,
-        handleLanguageChanged,
-
-        testEEH,
-
-        /* 暴露方法 */
-        setFormJson,
-        getFormJson,
-        clearDesigner,
-        refreshDesigner,
-        previewForm,
-        importJson,
-        exportJson,
-        exportCode,
-        generateSFC,
-        getFieldWidgets,
-        getContainerWidgets,
-        upgradeFormJson,
-        getWidgetRef,
-        getSelectedWidgetRef,
-        addDataSource,
-        addEC,
-        hasEC,
-        getEC,
-
-      }
     }
   }
 </script>

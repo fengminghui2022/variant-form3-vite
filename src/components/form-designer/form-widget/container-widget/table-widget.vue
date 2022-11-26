@@ -34,17 +34,17 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
+	import { computed,toRefs,inject,provide ,reactive,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+  
   import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
   import TableCellWidget from "@/components/form-designer/form-widget/container-widget/table-cell-widget"
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
 
+  import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin";
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
   export default {
     name: "table-widget",
     componentName: 'ContainerWidget',
-    mixins: [i18n, containerMixin, refMixinDesign],
-    inject: ['refList'],
     components: {
       ContainerWrapper,
       TableCellWidget,
@@ -56,28 +56,34 @@
       indexOfParentList: Number,
       designer: Object,
     },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+    setup(props){
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+      const { i18nt }=useI18n();
+      const refList=inject('refList')
 
-    },
-    watch: {
-      //
-    },
-    created() {
-      this.initRefList()
-    },
-    mounted() {
-      //
-    },
-    methods: {
+      const containerMixin = useContainer();
+      const designRefMixin = useDesignRef(refList,props.widget);
 
+      
+      const selected=computed(()=> {
+        return props.widget.id === props.designer.selectedId
+      })
 
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
+
+      designRefMixin.initRefList()
+
+      return {
+        i18nt,
+        ...designRefMixin,
+        ...containerMixin,
+
+        selected,
+        customClass
+      }
+      
     }
   }
 </script>
