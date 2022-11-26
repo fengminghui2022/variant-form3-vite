@@ -25,17 +25,19 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "../../../utils/i18n"
-  import refMixin from "../../../components/form-render/refMixin"
+  import { inject, toRefs, getCurrentInstance, onBeforeUnmount  } from 'vue'
+
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+	import { useContainer } from "@/components/form-render/container-item/containerItemMixin"
+
   import ContainerItemWrapper from './container-item-wrapper'
   import TableCellItem from './table-cell-item'
-  import containerItemMixin from "./containerItemMixin";
 
   export default {
     name: "table-item",
     componentName: 'ContainerItem',
-    mixins: [emitter, i18n, refMixin, containerItemMixin],
     components: {
       ContainerItemWrapper,
       TableCellItem,
@@ -56,19 +58,31 @@
         default: ''
       },
     },
-    inject: ['refList', 'sfRefList', 'globalModel'],
-    created() {
-      this.initRefList()
-    },
-    mounted() {
+    
+    setup(props){
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
+      
+      const refList=inject('refList')
+      const sfRefList=inject('sfRefList')
+      const globalModel=inject('globalModel')
 
-    },
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-    methods: {
+      const refMixin = useRef(props);
+      const containerMixin= useContainer(props,{},{});
 
-    },
+      onBeforeUnmount(()=>{
+        containerMixin.unregisterFromRefList()
+      })
+
+
+      refMixin.initRefList()
+      
+      return {
+        i18nt,
+        ...toRefs(props)
+      }
+
+    }
   }
 </script>
 

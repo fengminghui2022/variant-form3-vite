@@ -86,11 +86,11 @@
 
 <script>
   import CodeEditor from '@/components/code-editor/index'
-  import i18n from "@/utils/i18n";
+  import { getCurrentInstance,toRefs,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "OptionItemsSetting",
-    mixins: [i18n],
     components: {
       CodeEditor,
     },
@@ -98,8 +98,13 @@
       designer: Object,
       selectedWidget: Object,
     },
-    data() {
-      return {
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      
+      const { proxy } = getCurrentInstance()
+
+      const data=reactive({
         showImportDialogFlag: false,
         optionLines: '',
 
@@ -108,76 +113,64 @@
 
         //separator: '||',
         separator: ',',
-      }
-    },
-    computed: {
-      optionModel() {
-        return this.selectedWidget.options
-      },
+      })
 
-    },
-    watch: {
-      'selectedWidget.options': {
-        deep: true,
-        handler(val) {
-          //console.log('888888', 'Options change!')
-        }
-      },
-    },
-    methods: {
-      emitDefaultValueChange() {
-        console.log("emitDefaultValueChange");
-        if (!!this.designer && !!this.designer.formWidget) {
-          let fieldWidget = this.designer.formWidget.getWidgetRef(this.selectedWidget.options.name)
-          console.log("123",this.designer.formWidget)
+      const optionModel=computed(()=> {
+        return props.selectedWidget.options
+      })
+
+      const emitDefaultValueChange=() =>{
+        if (!!props.designer && !!props.designer.formWidget) {
+          let fieldWidget = props.designer.formWidget.getWidgetRef(data.selectedWidget.options.name)
+          console.log("123",props.designer.formWidget)
           if (!!fieldWidget && !!fieldWidget.refreshDefaultValue) {
             console.log("abc")
             fieldWidget.refreshDefaultValue()
           }
         }
-      },
+      }
 
-      deleteOption(option, index) {
-        this.optionModel.optionItems.splice(index, 1)
-      },
+      const deleteOption=(option, index)=> {
+        optionModel.optionItems.splice(index, 1)
+      }
 
-      addOption() {
-        let newValue = this.optionModel.optionItems.length + 1
-        this.optionModel.optionItems.push({
+      const addOption=() =>{
+        let newValue = optionModel.optionItems.length + 1
+        optionModel.optionItems.push({
           value: newValue,
           label: 'new option'
         })
-      },
+      }
 
-      importOptions() {
-        this.optionLines = ''
-        if (this.optionModel.optionItems.length > 0) {
-          this.optionModel.optionItems.forEach((opt) => {
+      const importOptions=()=> {
+        data.optionLines = ''
+        if (optionModel.optionItems.length > 0) {
+          optionModel.optionItems.forEach((opt) => {
             if (opt.value === opt.label) {
-              this.optionLines += opt.value + '\n'
+              data.optionLines += opt.value + '\n'
             } else {
-              this.optionLines += opt.value + this.separator + opt.label + '\n'
+              data.optionLines += opt.value + data.separator + opt.label + '\n'
             }
           })
         }
 
-        this.showImportDialogFlag = true
-      },
+        data.showImportDialogFlag = true
+      }
 
-      saveOptions() {
-        let lineArray = this.optionLines.split('\n')
+      const saveOptions=()=> {
+        let lineArray = data.optionLines.split('\n')
         //console.log('test', lineArray)
         if (lineArray.length > 0) {
-          this.optionModel.optionItems = []
+          optionModel.optionItems = []
           lineArray.forEach((optLine) => {
             if (!!optLine && !!optLine.trim()) {
-              if (optLine.indexOf(this.separator) !== -1) {
-                this.optionModel.optionItems.push({
-                  value: optLine.split(this.separator)[0],
-                  label: optLine.split(this.separator)[1]
+              if (optLine.indexOf(data.separator) !== -1) {
+                optionModel.optionItems.push({
+                  value: optLine.split(data.separator)[0],
+                  label: optLine.split(data.separator)[1]
                 })
               } else {
-                this.optionModel.optionItems.push({
+                optionModel.optionItems.push({
                   value: optLine,
                   label: optLine
                 })
@@ -185,39 +178,57 @@
             }
           })
         } else {
-          this.optionModel.optionItems = []
+          optionModel.optionItems = []
         }
 
-        this.showImportDialogFlag = false
-      },
+        data.showImportDialogFlag = false
+      }
 
-      resetDefault() {
-        if ((this.selectedWidget.type === 'checkbox') ||
-            ((this.selectedWidget.type === 'select') && this.selectedWidget.options.multiple)) {
-          this.optionModel.defaultValue = []
+      const resetDefault=() =>{
+        if ((data.selectedWidget.type === 'checkbox') ||
+            ((data.selectedWidget.type === 'select') && data.selectedWidget.options.multiple)) {
+          optionModel.defaultValue = []
         } else {
-          this.optionModel.defaultValue = ''
+          optionModel.defaultValue = ''
         }
 
-        this.emitDefaultValueChange()
-      },
+        emitDefaultValueChange()
+      }
 
-      importCascaderOptions() {
-        this.cascaderOptions = JSON.stringify(this.optionModel.optionItems, null, '  ')
-        this.showImportCascaderDialogFlag = true
-      },
+      const importCascaderOptions=()=> {
+        data.cascaderOptions = JSON.stringify(optionModel.optionItems, null, '  ')
+        data.showImportCascaderDialogFlag = true
+      }
 
-      saveCascaderOptions() {
+      const saveCascaderOptions=()=> {
         try {
-          let newOptions = JSON.parse(this.cascaderOptions)
-          this.optionModel.optionItems = newOptions
+          let newOptions = JSON.parse(data.cascaderOptions)
+          optionModel.optionItems = newOptions
           //TODO: 是否需要重置选项默认值？？
 
-          this.showImportCascaderDialogFlag = false
+          data.showImportCascaderDialogFlag = false
         } catch (ex) {
-          this.$message.error(this.i18nt('designer.hint.invalidOptionsData') + ex.message)
+          proxy.$message.error(i18nt('designer.hint.invalidOptionsData') + ex.message)
         }
-      },
+      }
+
+
+      return {
+        i18nt,
+        ...toRefs(data),
+
+        optionModel,
+
+        emitDefaultValueChange,
+
+        deleteOption,
+        addOption,
+        importOptions,
+        saveOptions,
+        resetDefault,
+        importCascaderOptions,
+        saveCascaderOptions
+      }
 
     }
   }

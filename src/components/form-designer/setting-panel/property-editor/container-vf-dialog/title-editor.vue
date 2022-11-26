@@ -5,17 +5,24 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
+	import { toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "title-editor",
-    mixins: [i18n, propertyMixin],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
+    setup(props){
+     const { i18nt }=useI18n();
+
+      return {
+        i18nt,
+        ...toRefs(props)
+      }
+    }
   }
 </script>
 

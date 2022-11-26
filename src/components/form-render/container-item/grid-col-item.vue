@@ -34,15 +34,18 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "../../../utils/i18n"
-  import refMixin from "../../../components/form-render/refMixin"
+  import { inject, reactive, toRefs, computed, getCurrentInstance } from 'vue'
+
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
+
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 
   export default {
     name: "GridColItem",
     componentName: 'ContainerItem',
-    mixins: [emitter, i18n, refMixin],
     components: {
       ...FieldComponents,
     },
@@ -71,65 +74,91 @@
       },
 
     },
-    inject: ['refList', 'globalModel', 'getFormConfig', 'previewState'],
-    data() {
-      return {
+    setup(props){
+      
+      const refList= inject('refList')
+      const globalModel= inject('globalModel')
+      const getFormConfig= inject('getFormConfig')
+      const previewState= inject('previewState')
+
+      const refMixin = useRef(props);
+      const { i18nt }= useI18n();
+      const { proxy } = getCurrentInstance()
+		  const designRefMixin = useDesignRef(refList,props.widget);
+
+      const formConfig=computed(()=> {
+        return getFormConfig()
+      })
+
+      const customClass=computed(()=> {
+        return props.widget.options.customClass || ''
+      })
+
+      const colHeightStyle=computed(()=> {
+        return !!props.colHeight ? {height: props.colHeight + 'px'} : {}
+      })
+
+
+      const data=reactive({
         layoutProps: {
-          span: this.widget.options.span,
-          md: this.widget.options.md || 12,
-          sm: this.widget.options.sm || 12,
-          xs: this.widget.options.xs || 12,
-          offset: this.widget.options.offset || 0,
-          push: this.widget.options.push || 0,
-          pull: this.widget.options.pull || 0,
+          span: props.widget.options.span,
+          md: props.widget.options.md || 12,
+          sm: props.widget.options.sm || 12,
+          xs: props.widget.options.xs || 12,
+          offset: props.widget.options.offset || 0,
+          push: props.widget.options.push || 0,
+          pull: props.widget.options.pull || 0,
         }
-      }
-    },
-    computed: {
-      formConfig() {
-        return this.getFormConfig()
-      },
+      })
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
-
-      colHeightStyle() {
-        return !!this.colHeight ? {height: this.colHeight + 'px'} : {}
-      },
-
-    },
-    created() {
-      this.initLayoutProps()
-      this.initRefList()
-    },
-    methods: {
-      initLayoutProps() {
-        if (!!this.widget.options.responsive) {
-          if (!!this.previewState) {
-            this.layoutProps.md = undefined
-            this.layoutProps.sm = undefined
-            this.layoutProps.xs = undefined
+      const initLayoutProps=()=> {
+        if (!!props.widget.options.responsive) {
+          if (!!previewState) {
+            data.layoutProps.md = undefined
+            data.layoutProps.sm = undefined
+            data.layoutProps.xs = undefined
 
             let lyType = this.formConfig.layoutType
             if (lyType === 'H5') {
-              this.layoutProps.span = this.widget.options.xs || 12
+              data.layoutProps.span = props.widget.options.xs || 12
             } else if (lyType === 'Pad') {
-              this.layoutProps.span = this.widget.options.sm || 12
+              data.layoutProps.span = props.widget.options.sm || 12
             } else {
-              this.layoutProps.span = this.widget.options.md || 12
+              data.layoutProps.span = props.widget.options.md || 12
             }
           } else {
-            this.layoutProps.span = undefined
+            data.layoutProps.span = undefined
           }
         } else {
-          this.layoutProps.md = undefined
-          this.layoutProps.sm = undefined
-          this.layoutProps.xs = undefined
+          data.layoutProps.md = undefined
+          data.layoutProps.sm = undefined
+          data.layoutProps.xs = undefined
         }
-      },
+      }
 
-    }
+      initLayoutProps()
+      refMixin.initRefList()
+      
+      return {
+        i18nt,
+        ...toRefs(data),
+
+        formConfig,
+        customClass,
+        colHeightStyle,
+
+        ...refMixin
+      }
+    },
+    computed: {
+      
+
+    },
+    created() {
+    
+    },
+    
+    
   }
 </script>
 

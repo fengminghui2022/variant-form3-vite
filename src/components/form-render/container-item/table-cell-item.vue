@@ -28,15 +28,17 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "../../../utils/i18n"
-  import refMixin from "../../../components/form-render/refMixin"
+
+  import { provide, inject, reactive, toRefs, computed,nextTick, getCurrentInstance, onMounted, onBeforeUnmount  } from 'vue'
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 
   export default {
     name: "TableCellItem",
     componentName: "ContainerItem",
-    mixins: [emitter, i18n, refMixin],
     components: {
       ...FieldComponents,
     },
@@ -59,19 +61,26 @@
         default: ''
       },
     },
-    inject: ['refList', 'globalModel'],
-    computed: {
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+    setup(props){
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
+      
+      const refList=inject('refList')
+      const globalModel=inject('globalModel')
 
-    },
-    created() {
-      /* tableCell不生成组件引用，故无须调用initRefList！！ */
-      //this.initRefList()
-    },
-    methods: {
+      
+      const refMixin = useRef(props);
+      const customClass=computed(()=> {
+        return proxy.widget.options.customClass || ''
+      })
 
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        customClass,
+        ...refList
+      }
     }
   }
 </script>

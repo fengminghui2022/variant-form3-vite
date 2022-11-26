@@ -9,7 +9,7 @@
 -->
 
 <template>
-  <div class="field-wrapper" :class="{'design-time-bottom-margin': !!this.designer}">
+  <div class="field-wrapper" :class="{'design-time-bottom-margin': !!designer}">
     <el-form-item v-if="!!field.formItemFlag && (!field.options.hidden || (designState === true))"
                   :label="label" :label-width="labelWidth + 'px'"
                   :title="field.options.labelTooltip"
@@ -39,7 +39,7 @@
       <slot></slot>
     </el-form-item>
 
-    <template v-if="!!this.designer">
+    <template v-if="!!designer">
       <div class="field-action" v-if="designer.selectedId === field.id">
         <i :title="i18nt('designer.hint.selectParentWidget')"
            @click.stop="selectParentWidget(field)"><svg-icon icon-class="el-back" /></i>
@@ -63,11 +63,11 @@
 
 <script>
   import SvgIcon from '@/components/svg-icon'
-  import i18n from "@/utils/i18n";
+  import { useI18n } from '@/utils/i18n'
+  import { computed,inject,toRefs,nextTick  } from 'vue-demi';
 
   export default {
     name: "form-item-wrapper",
-    mixins: [i18n],
     components: {
       SvgIcon
     },
@@ -98,126 +98,148 @@
 
       rules: Array,
     },
-    inject: ['getFormConfig', 'getSubFormFieldFlag', 'getSubFormName'],
-    computed: {
-      formConfig() {
-        return this.getFormConfig()
-      },
+    setup(props) {
+     const { i18nt,i18n2t }=useI18n();
 
-      selected() {
-        return !!this.designer && this.field.id === this.designer.selectedId
-      },
+     const getFormConfig=inject('getFormConfig')
+     const getSubFormFieldFlag=inject('getSubFormFieldFlag')
+     const getSubFormName=inject('getSubFormName')
 
-      label() {
-        if (!!this.field.options.labelHidden) {
+
+     const formConfig=computed(() =>{
+        return getFormConfig()
+      })
+
+     const selected=computed(() =>{
+        return !!props.designer && props.field.id === props.designer.selectedId
+     })
+
+     const label=computed(() =>{
+        if (!!props.field.options.labelHidden) {
           return ''
         }
 
-        return this.field.options.label
-      },
+        return props.field.options.label
+     })
 
-      labelWidth() {
-        if (!!this.field.options.labelHidden) {
+    const labelWidth=computed(() =>{
+        if (!!props.field.options.labelHidden) {
           return 0
         }
 
-        if (!!this.field.options.labelWidth) {
-          return this.field.options.labelWidth
+        if (!!props.field.options.labelWidth) {
+          return props.field.options.labelWidth
         }
 
-        if (!!this.designer) {
-          return this.designer.formConfig.labelWidth
+        if (!!props.designer) {
+          return props.designer.formConfig.labelWidth
         } else {
-          return this.formConfig.labelWidth
+          return formConfig.labelWidth
         }
-      },
+     })
 
-      labelAlign() {
-        if (!!this.field.options.labelAlign) {
-          return this.field.options.labelAlign
+    const labelAlign=computed(() =>{
+        if (!!props.field.options.labelAlign) {
+          return props.field.options.labelAlign
         }
 
-        if (!!this.designer) {
-          return this.designer.formConfig.labelAlign || 'label-left-align'
+        if (!!props.designer) {
+          return props.designer.formConfig.labelAlign || 'label-left-align'
         } else {
-          return this.formConfig.labelAlign || 'label-left-align'
+          return formConfig.labelAlign || 'label-left-align'
         }
-      },
+     })
 
-      customClass() {
-        return !!this.field.options.customClass ? this.field.options.customClass.join(' ') : ''
-      },
+    const customClass=computed(() =>{
+        return !!props.field.options.customClass ? props.field.options.customClass.join(' ') : ''
+    })
 
-      subFormName() {
-        return !!this.getSubFormName ? this.getSubFormName() : ''
-      },
+     const subFormName=computed(() =>{
+        return !!getFormConfig ? getFormConfig() : ''
+    })
 
-      subFormItemFlag() {
-        return !!this.getSubFormFieldFlag ? this.getSubFormFieldFlag() : false
-      },
+    const subFormItemFlag=computed(() =>{
+        return !!getFormConfig ? getSubFormFieldFlag() : false
+     })
+     
 
-    },
-    created() {
-      //
-    },
-    methods: {
-
-      selectField(field) {
-        if (!!this.designer) {
-          this.designer.setSelected(field)
-          this.designer.emitEvent('field-selected', this.parentWidget)  //发送选中组件的父组件对象
+    const selectField=(field)=> {
+        if (!!props.designer) {
+          props.designer.setSelected(field)
+          props.designer.emitEvent('field-selected', props.parentWidget)  //发送选中组件的父组件对象
         }
-      },
+    }
 
-      selectParentWidget() {
-        if (this.parentWidget) {
-          this.designer.setSelected(this.parentWidget)
+    const selectParentWidget=()=> {
+        if (props.parentWidget) {
+          props.designer.setSelected(props.parentWidget)
         } else {
-          this.designer.clearSelected()
+          props.designer.clearSelected()
         }
-      },
+    }
 
-      moveUpWidget() {
-        this.designer.moveUpWidget(this.parentList, this.indexOfParentList)
-        this.designer.emitHistoryChange()
-      },
+    const moveUpWidget=()=> {
+        props.designer.moveUpWidget(props.parentList, props.indexOfParentList)
+        props.designer.emitHistoryChange()
+    }
 
-      moveDownWidget() {
-        this.designer.moveDownWidget(this.parentList, this.indexOfParentList)
-        this.designer.emitHistoryChange()
-      },
+    const moveDownWidget=()=> {
+        props.designer.moveDownWidget(props.parentList, props.indexOfParentList)
+        props.designer.emitHistoryChange()
+    }
 
-      removeFieldWidget() {
-        if (!!this.parentList) {
+    const removeFieldWidget=()=> {
+        if (!!props.parentList) {
           let nextSelected = null
-          if (this.parentList.length === 1) {
-            if (!!this.parentWidget) {
-              nextSelected = this.parentWidget
+          if (props.parentList.length === 1) {
+            if (!!props.parentWidget) {
+              nextSelected = props.parentWidget
             }
-          } else if (this.parentList.length === (1 + this.indexOfParentList)) {
-            nextSelected = this.parentList[this.indexOfParentList - 1]
+          } else if (props.parentList.length === (1 + props.indexOfParentList)) {
+            nextSelected = props.parentList[props.indexOfParentList - 1]
           } else {
-            nextSelected = this.parentList[this.indexOfParentList + 1]
+            nextSelected = props.parentList[props.indexOfParentList + 1]
           }
 
-          this.$nextTick(() => {
-            this.parentList.splice(this.indexOfParentList, 1)
+          nextTick(() => {
+            props.parentList.splice(props.indexOfParentList, 1)
             //if (!!nextSelected) {
-            this.designer.setSelected(nextSelected)
+            props.designer.setSelected(nextSelected)
             //}
 
-            this.designer.emitHistoryChange()
+            props.designer.emitHistoryChange()
           })
         }
-      },
+    }
 
-      getPropName() {
-        if (this.subFormItemFlag && !this.designState) {
-          return this.subFormName + "." + this.subFormRowIndex + "." + this.field.options.name + ""
+    const getPropName=()=> {
+        if (subFormItemFlag && !props.designState) {
+          return subFormName + "." + props.subFormRowIndex + "." + props.field.options.name + ""
         } else {
-          return this.field.options.name
+          return props.field.options.name
         }
-      },
+    }
+
+    return {
+       i18nt,i18n2t,
+        ...toRefs(props),
+
+        formConfig, 
+        selected,
+        label,
+        labelWidth,
+        labelAlign,
+        customClass,
+        subFormName,
+        subFormItemFlag,
+
+        selectField,
+        selectParentWidget,
+        moveUpWidget,
+        moveDownWidget,
+        removeFieldWidget,
+        getPropName,
+    }
 
 
     }

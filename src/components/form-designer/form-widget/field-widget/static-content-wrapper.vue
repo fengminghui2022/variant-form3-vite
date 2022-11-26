@@ -1,11 +1,11 @@
 <template>
-  <div class="field-wrapper" :class="{'design-time-bottom-margin': !!this.designer}" :style="{display: displayStyle}">
+  <div class="field-wrapper" :class="{'design-time-bottom-margin': !!designer}" :style="{display: displayStyle}">
     <div class="static-content-item" v-if="!field.options.hidden || (designState === true)" :style="{display: displayStyle}"
          :class="[selected ? 'selected' : '', customClass]" @click.stop="selectField(field)">
       <slot></slot>
     </div>
 
-    <template v-if="!!this.designer">
+    <template v-if="!!designer">
       <div class="field-action" v-if="designer.selectedId === field.id">
         <i :title="i18nt('designer.hint.selectParentWidget')" @click.stop="selectParentWidget(field)">
           <svg-icon icon-class="el-back" />
@@ -29,12 +29,13 @@
 </template>
 
 <script>
+	import { computed, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
+
   import SvgIcon from '@/components/svg-icon'
-  import i18n from "@/utils/i18n";
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "static-content-wrapper",
-    mixins: [i18n],
     components: {
       SvgIcon
     },
@@ -68,66 +69,80 @@
         default: ''
       },
     },
-    computed: {
-      selected() {
-        return !!this.designer && this.field.id === this.designer.selectedId
-      },
+    setup(props){
+      
+      const { i18nt,i18n2t  }=useI18n();
 
-      customClass() {
-        return !!this.field.options.customClass ? this.field.options.customClass.join(' ') : ''
-      },
+      const selected=computed(()=>{
+        return !!props.designer && props.field.id === props.designer.selectedId
+      })
 
-    },
-    methods: {
+      const customClass=computed(()=>{
+        return !!props.field.options.customClass ? props.field.options.customClass.join(' ') : ''
+      })
 
-      selectField(field) {
-        if (!!this.designer) {
-          this.designer.setSelected(field)
-          this.designer.emitEvent('field-selected', this.parentWidget)  //发送选中组件的父组件对象
+      const selectField=(field)=> {
+        if (!!props.designer) {
+          props.designer.setSelected(field)
+          props.designer.emitEvent('field-selected', this.parentWidget)  //发送选中组件的父组件对象
         }
-      },
+      }
 
-      selectParentWidget() {
+      const selectParentWidget=()=> {
         if (this.parentWidget) {
-          this.designer.setSelected(this.parentWidget)
+          props.designer.setSelected(this.parentWidget)
         } else {
-          this.designer.clearSelected()
+          props.designer.clearSelected()
         }
-      },
+      }
 
-      moveUpWidget() {
-        this.designer.moveUpWidget(this.parentList, this.indexOfParentList)
-        this.designer.emitHistoryChange()
-      },
+      const moveUpWidget=()=> {
+        props.designer.moveUpWidget(props.parentList, props.indexOfParentList)
+        props.designer.emitHistoryChange()
+      }
 
-      moveDownWidget() {
-        this.designer.moveDownWidget(this.parentList, this.indexOfParentList)
-        this.designer.emitHistoryChange()
-      },
+      const moveDownWidget=()=> {
+        props.designer.moveDownWidget(props.parentList, props.indexOfParentList)
+        props.designer.emitHistoryChange()
+      }
 
-      removeFieldWidget() {
-        if (!!this.parentList) {
+      const removeFieldWidget=()=> {
+        if (!!props.parentList) {
           let nextSelected = null
-          if (this.parentList.length === 1) {
+          if (props.parentList.length === 1) {
             if (!!this.parentWidget) {
               nextSelected = this.parentWidget
             }
-          } else if (this.parentList.length === (1 + this.indexOfParentList)) {
-            nextSelected = this.parentList[this.indexOfParentList - 1]
+          } else if (props.parentList.length === (1 + props.indexOfParentList)) {
+            nextSelected = props.parentList[props.indexOfParentList - 1]
           } else {
-            nextSelected = this.parentList[this.indexOfParentList + 1]
+            nextSelected = props.parentList[props.indexOfParentList + 1]
           }
 
           this.$nextTick(() => {
-            this.parentList.splice(this.indexOfParentList, 1)
+            props.parentList.splice(props.indexOfParentList, 1)
             //if (!!nextSelected) {
-            this.designer.setSelected(nextSelected)
+            props.designer.setSelected(nextSelected)
             //}
 
-            this.designer.emitHistoryChange()
+            props.designer.emitHistoryChange()
           })
         }
-      },
+      }
+      return {
+        i18nt,i18n2t,
+        ...toRefs(props),
+
+        selected,
+        customClass,
+
+        selectField,
+        selectParentWidget,
+        moveUpWidget,
+        moveDownWidget,
+        removeFieldWidget
+      }
+
 
     }
   }

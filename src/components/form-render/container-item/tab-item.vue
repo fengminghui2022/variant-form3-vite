@@ -37,17 +37,21 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "../../../utils/i18n"
-  import refMixin from "../../../components/form-render/refMixin"
+
+  import { provide, inject, reactive, toRefs, computed, getCurrentInstance, onMounted, onBeforeUnmount  } from 'vue'
+
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+	import { useContainer } from "@/components/form-render/container-item/containerItemMixin"
+
+  
   import ContainerItemWrapper from './container-item-wrapper'
-  import containerItemMixin from "./containerItemMixin";
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 
   export default {
     name: "tab-item",
     componentName: 'ContainerItem',
-    mixins: [emitter, i18n, refMixin, containerItemMixin],
     components: {
       ContainerItemWrapper,
       ...FieldComponents,
@@ -68,51 +72,69 @@
         default: ''
       },
     },
-    inject: ['refList', 'sfRefList', 'globalModel'],
-    data() {
-      return {
-        activeTabName: '',
-      }
-    },
-    computed: {
-      visibleTabs() {
-        return this.widget.tabs.filter(tp => {
+    setup(props){
+      const refList=inject('refList')
+      const sfRefList=inject('sfRefList')
+      const globalModel=inject('globalModel')
+
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
+
+      const data=reactive({
+          activeTabName: ''
+      })
+      
+      const refMixin = useRef(props);
+      const emitterMixin =useEmitter();
+      const containerMixin= useContainer(props,data,{});
+
+      const visibleTabs=computed(()=> {
+        return props.widget.tabs.filter(tp => {
           return !tp.options.hidden
         })
-      },
+      })
 
-    },
-    created() {
-      this.initRefList()
-    },
-    mounted() {
-      this.initActiveTab()
-    },
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-    methods: {
-      initActiveTab() {
-        if ((this.widget.type === 'tab') && (this.widget.tabs.length > 0)) {
-          let activePanes = this.widget.tabs.filter((tp) => {
+      onMounted(()=> {
+        initActiveTab()
+      })
+
+      onBeforeUnmount(()=> {
+        containerMixin.unregisterFromRefList()
+      })
+
+      const initActiveTab=()=> {
+        if ((props.widget.type === 'tab') && (props.widget.tabs.length > 0)) {
+          let activePanes = props.widget.tabs.filter((tp) => {
             return tp.options.active === true
           })
           if (activePanes.length > 0) {
-            this.activeTabName = activePanes[0].options.name
+            data.activeTabName = activePanes[0].options.name
           } else {
-            this.activeTabName = this.widget.tabs[0].options.name
+            data.activeTabName = props.widget.tabs[0].options.name
           }
-        }
-      },
-
-      handleTabClick(tab) {
-        if (!!this.widget.options.onTabClick) {
-          let customFn = new Function('tab', this.widget.options.onTabClick)
-          customFn.call(this, tab)
         }
       }
 
-    },
+      const handleTabClick=(tab)=> {
+        if (!!props.widget.options.onTabClick) {
+          let customFn = new Function('tab', props.widget.options.onTabClick)
+          customFn.call(proxy, tab)
+        }
+      }
+
+
+
+      refMixin.initRefList()
+      return {
+        i18nt,
+        ...toRefs(data),
+
+        visibleTabs,
+        initActiveTab,
+        handleTabClick
+      }
+    }
+
   }
 </script>
 

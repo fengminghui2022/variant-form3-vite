@@ -35,14 +35,14 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { reactive,toRefs,getCurrentInstance } from 'vue'
+  import { useI18n } from '@/utils/i18n'
   //import Draggable from 'vuedraggable'
   import {deepClone} from "@/utils/util";
 
   export default {
     name: "tab-customClass-editor",
     componentName: 'PropertyEditor',
-    mixins: [i18n],
     components: {
       //Draggable,
     },
@@ -51,38 +51,48 @@
       selectedWidget: Object,
       optionModel: Object,
     },
-    data() {
-      return {
+    setup(props){
+     const { i18nt }=useI18n();
+     const { proxy } = getCurrentInstance()
+
+     const data=reactive({
         cssClassList: [],
-      }
-    },
-    created() {
-      this.cssClassList = deepClone(this.designer.getCssClassList())
+     })
+
+     data.cssClassList = deepClone(props.designer.getCssClassList())
       //监听表单css代码改动事件并重新加载！
-      this.designer.handleEvent('form-css-updated', (cssClassList) => {
-        this.cssClassList = cssClassList
+      props.designer.handleEvent('form-css-updated', (cssClassList) => {
+        data.cssClassList = cssClassList
       })
-    },
-    methods: {
-      onTabPaneActiveChange(evt, tpItem) {
+
+      const onTabPaneActiveChange=(evt, tpItem)=> {
         //TODO: !!!
-      },
+      }
 
-      addTabPane(curTabs) {
-        this.designer.addTabPaneOfTabs(curTabs)
-        this.designer.emitHistoryChange()
-      },
+      const addTabPane=(curTabs)=> {
+        props.designer.addTabPaneOfTabs(curTabs)
+        props.designer.emitHistoryChange()
+      }
 
-      deleteTabPane(curTabs, tpIdx) {
+      const deleteTabPane=(curTabs, tpIdx)=> {
         if (curTabs.tabs.length === 1) {
-          this.$message.info(this.i18nt('designer.hint.lastPaneCannotBeDeleted'))
+          proxy.$message.info(i18nt('designer.hint.lastPaneCannotBeDeleted'))
           return
         }
 
-        this.designer.deleteTabPaneOfTabs(curTabs, tpIdx)
-        this.designer.emitHistoryChange()
-      },
+        props.designer.deleteTabPaneOfTabs(curTabs, tpIdx)
+        props.designer.emitHistoryChange()
+      }
 
+
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        onTabPaneActiveChange,
+        addTabPane,
+        deleteTabPane
+      }
     }
   }
 </script>

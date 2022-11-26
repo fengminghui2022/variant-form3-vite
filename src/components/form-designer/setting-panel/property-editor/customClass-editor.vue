@@ -8,29 +8,35 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n";
-  import {deepClone} from "@/utils/util";
+	import { reactive,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+  import { deepClone } from "@/utils/util";
 
   export default {
     name: "customClass-editor",
     componentName: 'PropertyEditor',
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    data() {
-      return {
+    setup(props){
+      const { i18nt }=useI18n();
+
+      const data=reactive ({
         cssClassList: [],
-      }
-    },
-    created() {
-      this.cssClassList = deepClone(this.designer.getCssClassList())
-      //监听表单css代码改动事件并重新加载！
-      this.designer.handleEvent('form-css-updated', (cssClassList) => {
-        this.cssClassList = cssClassList
       })
+
+      data.cssClassList = deepClone(props.designer.getCssClassList())
+      //监听表单css代码改动事件并重新加载！
+      props.designer.handleEvent('form-css-updated', (cssClassList) => {
+        data.cssClassList = cssClassList
+      })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+      }
     }
   }
 </script>

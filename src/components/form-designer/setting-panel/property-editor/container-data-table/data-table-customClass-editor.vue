@@ -327,7 +327,9 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { computed, reactive,ref, toRefs,nextTick,getCurrentInstance,watch } from 'vue'
+  	import { useI18n } from '@/utils/i18n'
+
 	import {deepClone, generateId, getDSByName} from "@/utils/util"
 	import Sortable from "sortablejs"
 	import CodeEditor from '@/components/code-editor/index'
@@ -335,281 +337,309 @@
   export default {
     name: "data-table-customClass-editor",
     componentName: 'PropertyEditor',
-    mixins: [i18n],
     components: {
-			CodeEditor,
+		CodeEditor,
     },
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    data() {
-      return {
-				dialogVisible: false,
-				dataDialogVisible: false,
-				showButtonsEditDialog: false,
-				oldButtonName: '',
-        cssClassList: [],
-				tableDataOptions:[],
-				dataSetList: [],
-				widgetSizes: [
-				  {label: 'default', value: ''},
-				  {label: 'large', value: 'large'},
-				  {label: 'small', value: 'small'},
-				],
-				alignOptions: [
-					{
-						value: 'left',
-						label: 'left'
-					}, {
-						value: 'center',
-						label: 'center'
-					}, {
-						value: 'right',
-						label: 'right'
-					},
-				],
-				fieldTypeOptions:[
-					{
-						value: 'text',
-						label: 'Text'
-					}, {
-						value: 'number',
-						label: 'Number'
-					}, {
-						value: 'date',
-						label: 'Date'
-					},
-				],
-				op:[{
-						label: 'Date Format',
-						options: [
-							{value:'d1',label:"yyyy-MM-dd"},
-							{value:'d2',label:"yyyy/MM/dd"},
-							{value:'d3',label:"yyyy年MM月dd日"},
-							{value:'d4',label:"yyyy-MM-dd HH:mm:ss"},
-							{value:'d5',label:"yyyy-MM-dd hh:mm:ss"},
-						]
-					}, {
-          label: 'Number Format',
-          options: [
-						{value:'n1',label:"###,###,###,##0.######"},
-						{value:'n2',label:"###,###,###,##0.00####"},
-						{value:'n3',label:"###,###,###,##0.000000"},
-						{value:'n4',label:"###,###,###,##0.000"},
-						{value:'n5',label:"###,###,###,##0.00"},
-						{value:'n6',label:"###,###,###,##0"},
-						{value:'n7',label:"###,##0.00##%"},
-					]
-        }],
+	setup(props){
+      	const { i18nt }=useI18n();
+		
+    	const { proxy } = getCurrentInstance()
 
-				showRenderDialogFlag: false,
-				renderJson: '',
-				currentTableColumn: null,
-
-				nameRules: [
-					{ required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired') },
-				],
-      }
-    },
-		computed: {
-			dataSourceList() {
-				if (!this.designer.formConfig || !this.designer.formConfig.dataSources) {
-					return []
-				} else {
-					return this.designer.formConfig.dataSources
-				}
-			},
-
-		},
-		watch: {
-			selectedWidget: {
-				handler(val, oldVal) {
-					if (!val) {
-						return
-					}
-
-					this.loadDataSet(val.options.dsName)
+		const singleTable=ref(null)
+		const data=reactive({
+			dialogVisible: false,
+			dataDialogVisible: false,
+			showButtonsEditDialog: false,
+			oldButtonName: '',
+			cssClassList: [],
+			tableDataOptions:[],
+			dataSetList: [],
+			widgetSizes: [
+				{label: 'default', value: ''},
+				{label: 'large', value: 'large'},
+				{label: 'small', value: 'small'},
+			],
+			alignOptions: [
+				{
+					value: 'left',
+					label: 'left'
+				}, {
+					value: 'center',
+					label: 'center'
+				}, {
+					value: 'right',
+					label: 'right'
 				},
-				immediate: true
-			},
+			],
+			fieldTypeOptions:[
+				{
+					value: 'text',
+					label: 'Text'
+				}, {
+					value: 'number',
+					label: 'Number'
+				}, {
+					value: 'date',
+					label: 'Date'
+				},
+			],
+			op:[{
+					label: 'Date Format',
+					options: [
+						{value:'d1',label:"yyyy-MM-dd"},
+						{value:'d2',label:"yyyy/MM/dd"},
+						{value:'d3',label:"yyyy年MM月dd日"},
+						{value:'d4',label:"yyyy-MM-dd HH:mm:ss"},
+						{value:'d5',label:"yyyy-MM-dd hh:mm:ss"},
+					]
+				}, {
+			label: 'Number Format',
+			options: [
+					{value:'n1',label:"###,###,###,##0.######"},
+					{value:'n2',label:"###,###,###,##0.00####"},
+					{value:'n3',label:"###,###,###,##0.000000"},
+					{value:'n4',label:"###,###,###,##0.000"},
+					{value:'n5',label:"###,###,###,##0.00"},
+					{value:'n6',label:"###,###,###,##0"},
+					{value:'n7',label:"###,##0.00##%"},
+				]
+			}],
 
-		},
-    created() {
-      this.cssClassList = deepClone(this.designer.getCssClassList())
-      //监听表单css代码改动事件并重新加载！
-      this.designer.handleEvent('form-css-updated', (cssClassList) => {
-        this.cssClassList = cssClassList
-      })
-    },
-		mounted(){
-			// this.dragSort()
-		},
-    methods: {
-			//表格拖动排序
-			dragSort() {
-				//debugger
-				const el = this.$refs.singleTable.$el.querySelectorAll('.el-table__body-wrapper .el-table__body > tbody')[0]
-				let tableData = this.optionModel.tableColumns;
-				this.sortable = Sortable.create(el, {
-					ghostClass: 'sortable-ghost',
-					setData: function (dataTransfer) {
-						dataTransfer.setData('Text', '')
-					},
-					onEnd: e => {
-					  //e.oldIndex为拖动一行原来的位置，e.newIndex为拖动后新的位置
-						const targetRow = tableData.splice(e.oldIndex, 1)[0];
-						tableData.splice(e.newIndex, 0, targetRow);
-						let dragId = tableData[e.newIndex].id;//拖动行的id
-						let oneId,twoId
-						//拖动行的前一行
-						if( tableData[e.newIndex-1]){
-						 oneId = tableData[e.newIndex-1].id;}
-						else {
-						 oneId = ""
-						}
-						//拖动行的后一行
-						if( tableData[e.newIndex+1]){
-						 twoId = tableData[e.newIndex+1].id;}
-						else {
-						 twoId = ""
-						}
+			showRenderDialogFlag: false,
+			renderJson: '',
+			currentTableColumn: null,
+
+			nameRules: [
+				{ required: true, trigger: ['blur', 'change'], message: i18nt('designer.setting.fieldValueRequired') },
+			],
+		})
+
+		const dataSourceList=computed(()=>{
+			if (!props.designer.formConfig || !props.designer.formConfig.dataSources) {
+				return []
+			} else {
+				return props.designer.formConfig.dataSources
+			}
+		})
+
+
+		data.cssClassList = deepClone(props.designer.getCssClassList())
+		//监听表单css代码改动事件并重新加载！
+		props.designer.handleEvent('form-css-updated', (cssClassList) => {
+			data.cssClassList = cssClassList
+		})
+
+
+		//表格拖动排序
+		const dragSort=()=> {
+			//debugger
+			const el = singleTable.$el.querySelectorAll('.el-table__body-wrapper .el-table__body > tbody')[0]
+			let tableData = props.optionModel.tableColumns;
+			data.sortable = Sortable.create(el, {
+				ghostClass: 'sortable-ghost',
+				setData: function (dataTransfer) {
+					dataTransfer.setData('Text', '')
+				},
+				onEnd: e => {
+					//e.oldIndex为拖动一行原来的位置，e.newIndex为拖动后新的位置
+					const targetRow = tableData.splice(e.oldIndex, 1)[0];
+					tableData.splice(e.newIndex, 0, targetRow);
+					let dragId = tableData[e.newIndex].id;//拖动行的id
+					let oneId,twoId
+					//拖动行的前一行
+					if( tableData[e.newIndex-1]){
+						oneId = tableData[e.newIndex-1].id;}
+					else {
+						oneId = ""
 					}
-				})
-
-			},
-
-			openTableDataEdit(){
-				this.dataDialogVisible=true;
-				this.tableDataOptions = JSON.stringify(this.optionModel.tableData, null, '  ')
-			},
-
-			saveTableData(){
-				try {
-					  this.optionModel.tableData = JSON.parse(this.tableDataOptions)
-					  this.dataDialogVisible = false
-					} catch (ex) {
-					  this.$message.error(this.i18nt('designer.hint.invalidOptionsData') + ex.message)
+					//拖动行的后一行
+					if( tableData[e.newIndex+1]){
+						twoId = tableData[e.newIndex+1].id;}
+					else {
+						twoId = ""
 					}
-			},
-
-			openSetting(){
-				this.dialogVisible = true;
-				this.$nextTick(()=>{
-					this.dragSort()
-				})
-			},
-
-			// 确认表格列更改
-			colSubmit(){
-				this.dialogVisible = false;
-			},
-
-			addCol(){
-				let newRow = {columnId: new Date().getTime()};
-				this.optionModel.tableColumns.push(newRow);
-				this.designer.emitHistoryChange()
-			},
-
-			handleDelete(index,row){
-				if(this.optionModel.tableColumns.length === 1){
-					this.$message.warning(this.i18nt('designer.setting.onlyOneColumnCannotBeDeleted'))
-					 return false;
 				}
-				this.optionModel.tableColumns.splice(index,1)
-			},
+			})
 
-			showRenderDialog(tableColumn) {
-				this.currentTableColumn = tableColumn
-				this.renderJson = tableColumn.render || ''
-				this.showRenderDialogFlag = true
-			},
+		}
 
-			saveColumnRender() {
-				this.currentTableColumn.render = this.renderJson
-				this.showRenderDialogFlag = false
-			},
+		const openTableDataEdit=()=> {
+			data.dataDialogVisible=true;
+			data.tableDataOptions = JSON.stringify(props.optionModel.tableData, null, '  ')
+		}
 
-			onButtonNameFocus(event) {
-				console.log('test', event)
-				this.oldButtonName = event.target.value
-			},
-
-			onButtonNameChange(newName, btnIdx) {
-				let sameNameFlag = false
-				this.optionModel.operationButtons.map((tb, tbIdx) => {
-					if ((tb.name === newName) && (tbIdx !== btnIdx)) {
-						sameNameFlag = true
-					}
-				})
-				if (sameNameFlag) {
-					this.$message.error(this.i18nt('designer.setting.operationButtonDuplicatedNameError'))
-					this.optionModel.operationButtons[btnIdx].name = this.oldButtonName
+		const saveTableData=()=> {
+			try {
+					props.optionModel.tableData = JSON.parse(data.tableDataOptions)
+					data.dataDialogVisible = false
+				} catch (ex) {
+					proxy.$message.error(i18nt('designer.hint.invalidOptionsData') + ex.message)
 				}
-			},
+		}
 
-			editButtonsColumn() {
-				this.showButtonsEditDialog = true
-			},
+		const openSetting=()=> {
+			data.dialogVisible = true;
+			nextTick(()=>{
+				dragSort()
+			})
+		}
 
-			deleteOperationButton(idx) {
-				this.$confirm(this.i18nt('designer.setting.deleteOperationButtonHint'), this.i18nt('render.hint.prompt'), {
-					confirmButtonText: this.i18nt('render.hint.confirm'),
-					cancelButtonText: this.i18nt('render.hint.cancel')
-				}).then(() => {
-					this.optionModel.operationButtons.splice(idx, 1)
-				}).catch(error => {
-					//this.$message.error(error)
+		// 确认表格列更改
+		const colSubmit=()=> {
+			data.dialogVisible = false;
+		}
+
+		const addCol=()=> {
+			let newRow = {columnId: new Date().getTime()};
+			props.optionModel.tableColumns.push(newRow);
+			props.designer.emitHistoryChange()
+		}
+
+		const handleDelete=(index,row)=>{
+			if(props.optionModel.tableColumns.length === 1){
+				proxy.$message.warning(i18nt('designer.setting.onlyOneColumnCannotBeDeleted'))
+					return false;
+			}
+			props.optionModel.tableColumns.splice(index,1)
+		}
+
+		const showRenderDialog=(tableColumn)=> {
+			data.currentTableColumn = tableColumn
+			data.renderJson = tableColumn.render || ''
+			data.showRenderDialogFlag = true
+		}
+
+		const saveColumnRender=()=> {
+			data.currentTableColumn.render = data.renderJson
+			data.showRenderDialogFlag = false
+		}
+
+		const onButtonNameFocus=(event)=> {
+			console.log('test', event)
+			data.oldButtonName = event.target.value
+		}
+
+		const onButtonNameChange=(newName, btnIdx)=> {
+			let sameNameFlag = false
+			props.optionModel.operationButtons.map((tb, tbIdx) => {
+				if ((tb.name === newName) && (tbIdx !== btnIdx)) {
+					sameNameFlag = true
+				}
+			})
+			if (sameNameFlag) {
+				proxy.$message.error(i18nt('designer.setting.operationButtonDuplicatedNameError'))
+				props.optionModel.operationButtons[btnIdx].name = data.oldButtonName
+			}
+		}
+
+		const editButtonsColumn=()=> {
+			data.showButtonsEditDialog = true
+		}
+
+		const deleteOperationButton=(idx)=> {
+			proxy.$confirm(i18nt('designer.setting.deleteOperationButtonHint'), i18nt('render.hint.prompt'), {
+				confirmButtonText: i18nt('render.hint.confirm'),
+				cancelButtonText: i18nt('render.hint.cancel')
+			}).then(() => {
+				props.optionModel.operationButtons.splice(idx, 1)
+			}).catch(error => {
+				//proxy.$message.error(error)
+			})
+
+		}
+
+		const addOperationButton=()=> {
+			props.optionModel.operationButtons = props.optionModel.operationButtons || []
+			props.optionModel.operationButtons.push({
+				name: 'btn' + generateId(),
+				label: 'new btn',
+				type: 'text',
+				size: 'small',
+				round: false,
+				hidden: false,
+				disabled: false,
+			})
+		}
+
+		const loadDataSet=(dsName)=> {
+			data.dataSetList.length = 0
+			if (!dsName) {
+				return
+			}
+
+			let dsModel = getDSByName(props.designer.formConfig, dsName)
+			if (!!dsModel && !!dsModel.dataSets) {
+				dsModel.dataSets.forEach(dSet => {
+					data.dataSetList.push({
+						name: dSet.name,
+						remark: dSet.remark
+					})
 				})
+			}
+		}
 
-			},
+		const getDataSetList=()=> {
+			props.optionModel.dataSetName = ''
+			loadDataSet(props.optionModel.dsName)
+		}
 
-			addOperationButton() {
-				this.optionModel.operationButtons = this.optionModel.operationButtons || []
-				this.optionModel.operationButtons.push({
-					name: 'btn' + generateId(),
-					label: 'new btn',
-					type: 'text',
-					size: 'small',
-					round: false,
-					hidden: false,
-					disabled: false,
-				})
-			},
+		const handleTDEChange=(val)=> {
+			if (!!val) {
+				props.optionModel.rowKey = 'id'
+				props.optionModel.childrenKey = 'children'
+			} else {
+				props.optionModel.rowKey = ''
+				props.optionModel.childrenKey = ''
+			}
+		}
 
-			loadDataSet(dsName) {
-				this.dataSetList.length = 0
-				if (!dsName) {
+		
+		
+		watch(()=>props.selectedWidget,(val,oldVal)=> {
+				if (!val) {
 					return
 				}
-
-				let dsModel = getDSByName(this.designer.formConfig, dsName)
-				if (!!dsModel && !!dsModel.dataSets) {
-					dsModel.dataSets.forEach(dSet => {
-						this.dataSetList.push({
-							name: dSet.name,
-							remark: dSet.remark
-						})
-					})
-				}
+				loadDataSet(val.options.dsName)
 			},
+			{immediate: true}
+		)
 
-			getDataSetList() {
-				this.optionModel.dataSetName = ''
-				this.loadDataSet(this.optionModel.dsName)
-			},
 
-			handleTDEChange(val) {
-				if (!!val) {
-					this.optionModel.rowKey = 'id'
-					this.optionModel.childrenKey = 'children'
-				} else {
-					this.optionModel.rowKey = ''
-					this.optionModel.childrenKey = ''
-				}
-			},
 
+		return {
+         	i18nt,
+			...toRefs(props),
+			...toRefs(data),
+			
+			singleTable,
+
+			dataSourceList,
+
+
+			dragSort,
+			openTableDataEdit,
+			saveTableData,
+			openSetting,
+			colSubmit,
+			addCol,
+			handleDelete,
+			showRenderDialog,
+			saveColumnRender,
+			onButtonNameFocus,
+			onButtonNameChange,
+			editButtonsColumn,
+			deleteOperationButton,
+			addOperationButton,
+			loadDataSet,
+			getDataSetList,
+			handleTDEChange,
+
+		}
     }
   }
 </script>

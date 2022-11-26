@@ -228,7 +228,6 @@
         default: () => ({})
       },
     },
-    inject: ['getDesignerConfig'],
     setup(props){
       const { i18nt }=useI18n();
       

@@ -15,16 +15,16 @@
 </template>
 
 <script>
+	import { computed } from 'vue'
   export default {
     name: "container-item-wrapper",
     props: {
       widget: Object,
     },
-    computed: {
-      customClass() {
-        return !!this.widget.options.customClass ? this.widget.options.customClass.join(' ') : ''
-      },
-
+    setup(props){
+      const customClass=computed(()=>{
+          return !!props.widget.options.customClass ? props.widget.options.customClass.join(' ') : ''
+      })
     }
   }
 </script>

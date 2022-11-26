@@ -10,23 +10,31 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { toRefs,computed  } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "actionColumnPosition-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      noLabelSetting() {
+    setup(props){
+      const { i18nt }=useI18n();
+      const noLabelSetting=computed(()=> {
         return (this.selectedWidget.type === 'static-text') || (this.selectedWidget.type === 'html-text')
         //|| (this.selectedWidget.type === 'divider')
-      },
+      })
 
-    }
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        noLabelSetting
+      }
+    }  
+   
   }
 </script>
 

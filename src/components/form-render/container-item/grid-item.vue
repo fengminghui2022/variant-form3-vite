@@ -21,17 +21,20 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "../../../utils/i18n"
-  import refMixin from "../../../components/form-render/refMixin"
+  import { inject,  toRefs,  getCurrentInstance, onBeforeUnmount } from 'vue'
+
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+  import { useContainer } from "./containerItemMixin"
+	import { useDesignRef } from "@/components/form-designer/refMixinDesign"
+
   import ContainerItemWrapper from './container-item-wrapper'
   import GridColItem from './grid-col-item'
-  import containerItemMixin from "./containerItemMixin"
 
   export default {
     name: "vf-grid-item",  //grid-item跟VueGridLayout全局注册组件重名，故特殊处理！！
     componentName: 'ContainerItem',
-    mixins: [emitter, i18n, refMixin, containerItemMixin],
     components: {
       ContainerItemWrapper,
       GridColItem,
@@ -52,19 +55,31 @@
         default: ''
       },
     },
-    inject: ['refList', 'sfRefList', 'globalModel'],
-    created() {
-      this.initRefList()
-    },
-    mounted() {
+    setup(props){
+      const refList= inject('refList')
+      const globalModel= inject('globalModel')
+      const sfRefList= inject('sfRefList')
+      
+      const containerMixin= useContainer(props,{},{});
 
-    },
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-    methods: {
+      const { i18nt }= useI18n();
+      const { proxy } = getCurrentInstance()
+      const refMixin = useRef(props);
+		  const designRefMixin = useDesignRef(refList,props.widget);
 
-    },
+
+      onBeforeUnmount(()=> {
+        containerMixin.unregisterFromRefList()
+      })
+
+      refMixin.initRefList()
+
+      return {
+        i18nt,
+        ...toRefs(props)
+
+      }
+    }
   }
 </script>
 

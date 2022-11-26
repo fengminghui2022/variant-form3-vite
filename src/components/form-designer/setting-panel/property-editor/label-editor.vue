@@ -5,23 +5,30 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { computed,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "label-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      noLabelSetting() {
-        return (this.selectedWidget.type === 'static-text') || (this.selectedWidget.type === 'html-text')
-        //|| (this.selectedWidget.type === 'divider')
-      },
+    setup(props){
+      const { i18nt }=useI18n();
 
-    }
+      const noLabelSetting=computed(()=> {
+        return (props.selectedWidget.type === 'static-text') || (props.selectedWidget.type === 'html-text')
+        //|| (this.selectedWidget.type === 'divider')
+      })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        noLabelSetting
+      }
+    }  
   }
 </script>
 

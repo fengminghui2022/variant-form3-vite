@@ -31,17 +31,22 @@
 </template>
 
 <script>
+	import { toRefs ,reactive, getCurrentInstance, computed, onMounted, onBeforeUnmount } from 'vue'
+
   import FormItemWrapper from './form-item-wrapper'
   import SvgIcon from '@/components/svg-icon'
-  import emitter from '@/utils/emitter'
-  import i18n, {translate} from "@/utils/i18n";
   import {deepClone} from "@/utils/util";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old";
+
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+
+  
 
   export default {
     name: "picture-upload-widget",
     componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
     props: {
       field: Object,
       parentWidget: Object,
@@ -72,8 +77,13 @@
       FormItemWrapper,
       SvgIcon,
     },
-    data() {
-      return {
+    setup(props) {
+      
+      const { i18nt }=useI18n();
+      const emitterMixin =useEmitter();
+
+      const { proxy } = getCurrentInstance()
+      const data=reactive({
         oldFieldValue: null, //field组件change之前的值
         fieldModel: [],
         rules: [],
@@ -92,58 +102,53 @@
 
         previewUrl: '',
         showPreviewDialogFlag: false,
-      }
-    },
-    computed: {
-      realUploadURL() {
-        let uploadURL = this.field.options.uploadURL
+      })
+
+      const fieldMixin = useField(props,data);
+
+      const realUploadURL=computed(()=> {
+        let uploadURL = props.field.options.uploadURL
         if (!!uploadURL && ((uploadURL.indexOf('DSV.') > -1) || (uploadURL.indexOf('DSV[') > -1))) {
-          let DSV = this.getGlobalDsv()
-          return eval(this.field.options.uploadURL)
+          let DSV = fieldMixin.getGlobalDsv()
+          return eval(props.field.options.uploadURL)
         }
 
-        return this.field.options.uploadURL
-      },
+        return props.field.options.uploadURL
+      })
+      
+      onMounted(()=>{
+        fieldMixin.handleOnMounted()
+      })
+      
+      onBeforeUnmount(()=>{
+        fieldMixin.unregisterFromRefList()
+      })
 
-    },
-    beforeCreate() {
-      /* 这里不能访问方法和属性！！ */
-    },
 
-    created() {
-      /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
-         需要在父组件created中初始化！！ */
-      this.registerToRefList()
-      this.initFieldModel()
-      this.initEventHandler()
-      this.buildFieldRules()
+      fieldMixin.registerToRefList()
+      fieldMixin.initOptionItems()
+      fieldMixin.initFieldModel()
+      fieldMixin.initEventHandler()
+      fieldMixin.buildFieldRules()
 
-      this.handleOnCreated()
-    },
+      fieldMixin.handleOnCreated()
 
-    mounted() {
-      this.handleOnMounted()
-    },
 
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
+      
+      const handlePictureExceed=()=> {
+        let uploadLimit = props.field.options.limit
+        proxy.$message.warning( i18nt('render.hint.uploadExceed').replace('${uploadLimit}', uploadLimit) )
+      }
 
-    methods: {
-      handlePictureExceed() {
-        let uploadLimit = this.field.options.limit
-        this.$message.warning( this.i18nt('render.hint.uploadExceed').replace('${uploadLimit}', uploadLimit) )
-      },
+      const handlePicturePreview=(file)=> {
+        data.previewUrl = file.url
+        data.showPreviewDialogFlag = true
+      }
 
-      handlePicturePreview(file) {
-        this.previewUrl = file.url
-        this.showPreviewDialogFlag = true
-      },
-
-      beforePictureUpload(file) {
+      const beforePictureUpload=(file)=> {
         let fileTypeCheckResult = false
-        if (!!this.field.options && !!this.field.options.fileTypes) {
-          let uploadFileTypes = this.field.options.fileTypes
+        if (!!props.field.options && !!props.field.options.fileTypes) {
+          let uploadFileTypes = props.field.options.fileTypes
           if (uploadFileTypes.length > 0) {
             fileTypeCheckResult = uploadFileTypes.some( (ft) => {
               return file.type === 'image/' + ft
@@ -151,29 +156,29 @@
           }
         }
         if (!fileTypeCheckResult) {
-          this.$message.error(this.i18nt('render.hint.unsupportedFileType') + file.type)
+          proxy.$message.error(i18nt('render.hint.unsupportedFileType') + file.type)
           return false;
         }
 
         let fileSizeCheckResult = false
         let uploadFileMaxSize = 5  //5MB
-        if (!!this.field.options && !!this.field.options.fileMaxSize) {
-          uploadFileMaxSize = this.field.options.fileMaxSize
+        if (!!props.field.options && !!props.field.options.fileMaxSize) {
+          uploadFileMaxSize = props.field.options.fileMaxSize
         }
         fileSizeCheckResult = file.size / 1024 / 1024 <= uploadFileMaxSize
         if (!fileSizeCheckResult) {
-          this.$message.error(this.$('render.hint.fileSizeExceed') + uploadFileMaxSize + 'MB')
+          proxy.$message.error(i18nt('render.hint.fileSizeExceed') + uploadFileMaxSize + 'MB')
           return false;
         }
 
-        this.uploadData.key = file.name
-        return this.handleOnBeforeUpload(file)
-      },
+        data.uploadData.key = file.name
+        return handleOnBeforeUpload(file)
+      }
 
-      handleOnBeforeUpload(file) {
-        if (!!this.field.options.onBeforeUpload) {
-          let bfFunc = new Function('file', this.field.options.onBeforeUpload)
-          let result = bfFunc.call(this, file)
+      const handleOnBeforeUpload=(file)=> {
+        if (!!props.field.options.onBeforeUpload) {
+          let bfFunc = new Function('file', props.field.options.onBeforeUpload)
+          let result = bfFunc.call(proxy, file)
           if (typeof result === 'boolean') {
             return result
           } else {
@@ -182,88 +187,108 @@
         }
 
         return true
-      },
+      }
 
-      updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, defaultResult) {
-        this.fieldModel = this.fieldModel || []
-        let oldValue = deepClone(this.fieldModel)
+      const updateFieldModelAndEmitDataChangeForUpload=(fileList, customResult, defaultResult)=> {
+        data.fieldModel = data.fieldModel || []
+        let oldValue = deepClone(data.fieldModel)
         if (!!customResult && !!customResult.name && !!customResult.url) {
-          this.fieldModel.push({
+          data.fieldModel.push({
             name: customResult.name,
             url: customResult.url
           })
         } else if (!!defaultResult && !!defaultResult.name && !!defaultResult.url) {
-          this.fieldModel.push({
+          data.fieldModel.push({
             name: defaultResult.name,
             url: defaultResult.url
           })
         } else {
-          this.fieldModel = deepClone(fileList)
+          data.fieldModel = deepClone(fileList)
         }
 
-        this.syncUpdateFormModel(this.fieldModel)
-        this.emitFieldDataChange(this.fieldModel, oldValue)
-      },
+        fieldMixin.syncUpdateFormModel(data.fieldModel)
+        fieldMixin.emitFieldDataChange(data.fieldModel, oldValue)
+      }
 
-      handlePictureUpload(res, file, fileList) {
+      const handlePictureUpload=(res, file, fileList)=> {
         if (file.status === 'success') {
           let customResult = null
-          if (!!this.field.options.onUploadSuccess) {
-            let customFn = new Function('result', 'file', 'fileList', this.field.options.onUploadSuccess)
-            customResult = customFn.call(this, res, file, fileList)
+          if (!!props.field.options.onUploadSuccess) {
+            let customFn = new Function('result', 'file', 'fileList', props.field.options.onUploadSuccess)
+            customResult = customFn.call(proxy, res, file, fileList)
           }
 
-          this.updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
-          this.fileList = deepClone(fileList)
-          this.uploadBtnHidden = fileList.length >= this.field.options.limit
+          updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
+          data.fileList = deepClone(fileList)
+          data.uploadBtnHidden = fileList.length >= props.field.options.limit
         }
-      },
+      }
 
-      updateFieldModelAndEmitDataChangeForRemove(file, fileList) {
-        let oldValue = deepClone(this.fieldModel)
+      const updateFieldModelAndEmitDataChangeForRemove=(file, fileList)=> {
+        let oldValue = deepClone(data.fieldModel)
         let foundFileIdx = -1
-        this.fileListBeforeRemove.map((fi, idx) => {  /* 跟element-ui不同，element-plus删除文件时this.fileList数组对应元素已被删除！！ */
+        data.fileListBeforeRemove.map((fi, idx) => {  /* 跟element-ui不同，element-plus删除文件时data.fileList数组对应元素已被删除！！ */
           if ((fi.name === file.name) && ((fi.url === file.url) || (!!fi.uid && fi.uid === file.uid))) {  /* 这个判断有问题？？ */
             foundFileIdx = idx
           }
         })
         if (foundFileIdx > -1) {
-          this.fieldModel.splice(foundFileIdx, 1)
+          data.fieldModel.splice(foundFileIdx, 1)
         }
 
-        this.syncUpdateFormModel(this.fieldModel)
-        this.emitFieldDataChange(this.fieldModel, oldValue)
-      },
+        fieldMixin.syncUpdateFormModel(data.fieldModel)
+        fieldMixin.emitFieldDataChange(data.fieldModel, oldValue)
+      }
 
-      handleBeforeRemove(file, fileList) {
+      const handleBeforeRemove=(file, fileList)=> {
         /* 保留删除之前的文件列表！！ */
-        this.fileListBeforeRemove = deepClone(fileList)
-      },
+        data.fileListBeforeRemove = deepClone(fileList)
+      }
 
-      handlePictureRemove(file, fileList) {
-        this.updateFieldModelAndEmitDataChangeForRemove(file, fileList)
-        this.fileList = deepClone(fileList)
-        this.uploadBtnHidden = fileList.length >= this.field.options.limit
+      const handlePictureRemove=(file, fileList)=> {
+        updateFieldModelAndEmitDataChangeForRemove(file, fileList)
+        data.fileList = deepClone(fileList)
+        data.uploadBtnHidden = fileList.length >= props.field.options.limit
 
-        if (!!this.field.options.onFileRemove) {
-          let customFn = new Function('file', 'fileList', this.field.options.onFileRemove)
-          customFn.call(this, file, fileList)
+        if (!!props.field.options.onFileRemove) {
+          let customFn = new Function('file', 'fileList', props.field.options.onFileRemove)
+          customFn.call(proxy, file, fileList)
         }
-      },
+      }
 
-      handleUploadError(err, file, fileList) {
-        if (!!this.field.options.onUploadError) {
-          let customFn = new Function('error', 'file', 'fileList', this.field.options.onUploadError)
-          customFn.call(this, err, file, fileList)
+      const handleUploadError=(err, file, fileList)=> {
+        if (!!props.field.options.onUploadError) {
+          let customFn = new Function('error', 'file', 'fileList', props.field.options.onUploadError)
+          customFn.call(proxy, err, file, fileList)
         } else {
-          this.$message({
-            message: this.i18nt('render.hint.uploadError') + err,
+          proxy.$message({
+            message: i18nt('render.hint.uploadError') + err,
             duration: 3000,
             type: 'error',
           })
         }
-      },
+      }
 
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...fieldMixin,
+
+        realUploadURL,
+
+        handlePictureExceed,
+        handlePicturePreview,
+        beforePictureUpload,
+        handleOnBeforeUpload,
+        updateFieldModelAndEmitDataChangeForUpload,
+        handlePictureUpload,
+        updateFieldModelAndEmitDataChangeForRemove,
+        handleBeforeRemove,
+        handlePictureRemove,
+        handleUploadError
+      }
     }
   }
 </script>

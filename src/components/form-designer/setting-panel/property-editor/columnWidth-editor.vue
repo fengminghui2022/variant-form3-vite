@@ -7,17 +7,28 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { inject,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "columnWidth-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
     inject: ['isSubFormChildWidget'],
+    setup(props){
+      const { i18nt }=useI18n();
+      const isSubFormChildWidget=inject("isSubFormChildWidget")
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        
+        isSubFormChildWidget
+      }
+    }  
   }
 </script>
 

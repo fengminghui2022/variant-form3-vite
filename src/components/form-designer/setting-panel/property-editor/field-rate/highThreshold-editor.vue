@@ -6,16 +6,24 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "highThreshold-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
+    setup(props){
+      const { i18nt }=useI18n();
+
+      return {
+        i18nt,
+        ...toRefs(props),
+      }
+    }   
   }
 </script>
 

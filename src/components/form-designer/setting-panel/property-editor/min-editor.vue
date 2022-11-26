@@ -5,33 +5,41 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { computed,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "min-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      minValue: {
+    setup(props){
+      const { i18nt }=useI18n();
+
+      const minValue=computed({
         get() {
-          return this.optionModel['min']
+          return props.optionModel['min']
         },
 
         set(newValue) {
           //if ((!newValue && (newValue !== 0)) || isNaN(newValue)) {
           if ((newValue === undefined) || (newValue === null) || isNaN(newValue)) {
-            this.optionModel.min = null
+            props.optionModel.min = null
           } else {
-            this.optionModel.min = Number(newValue)
+            props.optionModel.min = Number(newValue)
           }
         }
-      },
+      })
 
-    },
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        minValue
+      }
+    }  
   }
 </script>
 

@@ -10,6 +10,7 @@
       selectedWidget: Object,
       optionModel: Object,
     },
+
   }
 </script>
 

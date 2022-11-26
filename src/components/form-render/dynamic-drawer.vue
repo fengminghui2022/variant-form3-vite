@@ -20,11 +20,12 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+  import { reactive, toRefs, computed,nextTick, getCurrentInstance, onBeforeUnmount  } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "dynamic-drawer",
-    mixins: [i18n],
     props: {
       options: {
         type: Object,
@@ -58,43 +59,39 @@
         default: null
       }
     },
-    data() {
-      return {
-        drawerVisible: false,
-      }
-    },
-    computed: {
-      cancelBtnLabel() {
-        return this.options.cancelButtonLabel || this.i18nt('designer.hint.cancel')
-      },
+    setup(props){
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
 
-      okBtnLabel() {
-        return this.options.okButtonLabel || this.i18nt('designer.hint.confirm')
-      }
+      const dFormRef=ref(null);
+      const data=reactive( {
+        dialogVisible: false,
+      })
 
-    },
-    mounted() {
-      //
-    },
-    beforeDestroy() {
-      this.parentFormRef.setChildFormRef(null)
-    },
-    methods: {
-      show() {
+      
+      const cancelBtnLabel=computed(()=> {
+         return props.options.cancelButtonLabel || i18nt('designer.hint.cancel')
+      })
+
+      const okBtnLabel=computed(()=> {
+         return props.options.okButtonLabel || i18nt('designer.hint.confirm')
+      })
+
+      const show=()=> {
         this.drawerVisible = true
 
         //设置readMode模式
-        this.$nextTick(() => {
+        nextTick(() => {
           if (!!this.options.readMode) {
-            this.$refs['dFormRef'].setReadMode(true)
+            dFormRef.value.setReadMode(true)
           }
 
-          this.$refs['dFormRef'].setDialogOrDrawerRef(this)
-          this.parentFormRef.setChildFormRef(this.$refs['dFormRef'])
+          dFormRef.value.setDialogOrDrawerRef(this)
+          this.parentFormRef.setChildFormRef(dFormRef.value)
         })
-      },
+      }
 
-      close() {
+      const close=()=> {
         if (!!this.options.onDrawerBeforeClose) {
           let customFn = new Function(this.options.onDrawerBeforeClose)
           let closeResult = customFn.call(this)
@@ -106,16 +103,16 @@
         this.drawerVisible = false
         this.$refs['drawerRef'].handleClose()
         setTimeout(this.deleteWrapperNode, 150)
-      },
+      }
 
-      deleteWrapperNode() {
+      const deleteWrapperNode=()=> {
         let wrapperNode = document.getElementById('vf-dynamic-drawer-wrapper' + this.wrapperId)
         if (!!wrapperNode) {
           document.body.removeChild(wrapperNode)
         }
-      },
+      }
 
-      handleBeforeClose(done) {
+      const handleBeforeClose=(done)=> {
         if (!!this.options.onDrawerBeforeClose) {
           let customFn = new Function(this.options.onDrawerBeforeClose)
           let closeResult = customFn.call(this)
@@ -123,21 +120,21 @@
         }
 
         return done()
-      },
+      }
 
-      handleCloseEvent() {
+      const handleCloseEvent=()=> {
         this.drawerVisible = false
         setTimeout(this.deleteWrapperNode, 150)
-      },
+      }
 
-      handleOpenedEvent() {
+      const handleOpenedEvent=()=> {
         if (!!this.options.onDrawerOpened) {
           let customFn = new Function(this.options.onDrawerOpened)
           customFn.call(this)
         }
-      },
+      }
 
-      handleCancelClick() {
+      const handleCancelClick=()=> {
         if (!!this.options.onCancelButtonClick) {
           let customFn = new Function(this.options.onCancelButtonClick)
           let clickResult = customFn.call(this)
@@ -148,9 +145,9 @@
 
         this.drawerVisible = false
         setTimeout(this.deleteWrapperNode, 150)
-      },
+      }
 
-      handleOkClick() {
+      const handleOkClick=()=> {
         if (!!this.options.onOkButtonClick) {
           let customFn = new Function(this.options.onOkButtonClick)
           let clickResult = customFn.call(this)
@@ -161,24 +158,57 @@
 
         this.drawerVisible = false
         setTimeout(this.deleteWrapperNode, 150)
-      },
+      }
 
-      getParentFormRef() {
+      const getParentFormRef=()=> {
         return this.parentFormRef
-      },
+      }
 
-      getFormRef() {
-        return this.$refs['dFormRef']
-      },
+      const getFormRef=()=> {
+        return dFormRef.value
+      }
 
-      getWidgetRef(widgetName, showError = false) {
-        return this.$refs['dFormRef'].getWidgetRef(widgetName, showError)
-      },
+      const getWidgetRef=(widgetName, showError = false)=> {
+        return dFormRef.value.getWidgetRef(widgetName, showError)
+      }
 
-      getExtraData() {
+      const getExtraData=()=> {
         return this.extraData
-      },
+      }
 
+
+      
+      onBeforeUnmount(()=>{
+        props.parentFormRef.setChildFormRef(null)
+      })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        dFormRef,
+
+        cancelBtnLabel,
+        okBtnLabel,
+
+
+        show,
+        close,
+        deleteWrapperNode,
+        handleBeforeClose,
+        handleCloseEvent,
+        handleOpenedEvent,
+        handleCancelClick,
+        handleOkClick,
+        getParentFormRef,
+        getFormRef,
+        getWidgetRef,
+        getExtraData
+      }
+
+    },
+    methods: {
+     
     }
   }
 </script>

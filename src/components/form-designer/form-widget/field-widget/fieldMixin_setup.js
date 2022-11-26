@@ -7,7 +7,7 @@ import { useI18n,translate } from '@/utils/i18n'
 
 
 
-export function useField(props,data){
+export default function(props,data){
   
   const { i18nt }=useI18n();
   const emitter =useEmitter();

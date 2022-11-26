@@ -19,11 +19,11 @@
 
 <script>
   import SvgIcon from '@/components/svg-icon'
-  import i18n from "@/utils/i18n"
+	import { reactive,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "picture-upload-fileTypes-editor",
-    mixins: [i18n],
     components: {
       SvgIcon
     },
@@ -32,14 +32,21 @@
       selectedWidget: Object,
       optionModel: Object,
     },
-    data() {
-      return {
+    setup(props){
+      const { i18nt }=useI18n();
+      const data=reactive({
         uploadPictureTypes: [
           {value: 'jpg', label: 'jpg'}, /* label如用大写字母，选择两个文件类型就会导致设置面板快速抖动、闪烁，非常奇怪！！ */
           {value: 'jpeg', label: 'jpeg'},
           {value: 'png', label: 'png'},
           {value: 'gif', label: 'gif'},
         ],
+      })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data)
       }
     }
   }

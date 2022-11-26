@@ -19,18 +19,20 @@
 </template>
 
 <script>
+	import { computed, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
   import FormItemWrapper from './form-item-wrapper'
   import emitter from '@/utils/emitter'
-  import i18n, {translate} from "@/utils/i18n";
-  import {deepClone} from "@/utils/util";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old";
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+
 
   import { Quill, quillEditor } from 'vue3-quill'
 
   export default {
     name: "rich-editor-widget",
     componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
     props: {
       field: Object,
       parentWidget: Object,
@@ -61,67 +63,74 @@
       FormItemWrapper,
       quillEditor,
     },
-    data() {
-      return {
+     setup(props){
+      
+      const { i18nt }=useI18n();
+      const emitterMixin =useEmitter();
+
+      const data=reactive({
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
 
         customToolbar: [], //富文本编辑器自定义工具栏
         valueChangedFlag: false, //vue2-editor数据值是否改变标志
-      }
-    },
-    computed: {
-      editorOption() {
+      })
+
+      const fieldMixin = useField(props,data);
+
+      const editorOption=computed(()=> {
         return {
           placeholder: this.field.options.placeholder,
           modules: {
             //toolbar: this.customToolbar
           }
         }
-      },
+      })
 
-    },
-    beforeCreate() {
-      /* 这里不能访问方法和属性！！ */
-    },
+      onMounted(()=>{
+        fieldMixin.handleOnMounted()
+      })
+      
+      onBeforeUnmount(()=>{
+        fieldMixin.unregisterFromRefList()
+      })
 
-    created() {
-      /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
-         需要在父组件created中初始化！！ */
-      this.registerToRefList()
-      this.initFieldModel()
-      this.initEventHandler()
-      this.buildFieldRules()
+      fieldMixin.registerToRefList()
+      fieldMixin.initFieldModel()
+      fieldMixin.initEventHandler()
+      fieldMixin.buildFieldRules()
 
-      this.handleOnCreated()
-    },
+      fieldMixin.handleOnCreated()
 
-    mounted() {
-      this.handleOnMounted()
-    },
-
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-
-    methods: {
-      handleRichEditorChangeEvent() {
+      const handleRichEditorChangeEvent=()=> {
         this.valueChangedFlag = true
         this.syncUpdateFormModel(this.fieldModel)
-      },
+      }
 
-      handleRichEditorFocusEvent() {
+      const handleRichEditorFocusEvent=()=> {
         this.oldFieldValue = deepClone(this.fieldModel)
-      },
+      }
 
-      handleRichEditorBlurEvent() {
+      const handleRichEditorBlurEvent=()=> {
         if (this.valueChangedFlag) {
           this.emitFieldDataChange(this.fieldModel, this.oldFieldValue)
           this.valueChangedFlag = false
         }
-      },
+      }
 
+      return {
+         i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...fieldMixin,
+
+        editorOption,
+
+        handleRichEditorChangeEvent,
+        handleRichEditorFocusEvent,
+        handleRichEditorBlurEvent
+      }
     }
   }
 </script>

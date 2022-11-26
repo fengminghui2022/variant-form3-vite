@@ -20,12 +20,12 @@
 
 <script>
   import SvgIcon from '@/components/svg-icon'
-  import i18n from "@/utils/i18n"
-  import {isEmptyStr} from "@/utils/util"
+	import { inject,reactive, computed, toRefs, getCurrentInstance } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+  import { isEmptyStr } from "@/utils/util"
 
   export default {
     name: "name-editor",
-    mixins: [i18n],
     components: {
       SvgIcon
     },
@@ -34,58 +34,76 @@
       selectedWidget: Object,
       optionModel: Object,
     },
-    inject: ['serverFieldList', 'getDesignerConfig'],
-    data() {
-      return {
-        nameRequiredRule: [{required: true, message: 'name required'}],
-      }
-    },
-    computed: {
-      noFieldList() {
-        return !this.serverFieldList || (this.serverFieldList.length <= 0)
-      },
+    setup(props){
+      const { i18nt }=useI18n();
+      
+      const { proxy } = getCurrentInstance()
 
-      widgetNameReadonly() {
-        return !!this.getDesignerConfig().widgetNameReadonly
-      },
+      const serverFieldList=inject("serverFieldList")
+      const getDesignerConfig=inject("getDesignerConfig")
 
-    },
-    methods: {
-      updateWidgetNameAndRef(newName) {
-        let oldName = this.designer.selectedWidgetName
+      const data=reactive({
+          nameRequiredRule: [{required: true, message: 'name required'}],
+      })
+
+      const noFieldList=computed(()=> {
+        return !serverFieldList || (serverFieldList.length <= 0)
+      })
+
+      const widgetNameReadonly=computed(()=> {
+        return !!getDesignerConfig().widgetNameReadonly
+      })
+
+      const updateWidgetNameAndRef=(newName)=> {
+        let oldName = props.designer.selectedWidgetName
         if (isEmptyStr(newName)) {
-          this.selectedWidget.options.name = oldName
-          this.$message.info(this.i18nt('designer.hint.nameRequired'))
+          props.selectedWidget.options.name = oldName
+          proxy.$message.info(i18nt('designer.hint.nameRequired'))
           return
         }
 
-        if (!!this.designer.formWidget) {
-          let foundRef = this.designer.formWidget.getWidgetRef(newName) // 检查newName是否已存在！！
+        if (!!props.designer.formWidget) {
+          let foundRef = props.designer.formWidget.getWidgetRef(newName) // 检查newName是否已存在！！
           if (!!foundRef) {
-            this.selectedWidget.options.name = oldName
-            this.$message.info(this.i18nt('designer.hint.duplicateName') + newName)
+            props.selectedWidget.options.name = oldName
+            proxy.$message.info(i18nt('designer.hint.duplicateName') + newName)
             return
           }
 
-          let widgetInDesign = this.designer.formWidget.getWidgetRef(oldName)
+          let widgetInDesign = props.designer.formWidget.getWidgetRef(oldName)
           if (!!widgetInDesign && !!widgetInDesign.registerToRefList) {
             widgetInDesign.registerToRefList(oldName)  //注册组件新的ref名称并删除老的ref！！
-            let newLabel = this.getLabelByFieldName(newName)
-            this.designer.updateSelectedWidgetNameAndLabel(this.selectedWidget, newName, newLabel)
+            let newLabel = getLabelByFieldName(newName)
+            props.designer.updateSelectedWidgetNameAndLabel(props.selectedWidget, newName, newLabel)
           }
         }
-      },
+      }
 
-      getLabelByFieldName(fieldName) {
-        for (let i = 0; i < this.serverFieldList.length; i++) {
-          if (this.serverFieldList[i].name === fieldName) {
-            return this.serverFieldList[i].label
+      const getLabelByFieldName=(fieldName)=> {
+        for (let i = 0; i < serverFieldList.length; i++) {
+          if (serverFieldList[i].name === fieldName) {
+            return serverFieldList[i].label
           }
         }
 
         return null
-      },
+      }
 
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+
+        serverFieldList,
+        getDesignerConfig,
+
+        noFieldList,
+        widgetNameReadonly,
+
+        updateWidgetNameAndRef,
+        getLabelByFieldName
+      }
     }
   }
 </script>

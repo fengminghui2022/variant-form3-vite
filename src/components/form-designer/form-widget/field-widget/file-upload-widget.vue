@@ -36,7 +36,7 @@
 </template>
 
 <script>
-	import { toRefs ,reactive,inject, getCurrentInstance, computed, onMounted, onBeforeUnmount } from 'vue'
+	import { toRefs ,reactive, getCurrentInstance, computed, onMounted, onBeforeUnmount } from 'vue'
   import FormItemWrapper from './form-item-wrapper'
   
   import { useEmitter } from '@/utils/emitter'
@@ -86,7 +86,6 @@
       
       const { i18nt }=useI18n();
       const emitterMixin =useEmitter();
-      
       
       const { proxy } = getCurrentInstance()
       const data=reactive({
@@ -217,7 +216,7 @@
             let mountFunc = new Function('result', 'file', 'fileList', props.field.options.onUploadSuccess)
             customResult = mountFunc.call(proxy, res, file, fileList)
           }
-          file.url=res.url
+          
           updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
           if (!!customResult && !!customResult.name) {
             file.name = customResult.name

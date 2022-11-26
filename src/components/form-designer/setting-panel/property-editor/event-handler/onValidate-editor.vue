@@ -7,12 +7,13 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import eventMixin from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
+	import { reactive, toRefs } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
+  import { useEmitterMixin } from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
 
   export default {
     name: "onValidate-editor",
-    mixins: [i18n, eventMixin],
     props: {
       designer: Object,
       selectedWidget: Object,
@@ -22,11 +23,22 @@
         default: false,
       },
     },
-    data() {
+    setup(props){
+      const { i18nt }=useI18n();
+
+      const emitterMixin= useEmitterMixin()
+
+      const data=reactive({
+          eventParams: ['rule', 'value', 'callback'],
+      })
+
       return {
-        eventParams: ['rule', 'value', 'callback'],
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...emitterMixin
       }
-    }
+    }    
   }
 </script>
 

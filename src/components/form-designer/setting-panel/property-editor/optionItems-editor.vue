@@ -32,14 +32,15 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+  import { useProperty } from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
+
   import OptionItemsSetting from "@/components/form-designer/setting-panel/option-items-setting"
-  import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
   import {getDSByName} from "@/utils/util"
 
   export default {
     name: "optionItems-editor",
-    mixins: [i18n, propertyMixin],
     props: {
       designer: Object,
       selectedWidget: Object,
@@ -48,57 +49,64 @@
     components: {
       OptionItemsSetting,
     },
-    data() {
-      return {
+    setup(props){
+      const { i18nt }=useI18n();
+      const data=reactive({
         dataSetList: [],
-      }
-    },
-    computed: {
-      dataSourceList() {
-        if (!this.designer.formConfig || !this.designer.formConfig.dataSources) {
-          return []
-        } else {
-          return this.designer.formConfig.dataSources
-        }
-      },
+      })
 
-    },
-    watch: {
-      selectedWidget: {
-        handler(val, oldVal) {
-          if (!val) {
-            return
+      const dataSourceList=computed(()=>{
+          if (!props.designer.formConfig || !props.designer.formConfig.dataSources) {
+            return []
+          } else {
+            return props.designer.formConfig.dataSources
           }
+      })
 
-          this.loadDataSet(val.options.dsName)
-        },
-        immediate: true
-      },
-
-    },
-    methods: {
-      loadDataSet(dsName) {
-        this.dataSetList.length = 0
+      const loadDataSet=(dsName)=> {
+        data.dataSetList.length = 0
         if (!dsName) {
           return
         }
 
-        let dsModel = getDSByName(this.designer.formConfig, dsName)
+        let dsModel = getDSByName(props.designer.formConfig, dsName)
         if (!!dsModel && !!dsModel.dataSets) {
           dsModel.dataSets.forEach(dSet => {
-            this.dataSetList.push({
+            dataSetList.push({
               name: dSet.name,
               remark: dSet.remark
             })
           })
         }
-      },
+      }
 
-      getDataSetList() {
-        this.optionModel.dataSetName = ''
-        this.loadDataSet(this.optionModel.dsName)
-      },
+      const getDataSetList=()=> {
+        props.optionModel.dataSetName = ''
+        loadDataSet(props.optionModel.dsName)
+      }
 
+      watch(()=>props.selectedWidget, {
+        handler(val, oldVal) {
+          if (!val) {
+            return
+          }
+
+          loadDataSet(val.options.dsName)
+        }},
+        { immediate: true }
+      )
+
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+
+        dataSourceList,
+
+        loadDataSet,
+        getDataSetList
+      }
     }
   }
 </script>

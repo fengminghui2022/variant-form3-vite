@@ -5,32 +5,40 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "max-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      maxValue: {
+    setup(props){
+      const { i18nt }=useI18n();
+
+      const maxValue=computed( {
         get() {
-          return this.optionModel['max']
+          return props.optionModel['max']
         },
 
         set(newValue) {
           if (!newValue || isNaN(newValue)) {
-            this.optionModel.max = null
+            props.optionModel.max = null
           } else {
-            this.optionModel.max = Number(newValue)
+            props.optionModel.max = Number(newValue)
           }
         }
-      },
+      })
 
-    }
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        maxValue
+      }
+    }  
   }
 </script>
 

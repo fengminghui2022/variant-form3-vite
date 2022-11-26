@@ -23,22 +23,27 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n";
+	import { computed, toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "grid-col-span-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      formConfig() {
+    setup(props){
+      const { i18nt }=useI18n();
+      const formConfig=computed(()=>{
         return this.designer.formConfig
-      },
+      })
 
-
+      return {
+        i18nt,
+        ...toRefs(props),
+        formConfig
+      }
     }
   }
 </script>

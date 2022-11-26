@@ -6,33 +6,38 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
+	import { computed,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "minLength-editor",
-    mixins: [i18n, propertyMixin],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      minLength: {
-        get() {
-          return this.optionModel['minLength']
-        },
+    setup(props){
+      const { i18nt }=useI18n();
+      const minLength= computed({
+          get() {
+            return props.optionModel['minLength']
+          },
 
-        set(newValue) {
-          if (!newValue || isNaN(newValue)) {
-            this.optionModel.minLength = null
-          } else {
-            this.optionModel.minLength = Number(newValue)
+          set(newValue) {
+            if (!newValue || isNaN(newValue)) {
+              props.optionModel.minLength = null
+            } else {
+              props.optionModel.minLength = Number(newValue)
+            }
           }
-        }
-      },
+      })
 
-    }
+      return {
+        i18nt,
+        ...toRefs(props),
+        minLength
+      }
+    }  
   }
 </script>
 

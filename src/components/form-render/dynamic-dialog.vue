@@ -20,11 +20,12 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+  import { reactive, toRefs, computed,nextTick, getCurrentInstance, onBeforeUnmount  } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "dynamic-dialog",
-    mixins: [i18n],
     props: {
       options: {
         type: Object,
@@ -58,126 +59,148 @@
         default: null
       }
     },
-    data() {
-      return {
+    setup(props){
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
+
+      const dFormRef=ref(null);
+      const data=reactive( {
         dialogVisible: false,
-      }
-    },
-    computed: {
-      cancelBtnLabel() {
-        return this.options.cancelButtonLabel || this.i18nt('designer.hint.cancel')
-      },
+      })
 
-      okBtnLabel() {
-        return this.options.okButtonLabel || this.i18nt('designer.hint.confirm')
-      }
+      const cancelBtnLabel=computed(()=> {
+         return props.options.cancelButtonLabel || i18nt('designer.hint.cancel')
+      })
 
-    },
-    mounted() {
-      //
-    },
-    beforeDestroy() {
-      this.parentFormRef.setChildFormRef(null)
-    },
-    methods: {
-      show() {
-        this.dialogVisible = true
+      const okBtnLabel=computed(()=> {
+         return props.options.okButtonLabel || i18nt('designer.hint.confirm')
+      })
+
+      const show=()=> {
+        data.dialogVisible = true
 
         //设置readMode模式
-        this.$nextTick(() => {
-          if (!!this.options.readMode) {
-            this.$refs['dFormRef'].setReadMode(true)
+        nextTick(() => {
+          if (!!props.options.readMode) {
+            dFormRef.valuesetReadMode(true)
           }
 
-          this.$refs['dFormRef'].setDialogOrDrawerRef(this)
-          this.parentFormRef.setChildFormRef(this.$refs['dFormRef'])
+          dFormRef.valuesetDialogOrDrawerRef(proxy)
+          props.parentFormRef.setChildFormRef(dFormRef)
         })
-      },
+      }
 
-      close() {
-        if (!!this.options.onDialogBeforeClose) {
-          let customFn = new Function('done', this.options.onDialogBeforeClose)
-          let closeResult = customFn.call(this)
+      const close=()=> {
+        if (!!props.options.onDialogBeforeClose) {
+          let customFn = new Function('done', props.options.onDialogBeforeClose)
+          let closeResult = customFn.call(proxy)
           if (closeResult === false) {
             return
           }
         }
 
-        this.dialogVisible = false
+        data.dialogVisible = false
         setTimeout(this.deleteWrapperNode, 150)
-      },
+      }
 
-      deleteWrapperNode() {
-        let wrapperNode = document.getElementById('vf-dynamic-dialog-wrapper' + this.wrapperId)
+      const deleteWrapperNode=()=> {
+        let wrapperNode = document.getElementById('vf-dynamic-dialog-wrapper' + props.wrapperId)
         if (!!wrapperNode) {
           document.body.removeChild(wrapperNode)
         }
-      },
+      }
 
-      handleBeforeClose(done) {
-        if (!!this.options.onDialogBeforeClose) {
-          let customFn = new Function('done', this.options.onDialogBeforeClose)
-          let closeResult = customFn.call(this)
+      const handleBeforeClose=(done)=> {
+        if (!!props.options.onDialogBeforeClose) {
+          let customFn = new Function('done', props.options.onDialogBeforeClose)
+          let closeResult = customFn.call(proxy)
           return (closeResult === false) ? closeResult : done()
         }
 
         return done()
-      },
+      }
 
-      handleCloseEvent() {
-        this.dialogVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
-      },
+      const handleCloseEvent=()=> {
+        data.dialogVisible = false
+        setTimeout(deleteWrapperNode, 150)
+      }
 
-      handleOpenedEvent() {
-        if (!!this.options.onDialogOpened) {
-          let customFn = new Function(this.options.onDialogOpened)
-          customFn.call(this)
+      const handleOpenedEvent=()=> {
+        if (!!props.options.onDialogOpened) {
+          let customFn = new Function(props.options.onDialogOpened)
+          customFn.call(proxy)
         }
-      },
+      }
 
-      handleCancelClick() {
-        if (!!this.options.onCancelButtonClick) {
-          let customFn = new Function(this.options.onCancelButtonClick)
-          let clickResult = customFn.call(this)
+      const handleCancelClick=()=> {
+        if (!!props.options.onCancelButtonClick) {
+          let customFn = new Function(props.options.onCancelButtonClick)
+          let clickResult = customFn.call(proxy)
           if (clickResult === false) {
             return
           }
         }
 
-        this.dialogVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
-      },
+        data.dialogVisible = false
+        setTimeout(deleteWrapperNode, 150)
+      }
 
-      handleOkClick() {
-        if (!!this.options.onOkButtonClick) {
-          let customFn = new Function(this.options.onOkButtonClick)
-          let clickResult = customFn.call(this)
+      const handleOkClick=()=> {
+        if (!!props.options.onOkButtonClick) {
+          let customFn = new Function(props.options.onOkButtonClick)
+          let clickResult = customFn.call(proxy)
           if (clickResult === false) {
             return
           }
         }
 
-        this.dialogVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
-      },
+        data.dialogVisible = false
+        setTimeout(deleteWrapperNode, 150)
+      }
 
-      getParentFormRef() {
-        return this.parentFormRef
-      },
+      const getParentFormRef=()=> {
+        return props.parentFormRef
+      }
 
-      getFormRef() {
-        return this.$refs['dFormRef']
-      },
+      const getFormRef=()=> {
+        return dFormRef
+      }
 
-      getWidgetRef(widgetName, showError = false) {
-        return this.$refs['dFormRef'].getWidgetRef(widgetName, showError)
-      },
+      const getWidgetRef=(widgetName, showError = false)=> {
+        return dFormRef.valuegetWidgetRef(widgetName, showError)
+      }
 
-      getExtraData() {
-        return this.extraData
-      },
+      const getExtraData=()=> {
+        return props.extraData
+      }
 
+
+      onBeforeUnmount(()=>{
+        props.parentFormRef.setChildFormRef(null)
+      })
+
+      return{
+        i18nt,
+        ...toRefs(props),
+
+        dFormRef,
+
+        cancelBtnLabel,
+        okBtnLabel,
+
+        show,
+        close,
+        deleteWrapperNode,
+        handleBeforeClose,
+        handleCloseEvent,
+        handleOpenedEvent,
+        handleCancelClick,
+        handleOkClick,
+        getParentFormRef,
+        getFormRef,
+        getWidgetRef,
+        getExtraData
+      }
     }
   }
 </script>

@@ -21,15 +21,16 @@
 </template>
 
 <script>
-  import FormItemWrapper from './form-item-wrapper'
-  import emitter from '@/utils/emitter'
-  import i18n, {translate} from "@/utils/i18n";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old";
+	import { computed, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
 
+  import FormItemWrapper from './form-item-wrapper'
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
   export default {
     name: "time-range-widget",
     componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
     props: {
       field: Object,
       parentWidget: Object,
@@ -59,48 +60,49 @@
     components: {
       FormItemWrapper,
     },
-    data() {
-      return {
+     setup(props){
+      
+      const { i18nt }=useI18n();
+      const emitterMixin =useEmitter();
+
+      const data=reactive({
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+      })
+
+      const fieldMixin = useField(props,data);
+
+      const contentForReadMode=computed(()=>{
+          if (!this.fieldModel) {
+            return '--'
+          } else {
+            return this.fieldModel[0] + ' - ' + this.fieldModel[1]
+          }
+      })
+
+      onMounted(()=>{
+        fieldMixin.handleOnMounted()
+      })
+      
+      onBeforeUnmount(()=>{
+        fieldMixin.unregisterFromRefList()
+      })
+
+      fieldMixin.registerToRefList()
+      fieldMixin.initFieldModel()
+      fieldMixin.initEventHandler()
+      fieldMixin.buildFieldRules()
+
+      fieldMixin.handleOnCreated()
+
+
+      return {
+         i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...fieldMixin
       }
-    },
-    computed: {
-      contentForReadMode() {
-        if (!this.fieldModel) {
-          return '--'
-        } else {
-          return this.fieldModel[0] + ' - ' + this.fieldModel[1]
-        }
-      },
-
-    },
-    beforeCreate() {
-      /* 这里不能访问方法和属性！！ */
-    },
-
-    created() {
-      /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
-         需要在父组件created中初始化！！ */
-      this.registerToRefList()
-      this.initFieldModel()
-      this.initEventHandler()
-      this.buildFieldRules()
-
-      this.handleOnCreated()
-    },
-
-    mounted() {
-      this.handleOnMounted()
-    },
-
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-
-    methods: {
-
     }
   }
 </script>

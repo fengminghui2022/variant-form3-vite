@@ -67,10 +67,10 @@
 </template>
 
 <script>
-	import { computed,toRefs,inject,reactive,nextTick } from 'vue'
+	import { computed,ref,toRefs,inject,reactive,nextTick } from 'vue'
 
 	import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
-	import emitter from '@/utils/emitter'
+	import { useEmitter } from '@/utils/emitter'
 
   	import { useI18n } from '@/utils/i18n'
 	import {formatDate1, formatDate2, formatDate3, formatDate4, formatDate5,
@@ -108,7 +108,7 @@
 		}
     },
 	setup(props){
-		
+		const emitter = useEmitter();
       	const { i18nt }=useI18n();
 		const refList=inject('refList')
 

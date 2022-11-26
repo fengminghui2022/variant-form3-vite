@@ -19,11 +19,11 @@
 
 <script>
   import SvgIcon from '@/components/svg-icon'
-  import i18n from "@/utils/i18n"
+	import { reactive,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "file-upload-fileTypes-editor",
-    mixins: [i18n],
     components: {
       SvgIcon
     },
@@ -32,14 +32,21 @@
       selectedWidget: Object,
       optionModel: Object,
     },
-    data() {
-      return {
-        uploadFileTypes: [
+    setup(props){
+      const { i18nt }=useI18n();
+      const data=reactive({
+        uploadPictureTypes: [
           {value: 'doc', label: 'doc'},
           {value: 'xls', label: 'xls'},
           {value: 'docx', label: 'docx'},
           {value: 'xlsx', label: 'xlsx'},
         ],
+      })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
       }
     }
   }

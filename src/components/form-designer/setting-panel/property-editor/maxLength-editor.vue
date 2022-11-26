@@ -6,32 +6,44 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
+	import { computed, toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+  import { useProperty } from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 
   export default {
     name: "maxLength-editor",
-    mixins: [i18n, propertyMixin],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      maxLength: {
+    setup(props){
+      const { i18nt }=useI18n();
+      const properyMixins=useProperty(props)
+
+
+      const maxLength=computed({
         get() {
-          return this.optionModel['maxLength']
+          return props.optionModel['maxLength']
         },
 
         set(newValue) {
           if (!newValue || isNaN(newValue)) {
-            this.optionModel.maxLength = null
+            props.optionModel.maxLength = null
           } else {
-            this.optionModel.maxLength = Number(newValue)
+            props.optionModel.maxLength = Number(newValue)
           }
         }
-      },
-    }
+      })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...properyMixins,
+
+        maxLength
+      }
+    }  
   }
 </script>
 

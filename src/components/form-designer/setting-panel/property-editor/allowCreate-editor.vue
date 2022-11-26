@@ -16,6 +16,14 @@
       selectedWidget: Object,
       optionModel: Object,
     },
+    setup(props){
+      const { i18nt }=useI18n();
+
+      return {
+        i18nt,
+        ...toRefs(props),
+      }
+    }  
 
   }
 </script>

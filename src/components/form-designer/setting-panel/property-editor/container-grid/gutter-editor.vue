@@ -24,18 +24,20 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "gutter-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    methods: {
-      spanChanged(curGrid) {
+    setup(props){
+      const { i18nt }=useI18n();
+
+      const spanChanged=(curGrid)=> {
         let spanSum = 0
         curGrid.cols.forEach((colItem) => {
           spanSum += colItem.options.span
@@ -46,19 +48,27 @@
           //TODO: 语言字符串资源化
         }
 
-        this.designer.saveCurrentHistoryStep()
-      },
+        props.designer.saveCurrentHistoryStep()
+      }
 
-      deleteCol(curGrid, colIdx) {
-        this.designer.deleteColOfGrid(curGrid, colIdx)
-        this.designer.emitHistoryChange()
-      },
+      const deleteCol=(curGrid, colIdx)=> {
+        props.designer.deleteColOfGrid(curGrid, colIdx)
+        props.designer.emitHistoryChange()
+      }
 
-      addNewCol(curGrid) {
-        this.designer.addNewColOfGrid(curGrid)
-        this.designer.emitHistoryChange()
-      },
+      const addNewCol=(curGrid)=> {
+        props.designer.addNewColOfGrid(curGrid)
+        props.designer.emitHistoryChange()
+      }
 
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        spanChanged,
+        deleteCol,
+        addNewCol
+      }
     }
   }
 </script>

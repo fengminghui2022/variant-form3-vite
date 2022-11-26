@@ -315,14 +315,15 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+  import { ref,computed,getCurrentInstance,toRefs,reactive ,nextTick } from 'vue'
+  import { useI18n } from '@/utils/i18n'
+
   import CodeEditor from "@/components/code-editor/index"
   import {copyToClipboard, deepClone, generateId, runDataSourceRequest} from "@/utils/util"
   import { Platform } from '@element-plus/icons-vue'
 
   export default {
     name: "data-source-setting",
-    mixins: [i18n],
     inject: ['getGlobalDsv'],
     components: {
       Platform,
@@ -332,9 +333,43 @@
       designer: Object,
       formConfig: Object,
     },
-    data() {
-      return {
-        //activeNames: ['2'],
+    setup(props){
+      
+      const { i18nt }=useI18n();
+
+      const { proxy } = getCurrentInstance()
+
+      const dsForm=ref(null)
+      const dsResultEditor=ref(null)
+      const exportDSEditor=ref(null)
+
+
+
+      const validateValueInput=(rule, value, callback) =>{
+        let ruleField = rule.field
+        let fieldType = ruleField.substring(0, ruleField.indexOf('.'))
+        let fieldIdx = Number(ruleField.substring(ruleField.indexOf('.') + 1, ruleField.lastIndexOf('.')))
+        let valueType = data.dsModel[fieldType][fieldIdx].type
+        if (valueType === 'Number') {
+          if (isNaN(value)) {
+            callback(new Error(i18nt('designer.setting.dsRequestNumberTypeError')))
+          } else {
+            callback()
+          }
+        } else if (valueType === 'Boolean') {
+          if ((value.toLowerCase() === 'true') || (value.toLowerCase() === 'false') || (value.toLowerCase() === 'null') ||
+             (value === '1') || (value === '0')) {
+            callback()
+          } else {
+            callback(new Error(i18nt('designer.setting.dsRequestBooleanTypeError')))
+          }
+        } else {
+          callback()
+        }
+      }
+
+
+      const data=reactive({
         activeNames: '2',
 
         dsModel: {
@@ -361,21 +396,21 @@
 
         formRules: {
           uniqueName: [
-            { required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired')}
+            { required: true, trigger: ['blur', 'change'], message: i18nt('designer.setting.fieldValueRequired')}
           ],
           requestURL: [
-            { required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired') }
+            { required: true, trigger: ['blur', 'change'], message: i18nt('designer.setting.fieldValueRequired') }
           ],
           requestMethod: [
-            { required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired') }
+            { required: true, trigger: ['blur', 'change'], message: i18nt('designer.setting.fieldValueRequired') }
           ]
         },
         nameRules: [
-          { required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired') },
+          { required: true, trigger: ['blur', 'change'], message: i18nt('designer.setting.fieldValueRequired') },
         ],
         valueRules: [
-          { required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired') },
-          { validator: this.validateValueInput, trigger: ['blur', 'change'] }
+          { required: true, trigger: ['blur', 'change'], message: i18nt('designer.setting.fieldValueRequired') },
+          { validator: validateValueInput, trigger: ['blur', 'change'] }
         ],
 
         showDataSourceDialogFlag: false,
@@ -393,215 +428,192 @@
         exportDSArray: [],
         dsExportContent: '',
         dsRawExportContent: '',
+      })
+
+
+      const addDataSource=()=> {
+        data.curEditDSIdx = -1
+        data.dsModel = new Object({})
+        data.dsModel.dataSourceId = null
+        data.dsModel.uniqueName = ''
+        data.dsModel.requestURL = ''
+        data.dsModel.requestURLType = 'String'
+        data.dsModel.requestMethod = 'get'
+        data.dsModel.description = ''
+        data.dsModel.headers = []
+        data.dsModel.params = []
+        data.dsModel.data = []
+        data.dsModel.configHandlerCode = '  return config'
+        data.dsModel.dataHandlerCode = '  return result.data.data;'
+        data.dsModel.errorHandlerCode = '  $message.error(error.message);'
+        data.dsModel.dataSetEnabled = false
+        data.dsModel.dataSets = []
+
+        data.showDataSourceDialogFlag = true
       }
-    },
-    methods: {
-      validateValueInput(rule, value, callback) {
-        let ruleField = rule.field
-        let fieldType = ruleField.substring(0, ruleField.indexOf('.'))
-        let fieldIdx = Number(ruleField.substring(ruleField.indexOf('.') + 1, ruleField.lastIndexOf('.')))
-        let valueType = this.dsModel[fieldType][fieldIdx].type
-        if (valueType === 'Number') {
-          if (isNaN(value)) {
-            callback(new Error(this.i18nt('designer.setting.dsRequestNumberTypeError')))
-          } else {
-            callback()
-          }
-        } else if (valueType === 'Boolean') {
-          if ((value.toLowerCase() === 'true') || (value.toLowerCase() === 'false') || (value.toLowerCase() === 'null') ||
-             (value === '1') || (value === '0')) {
-            callback()
-          } else {
-            callback(new Error(this.i18nt('designer.setting.dsRequestBooleanTypeError')))
-          }
-        } else {
-          callback()
+
+      const editDataSource=(dsIdx)=> {
+        data.dsModel = deepClone(props.formConfig.dataSources[dsIdx])
+        if (!data.dsModel.hasOwnProperty('dataSets')) { //补齐dataSets属性
+          data.dsModel.dataSets = []
         }
-      },
+        data.curEditDSIdx = dsIdx
+        data.showDataSourceDialogFlag = true
+      }
 
-      addDataSource() {
-        this.curEditDSIdx = -1
-        this.dsModel = new Object({})
-        this.dsModel.dataSourceId = null
-        this.dsModel.uniqueName = ''
-        this.dsModel.requestURL = ''
-        this.dsModel.requestURLType = 'String'
-        this.dsModel.requestMethod = 'get'
-        this.dsModel.description = ''
-        this.dsModel.headers = []
-        this.dsModel.params = []
-        this.dsModel.data = []
-        this.dsModel.configHandlerCode = '  return config'
-        this.dsModel.dataHandlerCode = '  return result.data.data;'
-        this.dsModel.errorHandlerCode = '  $message.error(error.message);'
-        this.dsModel.dataSetEnabled = false
-        this.dsModel.dataSets = []
-
-        this.showDataSourceDialogFlag = true
-      },
-
-      editDataSource(dsIdx) {
-        this.dsModel = deepClone(this.formConfig.dataSources[dsIdx])
-        if (!this.dsModel.hasOwnProperty('dataSets')) { //补齐dataSets属性
-          this.dsModel.dataSets = []
-        }
-        this.curEditDSIdx = dsIdx
-        this.showDataSourceDialogFlag = true
-      },
-
-      saveDataSource() {
-        this.$refs['dsForm'].validate((valid, fields) => {
+      const saveDataSource=()=> {
+        dsForm.validate((valid, fields) => {
           if (!valid) {
-            this.$message.error(this.i18nt('designer.setting.dsValidationError'))
+            proxy.$message.error(i18nt('designer.setting.dsValidationError'))
             return
           }
 
-          this.dsModel.dataSourceId = this.dsModel.dataSourceId || 'ds' + generateId()
-          let curDSId = this.dsModel.dataSourceId
-          let curDSName = this.dsModel.uniqueName
+          data.dsModel.dataSourceId = data.dsModel.dataSourceId || 'ds' + generateId()
+          let curDSId = data.dsModel.dataSourceId
+          let curDSName = data.dsModel.uniqueName
           let sameNameFlag = false
-          this.formConfig.dataSources.map(dsItem => { // 检查名称重复
+          props.formConfig.dataSources.map(dsItem => { // 检查名称重复
             if ((dsItem.uniqueName === curDSName) && (dsItem.dataSourceId !== curDSId)) {
               sameNameFlag = true
             }
           })
           if (sameNameFlag) {
-            this.$message.error(this.i18nt('designer.setting.dsDuplicatedNameError'))
+            proxy.$message.error(i18nt('designer.setting.dsDuplicatedNameError'))
             return
           }
 
-          if (this.curEditDSIdx >= 0) {
-            this.formConfig.dataSources.splice(this.curEditDSIdx, 1, this.dsModel)
-            this.showDataSourceDialogFlag = false
+          if (data.curEditDSIdx >= 0) {
+            props.formConfig.dataSources.splice(data.curEditDSIdx, 1, data.dsModel)
+            data.showDataSourceDialogFlag = false
           } else {
-            this.formConfig.dataSources.push(this.dsModel)
-            this.showDataSourceDialogFlag = false
+            props.formConfig.dataSources.push(data.dsModel)
+            data.showDataSourceDialogFlag = false
           }
 
           //TODO: 触发表单历史变动
         })
-      },
+      }
 
-      deleteDataSource(dsIdx) {
-        this.$confirm(this.i18nt('designer.setting.deleteDataSourceHint'), this.i18nt('render.hint.prompt'), {
-          confirmButtonText: this.i18nt('render.hint.confirm'),
-          cancelButtonText: this.i18nt('render.hint.cancel')
+      const deleteDataSource=(dsIdx)=> {
+        props.$confirm(i18nt('designer.setting.deleteDataSourceHint'), i18nt('render.hint.prompt'), {
+          confirmButtonText: i18nt('render.hint.confirm'),
+          cancelButtonText: i18nt('render.hint.cancel')
         }).then(() => {
-          this.formConfig.dataSources.splice(dsIdx, 1)
+          props.formConfig.dataSources.splice(dsIdx, 1)
         }).catch(error => {
           //this.$message.error(error)
         })
-      },
+      }
 
-      addRequestHeader() {
-        this.dsModel.headers.push({
+      const addRequestHeader=() =>{
+        data.dsModel.headers.push({
           name: '',
           type: 'String',
           value: ''
         })
-      },
+      }
 
-      deleteRequestHeader(idx) {
-        this.dsModel.headers.splice(idx, 1)
-      },
+      const deleteRequestHeader=(idx)=> {
+        data.dsModel.headers.splice(idx, 1)
+      }
 
-      addRequestParam() {
-        this.dsModel.params.push({
+      const addRequestParam=()=> {
+        data.dsModel.params.push({
           name: '',
           type: 'String',
           value: ''
         })
-      },
+      }
 
-      deleteRequestParam(idx) {
-        this.dsModel.params.splice(idx, 1)
-      },
+      const deleteRequestParam=(idx)=> {
+        data.dsModel.params.splice(idx, 1)
+      }
 
-      addRequestData() {
-        this.dsModel.data.push({
+      const addRequestData=()=> {
+        data.dsModel.data.push({
           name: '',
           type: 'String',
           value: ''
         })
-      },
+      }
 
-      deleteRequestData(idx) {
-        this.dsModel.data.splice(idx, 1)
-      },
+      const deleteRequestData=(idx)=> {
+        data.dsModel.data.splice(idx, 1)
+      }
 
-      testDataSource() {
-        let globalDsv = this.getGlobalDsv() || {}
-        this.dsvJson = JSON.stringify(globalDsv, null, '  ')
-        this.showTestDataSourceDialogFlag = true
-      },
+      const testDataSource=()=> {
+        let globalDsv = getGlobalDsv() || {}
+        data.dsvJson = JSON.stringify(globalDsv, null, '  ')
+        data.showTestDataSourceDialogFlag = true
+      }
 
-      async doDataSourceRequest() {
-        let dsvObj = JSON.parse(this.dsvJson)
-        let dsResult = await runDataSourceRequest(this.dsModel, dsvObj, null, true, this.$message)
-        this.$refs.dsResultEditor.setValue( JSON.stringify(dsResult, null, '  ') )
-      },
+      const doDataSourceRequest=async ()=> {
+        let dsvObj = JSON.parse(data.dsvJson)
+        let dsResult = await runDataSourceRequest(data.dsModel, dsvObj, null, true, proxy.$message)
+        dsResultEditor.setValue( JSON.stringify(dsResult, null, '  ') )
+      }
 
-      clearRequestResult() {
-        this.$refs.dsResultEditor.setValue('')
-      },
+      const clearRequestResult=()=> {
+        dsResultEditor.setValue('')
+      }
 
-      addDataSet() {
-        this.dsModel.dataSets.push({
+      const addDataSet=()=> {
+        data.dsModel.dataSets.push({
           name: '',
           remark: ''
         })
-      },
+      }
 
-      deleteDataSet(idx) {
-        this.dsModel.dataSets.splice(idx, 1)
-      },
+      const deleteDataSet=(idx)=> {
+        data.dsModel.dataSets.splice(idx, 1)
+      }
 
-      importDataSource() {
-        this.importDSTemplate = ''
-        this.showImportDSDialogFlag = true
-      },
+      const importDataSource=()=> {
+        data.importDSTemplate = ''
+        data.showImportDSDialogFlag = true
+      }
 
-      doImportDataSource() {
+      const doImportDataSource=()=> {
         try {
-          let importDSArray = JSON.parse(this.importDSTemplate)
-          if (!!this.clearOldDSFlag) {
-            this.formConfig.dataSources.splice(0, this.formConfig.dataSources.length)
+          let importDSArray = JSON.parse(data.importDSTemplate)
+          if (!!data.clearOldDSFlag) {
+            props.formConfig.dataSources.splice(0, props.formConfig.dataSources.length)
           }
-          this.formConfig.dataSources = this.formConfig.dataSources.concat(importDSArray)
-          this.$message.success(this.i18nt('designer.hint.importJsonSuccess'))
-          this.designer.emitHistoryChange()
-          this.showImportDSDialogFlag = false
+          props.formConfig.dataSources = props.formConfig.dataSources.concat(importDSArray)
+          proxy.$message.success(i18nt('designer.hint.importJsonSuccess'))
+          props.designer.emitHistoryChange()
+          data.showImportDSDialogFlag = false
         } catch (ex) {
-          this.$message.error(ex.message)
+          proxy.$message.error(ex.message)
         }
-      },
+      }
 
-      exportDataSource() {
-        this.dsExportContent = ''
-        this.dsRawExportContent = ''
-        this.exportDSArray.splice(0, this.exportDSArray.length)
-        if (!!this.formConfig.dataSources && (this.formConfig.dataSources.length > 0)) {
-          this.formConfig.dataSources.forEach(ds => {
+      const exportDataSource=()=> {
+        data.dsExportContent = ''
+        data.dsRawExportContent = ''
+        data.exportDSArray.splice(0, data.exportDSArray.length)
+        if (!!props.formConfig.dataSources && (props.formConfig.dataSources.length > 0)) {
+          props.formConfig.dataSources.forEach(ds => {
             let newDS = deepClone(ds)
             newDS.checked = false
-            this.exportDSArray.push(newDS)
+            data.exportDSArray.push(newDS)
           })
         }
 
-        this.showExportDSDialogFlag = true
-      },
+        data.showExportDSDialogFlag = true
+      }
 
-      copyDataSourceJson(e) {
-        copyToClipboard(this.dsRawExportContent, e,
-            this.$message,
-            this.i18nt('designer.hint.copyJsonSuccess'),
-            this.i18nt('designer.hint.copyJsonFail')
+      const copyDataSourceJson=(e)=> {
+        copyToClipboard(data.dsRawExportContent, e,
+            proxy.$message,
+            i18nt('designer.hint.copyJsonSuccess'),
+            i18nt('designer.hint.copyJsonFail')
         )
-      },
+      }
 
-      handleExportDSChange(val) {
+      const handleExportDSChange=(val)=> {
         let selectedDSArray = []
-        this.exportDSArray.forEach(ds => {
+        data.exportDSArray.forEach(ds => {
           if (!!ds.checked) {
             let selectedDs = deepClone(ds)
             delete selectedDs['checked']
@@ -609,17 +621,52 @@
           }
         })
 
-        this.dsExportContent = JSON.stringify(selectedDSArray, null, '  ')
-        this.dsRawExportContent = JSON.stringify(selectedDSArray)
-      },
+        data.dsExportContent = JSON.stringify(selectedDSArray, null, '  ')
+        data.dsRawExportContent = JSON.stringify(selectedDSArray)
+      }
 
-      handleExportTabClick() {
-        this.$nextTick(() => {
-          this.$refs.exportDSEditor.setValue(this.dsExportContent)
+      const handleExportTabClick=()=> {
+        nextTick(() => {
+          exportDSEditor.setValue(data.dsExportContent)
         })
-      },
+      }
 
-    },
+
+
+      return {
+        i18nt,
+        ...toRefs(props),
+
+        dsForm,
+        dsResultEditor,
+        exportDSEditor,
+
+
+        validateValueInput,
+        addDataSource,
+        editDataSource,
+        saveDataSource,
+        deleteDataSource,
+        addRequestHeader,
+        deleteRequestHeader,
+        addRequestParam,
+        deleteRequestParam,
+        addRequestData,
+        deleteRequestData,
+        testDataSource,
+        doDataSourceRequest,
+        clearRequestResult,
+        addDataSet,
+        deleteDataSet,
+        importDataSource,
+        doImportDataSource,
+        exportDataSource,
+        copyDataSourceJson,
+        handleExportDSChange,
+        handleExportTabClick
+
+      }
+    }
   }
 </script>
 

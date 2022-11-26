@@ -9,23 +9,30 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+  import { reactive, toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
 
   export default {
     name: "size-editor",
-    mixins: [i18n],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
-    data() {
-      return {
-        widgetSizes: [
+    setup(props){
+     const { i18nt }=useI18n();
+     const data=reactive({
+       widgetSizes: [
           {label: 'default', value: ''},
           {label: 'large', value: 'large'},
           {label: 'small', value: 'small'},
         ],
+     })
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(data)
       }
     }
   }

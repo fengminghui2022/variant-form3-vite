@@ -10,12 +10,22 @@
 
   export default {
     name: "cascader-multiple-editor",
-    mixins: [i18n, propertyMixin],
     props: {
       designer: Object,
       selectedWidget: Object,
       optionModel: Object,
     },
+    setup(props){
+      const { i18nt }=useI18n();
+      const properyMixins= useProperty(props)
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...toRefs(properyMixins)
+      }
+    }    
+    
   }
 </script>
 

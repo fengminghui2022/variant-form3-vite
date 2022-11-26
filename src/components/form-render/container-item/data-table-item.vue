@@ -85,623 +85,699 @@
 	</container-item-wrapper>
 </template>
 <script>
+	import { computed,ref,getCurrentInstance,toRefs,inject,reactive,nextTick,onMounted,onBeforeUnmount } from 'vue'
+
+	import { useEmitter } from '@/utils/emitter'
+  	import { useI18n } from '@/utils/i18n'
+	import { useRef } from "@/components/form-render/refMixin"
+	import { useContainer } from "@/components/form-render/container-item/containerItemMixin"
+
+
 	import ContainerItemWrapper from '@/components/form-render/container-item/container-item-wrapper'
-	import emitter from '@/utils/emitter'
-  import i18n from "@/utils/i18n"
 	import {formatDate1, formatDate2, formatDate3, formatDate4, formatDate5,
 					formatNumber1, formatNumber2, formatNumber3, formatNumber4,
 					formatNumber5, formatNumber6, formatNumber7} from "@/utils/format"
 	import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
-	import refMixin from "@/components/form-render/refMixin"
-	import containerItemMixin from "@/components/form-render/container-item/containerItemMixin"
 	import TableColumnCustomRender from '@/components/form-render/table-column-custom-render'
 	import {deepClone, getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
 
   export default {
     name: "DataTableItem",
     componentName: 'ContainerItem',  //必须固定为ContainerItem，用于接收父级组件的broadcast事件
-    mixins: [emitter, i18n, refMixin, containerItemMixin],
-		components: {
-		  ContainerItemWrapper,
-			TableColumnCustomRender,
-		  ...FieldComponents,
+    // mixins: [emitter, i18n, refMixin, containerItemMixin],
+	components: {
+		ContainerItemWrapper,
+		TableColumnCustomRender,
+		...FieldComponents,
+	},
+	props: {
+		widget: Object,
+		parentWidget: Object,
+		parentList: Array,
+		indexOfParentList: Number,
+
+		subFormRowIndex: { /* 子表单组件行索引，从0开始计数 */
+			type: Number,
+			default: -1
 		},
-		props: {
-			widget: Object,
-			parentWidget: Object,
-			parentList: Array,
-			indexOfParentList: Number,
-
-			subFormRowIndex: { /* 子表单组件行索引，从0开始计数 */
-				type: Number,
-				default: -1
-			},
-			subFormColIndex: { /* 子表单组件列索引，从0开始计数 */
-				type: Number,
-				default: -1
-			},
-			subFormRowId: { /* 子表单组件行Id，唯一id且不可变 */
-				type: String,
-				default: ''
-			},
-
+		subFormColIndex: { /* 子表单组件列索引，从0开始计数 */
+			type: Number,
+			default: -1
 		},
-		inject: ['refList', 'sfRefList', 'globalModel', 'getFormConfig', 'getGlobalDsv'],
-		data() {
-			return {
-				selectAllFlag: false,
+		subFormRowId: { /* 子表单组件行Id，唯一id且不可变 */
+			type: String,
+			default: ''
+		}
 
-				selectedIndices: [],
-				selectedRows: [],
-				pageSize: this.widget.options.pagination.pageSize,
-				pageSizes: this.widget.options.pagination.pageSizes,
-				currentPage: this.widget.options.pagination.currentPage,
-				total: this.widget.options.pagination.total,
+	},		
+	setup(props){
+      	const { i18nt }= useI18n();
+		const refList= inject('refList')
+		const sfRefList = inject('sfRefList')
+		const globalModel = inject('globalModel')
+		const getFormConfig = inject('getFormConfig')
+		const getGlobalDsv = inject('getGlobalDsv')
 
-				//是否跳过selectionChange事件
-				skipSelectionChangeEvent: false,
-			}
-		},
-		computed: {
-			formConfig() {
-				return this.getFormConfig()
-			},
+		const dataTable=ref(null)
 
-			paginationLayout() {
-				return !!this.widget.options.smallPagination ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
-			},
+  		const { proxy } = getCurrentInstance()
+		const data=reactive({
+		
+			selectAllFlag: false,
 
-			customClass() {
-				return this.widget.options.customClass || ''
-			},
+			selectedIndices: [],
+			selectedRows: [],
+			pageSize: props.widget.options.pagination.pageSize,
+			pageSizes: props.widget.options.pagination.pageSizes,
+			currentPage: props.widget.options.pagination.currentPage,
+			total: props.widget.options.pagination.total,
 
-			widgetSize() {
-				return this.widget.options.tableSize || "default"
-			},
+			//是否跳过selectionChange事件
+			skipSelectionChangeEvent: false
+		})
+		
+      const refMixin = useRef(props);
+      const emitterMixin =useEmitter();
+      const containerMixin= useContainer(props,data,{});
 
-			singleRowSelectFlag() {
-				return !this.widget.options.showCheckBox
-			},
+		const formConfig=computed(()=> {
+			return getFormConfig()
+		})
 
-			buttonsColumnFixed() {
-				if (this.widget.options.buttonsColumnFixed === undefined) {
-					return 'right'
-				}
+		const paginationLayout=computed(()=> {
+			return !!props.widget.options.smallPagination ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
+		})
 
-				return !this.widget.options.buttonsColumnFixed ? false : this.widget.options.buttonsColumnFixed
-			},
+		const customClass=computed(()=> {
+			return props.widget.options.customClass || ''
+		})
 
-			tableHeight() {
-				return this.widget.options.tableHeight || undefined
-			},
+		const widgetSize=computed(()=> {
+			return props.widget.options.tableSize || "default"
+		})
 
-			selectionWidth() {
-				return !this.widget.options.showSummary ? (!this.widget.options.treeDataEnabled ? 42 : 70): 53
-			},
+		const singleRowSelectFlag=computed(()=> {
+			return !props.widget.options.showCheckBox
+		})
 
-		},
-		created() {
-			this.initRefList()
-			this.handleOnCreated()
-		},
-		mounted() {
-			if (!!this.widget.options.dsEnabled) {
-				this.loadDataFromDS({})
+		const buttonsColumnFixed=computed(()=> {
+			if (props.widget.options.buttonsColumnFixed === undefined) {
+				return 'right'
 			}
 
-			this.$nextTick(() => {
-				this.handleOnMounted()
+			return !props.widget.options.buttonsColumnFixed ? false : props.widget.options.buttonsColumnFixed
+		})
+
+		const tableHeight=computed(()=> {
+			return props.widget.options.tableHeight || undefined
+		})
+
+		const selectionWidth=computed(()=> {
+			return !props.widget.options.showSummary ? (!props.widget.options.treeDataEnabled ? 42 : 70): 53
+		})
+
+
+
+		onMounted(()=> {
+			if (!!props.widget.options.dsEnabled) {
+				loadDataFromDS({})
+			}
+
+			nextTick(() => {
+				handleOnMounted()
 			})
-		},
-		beforeDestroy() {
-			this.unregisterFromRefList()
-		},
-    methods: {
-			selectWidget(widget) {
-				this.designer.setSelected(widget)
-			},
+		})
 
-			renderHeader(h, { column, $index }) {//debugger
-				//console.log('column=====', column)
-				let colCount = 0;
-				if(this.widget.options.showIndex){
-					colCount++;
+		onBeforeUnmount(()=> {
+			containerMixin.unregisterFromRefList()
+		})
+
+		const selectWidget=(widget)=> {
+			// this.designer.setSelected(widget)
+		}
+
+		const renderHeader=(h, { column, $index })=> {//debugger
+			//console.log('column=====', column)
+			let colCount = 0;
+			if(props.widget.options.showIndex){
+				colCount++;
+			}
+			if(props.widget.options.showCheckBox){
+				colCount++;
+			}
+
+			column.formatS = props.widget.options.tableColumns[$index-colCount].formatS
+			return column.label;
+		}
+
+		const formatter=(row, column, cellValue)=> {
+			return cellValue;
+		}
+
+		const formatterValue=(row, column, cellValue)=> {
+			if (!cellValue) {
+				return ''
+			}
+
+			if(!!column.formatS) {
+				switch(column.formatS) {
+					case 'd1':
+							return formatDate1(cellValue);
+					case 'd2':
+							return formatDate2(cellValue);
+					case 'd3':
+							return formatDate3(cellValue);
+					case 'd4':
+							return formatDate4(cellValue);
+					case 'd5':
+							return formatDate5(cellValue);
+					case 'n1':
+							return formatNumber1(cellValue);
+					case 'n2':
+							return formatNumber2(cellValue);
+					case 'n3':
+							return formatNumber3(cellValue);
+					case 'n4':
+							return formatNumber4(cellValue);
+					case 'n5':
+							return formatNumber5(cellValue);
+					case 'n6':
+							return formatNumber6(cellValue);
+					case 'n7':
+							return formatNumber7(cellValue);
 				}
-				if(this.widget.options.showCheckBox){
-					colCount++;
+			}
+			return cellValue;
+		}
+
+		const getColumnRender=(row, column)=> {
+			/* TODO: 每个table-cell，render函数会执行2次，原因不明！！！ */
+			return new Function('h', 'params', 'components', column.render)
+		}
+
+				/* 注意：在加载树形结构数据时，此方法只能获取第一级选中节点，选择子节点时返回-1，应在文档中加以说明！！！ */
+		const getRowIndex=(row)=> {
+			return props.widget.options.tableData.lastIndexOf(row)
+		}
+
+		const findColumnAndSetHidden=(columnName, hiddenFlag)=> {
+			props.widget.options.tableColumns.forEach(tc => {
+				if (tc.prop === columnName) {
+					tc.show = !hiddenFlag
+				}
+			})
+		}
+
+		const handleOnCreated=()=> {
+			if (!!props.widget.options.onCreated) {
+				let customFunc = new Function(props.widget.options.onCreated)
+				customFunc.call(proxy)
+			}
+		}
+
+		const handleOnMounted=()=> {
+			if (!!props.widget.options.onMounted) {
+				let customFunc = new Function(props.widget.options.onMounted)
+				customFunc.call(proxy)
+			}
+		}
+
+		const handleCurrentChange=(currentRow, oldCurrentRow)=> {
+			if (!!data.skipSelectionChangeEvent) {
+				return
+			}
+
+			if (!!props.widget.options.showCheckBox) {
+				return
+			}
+
+			data.selectedIndices.length = 0
+			data.selectedRows.length = 0
+			let rowIndex = getRowIndex(currentRow)
+			data.selectedIndices.push(rowIndex)
+			data.selectedRows.push(currentRow)
+
+			if (!!props.widget.options.onSelectionChange) {
+				let customFn = new Function('selection', 'selectedIndices', props.widget.options.onSelectionChange)
+				customFn.call(proxy, [currentRow], data.selectedIndices)
+			} else {
+				/* 必须调用mixins中的dispatch方法逐级向父组件发送消息！！ */
+				emitter.dispatch('VFormRender', 'dataTableSelectionChange', [proxy, [currentRow], data.selectedIndices])
+			}
+		}
+
+		/**
+		 * 注意：加载树形数据后，选中行如包含子节点则会触发两次该事件！！
+		 * @param selection
+		 */
+		const handleSelectionChange=(selection)=> {
+			if (!!data.skipSelectionChangeEvent) {
+				return
+			}
+
+			data.selectedIndices.length = 0
+			data.selectedRows.length = 0
+			selection.map((row) => {
+				let rowIndex = getRowIndex(row)
+				data.selectedIndices.push(rowIndex)
+				data.selectedRows.push(row)
+			})
+
+			if (!!props.widget.options.onSelectionChange) {
+				let customFn = new Function('selection', 'selectedIndices', props.widget.options.onSelectionChange)
+				customFn.call(proxy, selection, data.selectedIndices)
+			} else {
+				/* 必须调用mixins中的dispatch方法逐级向父组件发送消息！！ */
+				emitter.dispatch('VFormRender', 'dataTableSelectionChange', [proxy, selection, data.selectedIndices])
+			}
+		}
+
+		const handleSortChange=({column, prop, order})=> {
+			// emitter.dispatch('VFormRender', 'dataTableSortChange',
+			// 				[proxy, column, prop, order, data.pageSize, data.currentPage])
+			//
+			// console.log('test====', prop)
+		}
+
+		const handlePageSizeChange=(pageSize)=> {
+			data.pageSize = pageSize
+			if (!!props.widget.options.dsEnabled && !!props.widget.options.dsName) {
+				loadDataFromDS()
+			}
+
+			if (!!props.widget.options.onPageSizeChange) {
+				let customFn = new Function('pageSize', 'currentPage', props.widget.options.onPageSizeChange)
+				customFn.call(proxy, pageSize, data.currentPage)
+			} else {
+				emitter.dispatch('VFormRender', 'dataTablePageSizeChange', [proxy, pageSize, data.currentPage])
+			}
+		}
+
+		const handleCurrentPageChange=(currentPage)=> {
+			data.currentPage = currentPage
+			if (!!props.widget.options.dsEnabled && !!props.widget.options.dsName) {
+				loadDataFromDS()
+			}
+
+			if (!!props.widget.options.onCurrentPageChange) {
+				let customFn = new Function('pageSize', 'currentPage', props.widget.options.onCurrentPageChange)
+				customFn.call(proxy, data.pageSize, currentPage)
+			} else {
+				emitter.dispatch('VFormRender', 'dataTablePageChange', [proxy, data.pageSize, currentPage])
+			}
+		}
+
+		const handleOperationButtonClick=(btnName, rowIndex, row)=> {
+			data.skipSelectionChangeEvent = true
+			try {
+				if (!!props.widget.options.onOperationButtonClick) {
+					let customFn = new Function('buttonName', 'rowIndex', 'row', props.widget.options.onOperationButtonClick)
+					customFn.call(proxy, btnName, rowIndex, row)
+				} else {
+					emitter.dispatch('VFormRender', 'operationButtonClick', [proxy, btnName, rowIndex, row])
+				}
+			} finally {
+				data.skipSelectionChangeEvent = false
+			}
+		}
+
+		const showOperationButton=(buttonConfig, rowIndex, row)=> {
+			if (!!props.widget.options.onHideOperationButton) {
+				let customFn = new Function('buttonConfig', 'rowIndex', 'row', props.widget.options.onHideOperationButton)
+				return !customFn.call(proxy, buttonConfig, rowIndex, row)
+			} else {
+				return !buttonConfig.hidden
+			}
+		}
+
+		const disableOperationButton=(buttonConfig, rowIndex, row)=> {
+			if (!!props.widget.options.onDisableOperationButton) {
+				let customFn = new Function('buttonConfig', 'rowIndex', 'row', props.widget.options.onDisableOperationButton)
+				return customFn.call(proxy, buttonConfig, rowIndex, row)
+			} else {
+				return buttonConfig.disabled
+			}
+		}
+
+		const getOperationButtonLabel=(buttonConfig, rowIndex, row)=> {
+			if (!!props.widget.options.onGetOperationButtonLabel) {
+				let customFn = new Function('buttonConfig', 'rowIndex', 'row', props.widget.options.onGetOperationButtonLabel)
+				//return customFn.call(proxy, buttonConfig, rowIndex, row) || buttonConfig.label
+				return customFn.call(proxy, buttonConfig, rowIndex, row)
+			} else {
+				return buttonConfig.label
+			}
+		}
+
+		const getRowClassName=({row, rowIndex})=> {
+			if (!!props.widget.options.onGetRowClassName) {
+				let customFn = new Function('rowIndex', 'row', props.widget.options.onGetRowClassName)
+				return customFn.call(proxy, rowIndex, row)
+			} else {
+				return ''
+			}
+		}
+
+		const getSpanMethod=({row, column, rowIndex, columnIndex})=> {
+			if (!!props.widget.options.onGetSpanMethod) {
+				let customFn = new Function('row', 'column', 'rowIndex', 'columnIndex', props.widget.options.onGetSpanMethod)
+				return customFn.call(proxy, row, column, rowIndex, columnIndex)
+			}
+		}
+
+		const handleHeaderClick=(column, event)=> {
+			if (!!props.widget.options.onHeaderClick) {
+				let customFn = new Function('column', 'event', props.widget.options.onHeaderClick)
+				return customFn.call(proxy, column, event)
+			}
+		}
+
+		const handleRowClick=(row, column, event)=> {
+			if (!!props.widget.options.onRowClick) {
+				let customFn = new Function('row', 'column', 'event', props.widget.options.onRowClick)
+				return customFn.call(proxy, row, column, event)
+			}
+		}
+
+		const handleRowDoubleClick=(row, column, event)=> {
+			if (!!props.widget.options.onRowDoubleClick) {
+				let customFn = new Function('row', 'column', 'event', props.widget.options.onRowDoubleClick)
+				return customFn.call(proxy, row, column, event)
+			}
+		}
+
+		const handleCellClick=(row, column, cell, event)=> {
+			if (!!props.widget.options.onCellClick) {
+				let customFn = new Function('row', 'column', 'cell', 'event', props.widget.options.onCellClick)
+				return customFn.call(proxy, row, column, cell, event)
+			}
+		}
+
+		const handleCellDoubleClick=(row, column, cell, event)=> {
+			if (!!props.widget.options.onCellDoubleClick) {
+				let customFn = new Function('row', 'column', 'cell', 'event', props.widget.options.onCellDoubleClick)
+				return customFn.call(proxy, row, column, cell, event)
+			}
+		}
+
+		const toggleSelection=(row, flag, selectedRows)=> {
+			if (row) {
+				dataTable.toggleRowSelection(row, flag)
+
+				if (flag) {
+					selectedRows.push(row)
+					return
 				}
 
-				column.formatS = this.widget.options.tableColumns[$index-colCount].formatS
-			  return column.label;
-			},
-
-			formatter(row, column, cellValue) {
-			  return cellValue;
-			},
-
-			formatterValue(row, column, cellValue) {
-				if (!cellValue) {
-					return ''
-				}
-
-				if(!!column.formatS) {
-					switch(column.formatS) {
-						case 'd1':
-								return formatDate1(cellValue);
-						case 'd2':
-								return formatDate2(cellValue);
-						case 'd3':
-								return formatDate3(cellValue);
-						case 'd4':
-								return formatDate4(cellValue);
-						case 'd5':
-								return formatDate5(cellValue);
-						case 'n1':
-								return formatNumber1(cellValue);
-						case 'n2':
-								return formatNumber2(cellValue);
-						case 'n3':
-								return formatNumber3(cellValue);
-						case 'n4':
-								return formatNumber4(cellValue);
-						case 'n5':
-								return formatNumber5(cellValue);
-						case 'n6':
-								return formatNumber6(cellValue);
-						case 'n7':
-								return formatNumber7(cellValue);
-					}
-				}
-			  return cellValue;
-			},
-
-			getColumnRender(row, column) {
-				/* TODO: 每个table-cell，render函数会执行2次，原因不明！！！ */
-				return new Function('h', 'params', 'components', column.render)
-			},
-
-			/* 注意：在加载树形结构数据时，此方法只能获取第一级选中节点，选择子节点时返回-1，应在文档中加以说明！！！ */
-			getRowIndex(row) {
-				return this.widget.options.tableData.lastIndexOf(row)
-			},
-
-			findColumnAndSetHidden(columnName, hiddenFlag) {
-				this.widget.options.tableColumns.forEach(tc => {
-					if (tc.prop === columnName) {
-						tc.show = !hiddenFlag
+				let foundRowIdx = -1
+				let rowKey = props.widget.options.rowKey || 'id'
+				selectedRows.forEach((sr, idx) => {
+					if (sr[rowKey] === row[rowKey]) {
+						foundRowIdx = idx
 					}
 				})
-			},
 
-			handleOnCreated() {
-				if (!!this.widget.options.onCreated) {
-					let customFunc = new Function(this.widget.options.onCreated)
-					customFunc.call(this)
+				if (foundRowIdx > -1) {
+					selectedRows.splice(foundRowIdx, 1)
 				}
-			},
+			}
+		}
 
-			handleOnMounted() {
-				if (!!this.widget.options.onMounted) {
-					let customFunc = new Function(this.widget.options.onMounted)
-					customFunc.call(this)
+		const setChildrenSelected=(children, flag, selectedRows)=> {
+			let childrenKey = props.widget.options.childrenKey || 'children'
+			children.map(child => {
+				toggleSelection(child, flag, selectedRows)
+				if (child[childrenKey]) {
+					setChildrenSelected(child[childrenKey], flag, selectedRows)
 				}
-			},
+			})
+		}
 
-			handleCurrentChange(currentRow, oldCurrentRow) {
-				if (!!this.skipSelectionChangeEvent) {
-					return
+		const handleRowSelect=(selection, row)=> {
+			data.skipSelectionChangeEvent = true
+
+			let selectedRows = deepClone(selection)
+			let rowKey = props.widget.options.rowKey || 'id'
+			let childrenKey = props.widget.options.childrenKey || 'children'
+			if (selection.some(el => { return row[rowKey] === el[rowKey] })) {
+				if (row[childrenKey]) {
+					setChildrenSelected(row[childrenKey], true, selectedRows)
 				}
-
-				if (!!this.widget.options.showCheckBox) {
-					return
+			} else {
+				if (row[childrenKey]) {
+					setChildrenSelected(row[childrenKey], false, selectedRows)
 				}
+			}
 
-				this.selectedIndices.length = 0
-				this.selectedRows.length = 0
-				let rowIndex = this.getRowIndex(currentRow)
-				this.selectedIndices.push(rowIndex)
-				this.selectedRows.push(currentRow)
+			data.skipSelectionChangeEvent = false
+			// 一次性处理多行选中或取消选中，只触发一次事件！！！
+			nextTick(() => {
+				handleSelectionChange(selectedRows)
+			})
+		}
 
-				if (!!this.widget.options.onSelectionChange) {
-					let customFn = new Function('selection', 'selectedIndices', this.widget.options.onSelectionChange)
-					customFn.call(this, [currentRow], this.selectedIndices)
-				} else {
-					/* 必须调用mixins中的dispatch方法逐级向父组件发送消息！！ */
-					this.dispatch('VFormRender', 'dataTableSelectionChange', [this, [currentRow], this.selectedIndices])
+		const setSelectedFlag=(data, flag)=> {
+			let childrenKey = props.widget.options.childrenKey || 'children'
+			data.forEach(row => {
+				dataTable.toggleRowSelection(row, flag)
+				if (row[childrenKey]) {
+					setSelectedFlag(row[childrenKey], flag)
 				}
-			},
+			})
+		}
 
-			/**
-			 * 注意：加载树形数据后，选中行如包含子节点则会触发两次该事件！！
-			 * @param selection
-			 */
-			handleSelectionChange(selection) {
-				if (!!this.skipSelectionChangeEvent) {
-					return
-				}
+		const handleAllSelect=(selection)=> {
+			data.skipSelectionChangeEvent = true
+			data.selectAllFlag = !data.selectAllFlag
+			setSelectedFlag(props.widget.options.tableData, data.selectAllFlag)
 
-				this.selectedIndices.length = 0
-				this.selectedRows.length = 0
-				selection.map((row) => {
-					let rowIndex = this.getRowIndex(row)
-					this.selectedIndices.push(rowIndex)
-					this.selectedRows.push(row)
+			data.skipSelectionChangeEvent = false
+			// 一次性处理多行选中或取消选中，只触发一次事件！！！
+			nextTick(() => {
+				handleSelectionChange(selection)
+			})
+		}
+
+		//--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
+		/* 提示：用户可自行扩充这些方法！！！ */
+		const getTableColumns=()=> {
+			return props.widget.options.tableColumns
+		}
+
+		/**
+		 * 设置表格列
+		 * @param tableColumns
+		 */
+		const setTableColumns=(tableColumns)=> {
+			props.widget.options.tableColumns = tableColumns
+			nextTick(() => {
+				dataTable.doLayout()  //防止行列显示错位！！
+			})
+		}
+
+		/**
+		 * 设置表格列（为了兼容文档错误，setTableColumn应为setTableColumns）
+		 * @param tableColumns
+		 */
+		const setTableColumn=(tableColumns)=> {
+			setTableColumns(tableColumns)
+		}
+
+		/**
+		 * 从数据源加载表格列
+		 * @param localDsv 本地数据源变量DSV
+		 * @param dsName 数据源名称
+		 */
+		const loadColumnsFromDS=(localDsv = {}, dsName)=> {
+			let curDS = getDSByName(formConfig, dsName)
+			if (!!curDS) {
+				let gDsv = getGlobalDsv() || {}
+				let newDsv = new Object({})
+				overwriteObj(newDsv, gDsv)
+				overwriteObj(newDsv, localDsv)
+				newDsv.widgetName = props.widget.options.name
+				runDataSourceRequest(curDS, newDsv, refMixin.getFormRef(), false, proxy.$message).then(res => {
+					setTableColumns(res)
+				}).catch(err => {
+					proxy.$message.error(err.message)
 				})
+			}
+		}
 
-				if (!!this.widget.options.onSelectionChange) {
-					let customFn = new Function('selection', 'selectedIndices', this.widget.options.onSelectionChange)
-					customFn.call(this, selection, this.selectedIndices)
-				} else {
-					/* 必须调用mixins中的dispatch方法逐级向父组件发送消息！！ */
-					this.dispatch('VFormRender', 'dataTableSelectionChange', [this, selection, this.selectedIndices])
-				}
-			},
-
-			handleSortChange({column, prop, order}) {
-				// this.dispatch('VFormRender', 'dataTableSortChange',
-				// 				[this, column, prop, order, this.pageSize, this.currentPage])
-				//
-				// console.log('test====', prop)
-			},
-
-			handlePageSizeChange(pageSize) {
-				this.pageSize = pageSize
-				if (!!this.widget.options.dsEnabled && !!this.widget.options.dsName) {
-					this.loadDataFromDS()
+		/**
+		 * 动态设置表格列的隐藏或显示
+		 * @param columnNames
+		 * @param hiddenFlag
+		 */
+		const setTableColumnsHidden=(columnNames, hiddenFlag)=> {
+			if (!!columnNames) {
+				if (typeof columnNames === 'string') {
+					findColumnAndSetHidden(columnNames, hiddenFlag)
+				} else if (Array.isArray(columnNames)) {
+					columnNames.forEach(cn => {
+						findColumnAndSetHidden(cn, hiddenFlag)
+					})
 				}
 
-				if (!!this.widget.options.onPageSizeChange) {
-					let customFn = new Function('pageSize', 'currentPage', this.widget.options.onPageSizeChange)
-					customFn.call(this, pageSize, this.currentPage)
-				} else {
-					this.dispatch('VFormRender', 'dataTablePageSizeChange', [this, pageSize, this.currentPage])
-				}
-			},
+				nextTick(() => {
+					dataTable.doLayout()  //防止行列显示错位！！
+				})
+			}
+		}
 
-			handleCurrentPageChange(currentPage) {
-				this.currentPage = currentPage
-				if (!!this.widget.options.dsEnabled && !!this.widget.options.dsName) {
-					this.loadDataFromDS()
-				}
+		/**
+		 * 获取表格数据
+		 */
+		const getTableData=()=> {
+			return props.widget.options.tableData
+		}
 
-				if (!!this.widget.options.onCurrentPageChange) {
-					let customFn = new Function('pageSize', 'currentPage', this.widget.options.onCurrentPageChange)
-					customFn.call(this, this.pageSize, currentPage)
-				} else {
-					this.dispatch('VFormRender', 'dataTablePageChange', [this, this.pageSize, currentPage])
-				}
-			},
+		/**
+		 * 设置表格数据
+		 * @param tableData
+		 */
+		const setTableData=(tableData)=> {
+			props.widget.options.tableData = tableData
+		}
 
-			handleOperationButtonClick(btnName, rowIndex, row) {
-				this.skipSelectionChangeEvent = true
-				try {
-					if (!!this.widget.options.onOperationButtonClick) {
-						let customFn = new Function('buttonName', 'rowIndex', 'row', this.widget.options.onOperationButtonClick)
-						customFn.call(this, btnName, rowIndex, row)
+		/**
+		 * 从数据源加载表格数据
+		 * @param localDsv 本地数据源变量DSV
+		 * @param dsName 数据源名称，不传此值，则使用dsName属性绑定的数据源
+		 */
+		const loadDataFromDS=(localDsv = {}, dsName = '')=> {
+			let curDSName = dsName || props.widget.options.dsName
+			let curDSetName = props.widget.options.dataSetName
+			let curDS = getDSByName(formConfig, curDSName)
+			if (!!curDS) {
+				let gDsv = getGlobalDsv() || {}
+				let newDsv = new Object({})
+				overwriteObj(newDsv, gDsv)
+				overwriteObj(newDsv, localDsv)
+				newDsv.widgetName = props.widget.options.name
+				newDsv.pageSize = data.pageSize
+				newDsv.currentPage = data.currentPage
+				runDataSourceRequest(curDS, newDsv, refMixin.getFormRef(), false, proxy.$message).then(res => {
+					if (!!curDSetName && res.hasOwnProperty(curDSetName)) {
+						setTableData(res[curDSetName])
 					} else {
-						this.dispatch('VFormRender', 'operationButtonClick', [this, btnName, rowIndex, row])
+						setTableData(res)
 					}
-				} finally {
-					this.skipSelectionChangeEvent = false
-				}
-			},
-
-			showOperationButton(buttonConfig, rowIndex, row) {
-				if (!!this.widget.options.onHideOperationButton) {
-					let customFn = new Function('buttonConfig', 'rowIndex', 'row', this.widget.options.onHideOperationButton)
-					return !customFn.call(this, buttonConfig, rowIndex, row)
-				} else {
-					return !buttonConfig.hidden
-				}
-			},
-
-			disableOperationButton(buttonConfig, rowIndex, row) {
-				if (!!this.widget.options.onDisableOperationButton) {
-					let customFn = new Function('buttonConfig', 'rowIndex', 'row', this.widget.options.onDisableOperationButton)
-					return customFn.call(this, buttonConfig, rowIndex, row)
-				} else {
-					return buttonConfig.disabled
-				}
-			},
-
-			getOperationButtonLabel(buttonConfig, rowIndex, row) {
-				if (!!this.widget.options.onGetOperationButtonLabel) {
-					let customFn = new Function('buttonConfig', 'rowIndex', 'row', this.widget.options.onGetOperationButtonLabel)
-					//return customFn.call(this, buttonConfig, rowIndex, row) || buttonConfig.label
-					return customFn.call(this, buttonConfig, rowIndex, row)
-				} else {
-					return buttonConfig.label
-				}
-			},
-
-			getRowClassName({row, rowIndex}) {
-				if (!!this.widget.options.onGetRowClassName) {
-					let customFn = new Function('rowIndex', 'row', this.widget.options.onGetRowClassName)
-					return customFn.call(this, rowIndex, row)
-				} else {
-					return ''
-				}
-			},
-
-			getSpanMethod({row, column, rowIndex, columnIndex}) {
-				if (!!this.widget.options.onGetSpanMethod) {
-					let customFn = new Function('row', 'column', 'rowIndex', 'columnIndex', this.widget.options.onGetSpanMethod)
-					return customFn.call(this, row, column, rowIndex, columnIndex)
-				}
-			},
-
-			handleHeaderClick(column, event) {
-				if (!!this.widget.options.onHeaderClick) {
-					let customFn = new Function('column', 'event', this.widget.options.onHeaderClick)
-					return customFn.call(this, column, event)
-				}
-			},
-
-			handleRowClick(row, column, event) {
-				if (!!this.widget.options.onRowClick) {
-					let customFn = new Function('row', 'column', 'event', this.widget.options.onRowClick)
-					return customFn.call(this, row, column, event)
-				}
-			},
-
-			handleRowDoubleClick(row, column, event) {
-				if (!!this.widget.options.onRowDoubleClick) {
-					let customFn = new Function('row', 'column', 'event', this.widget.options.onRowDoubleClick)
-					return customFn.call(this, row, column, event)
-				}
-			},
-
-			handleCellClick(row, column, cell, event) {
-				if (!!this.widget.options.onCellClick) {
-					let customFn = new Function('row', 'column', 'cell', 'event', this.widget.options.onCellClick)
-					return customFn.call(this, row, column, cell, event)
-				}
-			},
-
-			handleCellDoubleClick(row, column, cell, event) {
-				if (!!this.widget.options.onCellDoubleClick) {
-					let customFn = new Function('row', 'column', 'cell', 'event', this.widget.options.onCellDoubleClick)
-					return customFn.call(this, row, column, cell, event)
-				}
-			},
-
-			toggleSelection(row, flag, selectedRows) {
-				if (row) {
-					this.$refs.dataTable.toggleRowSelection(row, flag)
-
-					if (flag) {
-						selectedRows.push(row)
-						return
-					}
-
-					let foundRowIdx = -1
-					let rowKey = this.widget.options.rowKey || 'id'
-					selectedRows.forEach((sr, idx) => {
-						if (sr[rowKey] === row[rowKey]) {
-							foundRowIdx = idx
-						}
-					})
-
-					if (foundRowIdx > -1) {
-						selectedRows.splice(foundRowIdx, 1)
-					}
-				}
-			},
-
-			setChildrenSelected(children, flag, selectedRows) {
-				let childrenKey = this.widget.options.childrenKey || 'children'
-				children.map(child => {
-					this.toggleSelection(child, flag, selectedRows)
-					if (child[childrenKey]) {
-						this.setChildrenSelected(child[childrenKey], flag, selectedRows)
-					}
+				}).catch(err => {
+					proxy.$message.error(err.message)
 				})
-			},
+			}
+		}
 
-			handleRowSelect(selection, row) {
-				this.skipSelectionChangeEvent = true
+		/**
+		 * 设置表格分页
+		 * @param pagination
+		 */
+		const setPagination=(pagination)=> {
+			if (pagination.currentPage !== undefined) {
+				data.currentPage = pagination.currentPage
+				props.widget.options.pagination.currentPage = pagination.currentPage
+			}
 
-				let selectedRows = deepClone(selection)
-				let rowKey = this.widget.options.rowKey || 'id'
-				let childrenKey = this.widget.options.childrenKey || 'children'
-				if (selection.some(el => { return row[rowKey] === el[rowKey] })) {
-					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], true, selectedRows)
-					}
-				} else {
-					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], false, selectedRows)
-					}
-				}
+			if (pagination.pageSize !== undefined) {
+				data.pageSize = pagination.pageSize
+				props.widget.options.pagination.pageSize = pagination.pageSize
+			}
 
-				this.skipSelectionChangeEvent = false
-				// 一次性处理多行选中或取消选中，只触发一次事件！！！
-				this.$nextTick(() => {
-					this.handleSelectionChange(selectedRows)
-				})
-			},
+			if (pagination.pageSizes !== undefined) {
+				data.pageSizes = pagination.pageSizes
+				props.widget.options.pagination.pageSizes = pagination.pageSizes
+			}
 
-			setSelectedFlag(data, flag) {
-				let childrenKey = this.widget.options.childrenKey || 'children'
-				data.forEach(row => {
-					this.$refs.dataTable.toggleRowSelection(row, flag)
-					if (row[childrenKey]) {
-						this.setSelectedFlag(row[childrenKey], flag)
-					}
-				})
-			},
+			if (pagination.total !== undefined) {
+				data.total = pagination.total
+				props.widget.options.pagination.total = pagination.total
+			}
+		}
 
-			handleAllSelect(selection) {
-				this.skipSelectionChangeEvent = true
-				this.selectAllFlag = !this.selectAllFlag
-				this.setSelectedFlag(this.widget.options.tableData, this.selectAllFlag)
+		/**
+		 * 获取选中行数据，格式为对象数组
+		 * @returns {[]}
+		 */
+		const getSelectedRow=()=> {
+			//return dataTable.selection
+			return data.selectedRows
+		}
 
-				this.skipSelectionChangeEvent = false
-				// 一次性处理多行选中或取消选中，只触发一次事件！！！
-				this.$nextTick(() => {
-					this.handleSelectionChange(selection)
-				})
-			},
+		/**
+		 * 获取选中行索引，格式为数组
+		 * @returns {[]}
+		 */
+		const getSelectedIndex=()=> {
+			return data.selectedIndices
+		}
 
-			//--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
-			/* 提示：用户可自行扩充这些方法！！！ */
 
-			getTableColumns() {
-				return this.widget.options.tableColumns
-			},
 
-			/**
-			 * 设置表格列
-			 * @param tableColumns
-			 */
-			setTableColumns(tableColumns) {
-				this.widget.options.tableColumns = tableColumns
-				this.$nextTick(() => {
-					this.$refs.dataTable.doLayout()  //防止行列显示错位！！
-				})
-			},
 
-			/**
-			 * 设置表格列（为了兼容文档错误，setTableColumn应为setTableColumns）
-			 * @param tableColumns
-			 */
-			setTableColumn(tableColumns) {
-				this.setTableColumns(tableColumns)
-			},
+		refMixin.initRefList()
+		handleOnCreated()
 
-			/**
-			 * 从数据源加载表格列
-			 * @param localDsv 本地数据源变量DSV
-			 * @param dsName 数据源名称
-			 */
-			loadColumnsFromDS(localDsv = {}, dsName) {
-				let curDS = getDSByName(this.formConfig, dsName)
-				if (!!curDS) {
-					let gDsv = this.getGlobalDsv() || {}
-					let newDsv = new Object({})
-					overwriteObj(newDsv, gDsv)
-					overwriteObj(newDsv, localDsv)
-					newDsv.widgetName = this.widget.options.name
-					runDataSourceRequest(curDS, newDsv, this.getFormRef(), false, this.$message).then(res => {
-						this.setTableColumns(res)
-					}).catch(err => {
-						this.$message.error(err.message)
-					})
-				}
-			},
+		return {
+			i18nt,
+			...toRefs(data),
 
-			/**
-			 * 动态设置表格列的隐藏或显示
-			 * @param columnNames
-			 * @param hiddenFlag
-			 */
-			setTableColumnsHidden(columnNames, hiddenFlag) {
-				if (!!columnNames) {
-					if (typeof columnNames === 'string') {
-						this.findColumnAndSetHidden(columnNames, hiddenFlag)
-					} else if (Array.isArray(columnNames)) {
-						columnNames.forEach(cn => {
-							this.findColumnAndSetHidden(cn, hiddenFlag)
-						})
-					}
+			dataTable,
 
-					this.$nextTick(() => {
-						this.$refs.dataTable.doLayout()  //防止行列显示错位！！
-					})
-				}
-			},
+			formConfig,
+			paginationLayout,
+			customClass,
+			widgetSize,
+			singleRowSelectFlag,
+			buttonsColumnFixed,
+			tableHeight,
+			selectionWidth,
 
-			/**
-			 * 获取表格数据
-			 */
-			getTableData() {
-				return this.widget.options.tableData
-			},
+			selectWidget,
+			renderHeader,
+			formatter,
+			formatterValue,
+			getColumnRender,
+			getRowIndex,
+			findColumnAndSetHidden,
 
-			/**
-			 * 设置表格数据
-			 * @param tableData
-			 */
-			setTableData(tableData) {
-				this.widget.options.tableData = tableData
-			},
+			handleCurrentChange,
+			handleSelectionChange,
+			handleSortChange,
+			handlePageSizeChange,
+			handleCurrentPageChange,
+			handleOperationButtonClick,
+			showOperationButton,
+			disableOperationButton,
+			getOperationButtonLabel,
+			getRowClassName,
+			getSpanMethod,
+			handleHeaderClick,
+			handleRowClick,
+			handleRowDoubleClick,
+			handleCellClick,
+			handleCellDoubleClick,
+			toggleSelection,
+			setChildrenSelected,
+			handleRowSelect,
+			setSelectedFlag,
+			handleAllSelect,
+			getTableColumns,
+			setTableColumns,
+			setTableColumn,
+			loadColumnsFromDS,
+			setTableColumnsHidden,
+			getTableData,
+			setTableData,
+			loadDataFromDS,
+			setPagination,
+			getSelectedRow,
+			getSelectedIndex,
+		}
 
-			/**
-			 * 从数据源加载表格数据
-			 * @param localDsv 本地数据源变量DSV
-			 * @param dsName 数据源名称，不传此值，则使用dsName属性绑定的数据源
-			 */
-			loadDataFromDS(localDsv = {}, dsName = '') {
-				let curDSName = dsName || this.widget.options.dsName
-				let curDSetName = this.widget.options.dataSetName
-				let curDS = getDSByName(this.formConfig, curDSName)
-				if (!!curDS) {
-					let gDsv = this.getGlobalDsv() || {}
-					let newDsv = new Object({})
-					overwriteObj(newDsv, gDsv)
-					overwriteObj(newDsv, localDsv)
-					newDsv.widgetName = this.widget.options.name
-					newDsv.pageSize = this.pageSize
-					newDsv.currentPage = this.currentPage
-					runDataSourceRequest(curDS, newDsv, this.getFormRef(), false, this.$message).then(res => {
-						if (!!curDSetName && res.hasOwnProperty(curDSetName)) {
-							this.setTableData(res[curDSetName])
-						} else {
-							this.setTableData(res)
-						}
-					}).catch(err => {
-						this.$message.error(err.message)
-					})
-				}
-			},
 
-			/**
-			 * 设置表格分页
-			 * @param pagination
-			 */
-			setPagination(pagination) {
-				if (pagination.currentPage !== undefined) {
-					this.currentPage = pagination.currentPage
-					this.widget.options.pagination.currentPage = pagination.currentPage
-				}
-
-				if (pagination.pageSize !== undefined) {
-					this.pageSize = pagination.pageSize
-					this.widget.options.pagination.pageSize = pagination.pageSize
-				}
-
-				if (pagination.pageSizes !== undefined) {
-					this.pageSizes = pagination.pageSizes
-					this.widget.options.pagination.pageSizes = pagination.pageSizes
-				}
-
-				if (pagination.total !== undefined) {
-					this.total = pagination.total
-					this.widget.options.pagination.total = pagination.total
-				}
-			},
-
-			/**
-			 * 获取选中行数据，格式为对象数组
-			 * @returns {[]}
-			 */
-			getSelectedRow() {
-				//return this.$refs.dataTable.selection
-				return this.selectedRows
-			},
-
-			/**
-			 * 获取选中行索引，格式为数组
-			 * @returns {[]}
-			 */
-			getSelectedIndex() {
-				return this.selectedIndices
-			},
-
-			//--------------------- 以上为组件支持外部调用的API方法 end ------------------//
-
-    }
-  }
+	}
+}
 </script>
 
 <style lang="scss" scoped>

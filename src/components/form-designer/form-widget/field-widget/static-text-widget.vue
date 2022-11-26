@@ -7,15 +7,17 @@
 </template>
 
 <script>
+	import { computed, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
   import StaticContentWrapper from './static-content-wrapper'
-  import emitter from '@/utils/emitter'
-  import i18n, {translate} from "@/utils/i18n";
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old";
+  
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
 
   export default {
     name: "static-text-widget",
     componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
     props: {
       field: Object,
       parentWidget: Object,
@@ -45,34 +47,42 @@
     components: {
       StaticContentWrapper,
     },
-    computed: {
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const emitterMixin =useEmitter();
 
-    },
-    beforeCreate() {
-      /* 这里不能访问方法和属性！！ */
-    },
+      const data=reactive({
+        oldFieldValue: null, //field组件change之前的值
+        fieldModel: null,
+        rules: [],
+      })
 
-    created() {
-      /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
+      const fieldMixin = useField(props,data);
+
+      onMounted(()=>{
+        fieldMixin.handleOnMounted()
+      })
+      
+      onBeforeUnmount(()=>{
+        fieldMixin.unregisterFromRefList()
+      })
+
+       /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
          需要在父组件created中初始化！！ */
-      this.registerToRefList()
-      this.initEventHandler()
+      fieldMixin.registerToRefList()
+      fieldMixin.initEventHandler()
 
-      this.handleOnCreated()
-    },
+      fieldMixin.handleOnCreated()
 
-    mounted() {
-      this.handleOnMounted()
-    },
 
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-
-    methods: {
-
+      return {
+         i18nt,
+        ...toRefs(props),
+        ...toRefs(data),
+        ...fieldMixin
+      }
     }
-
   }
 </script>
 

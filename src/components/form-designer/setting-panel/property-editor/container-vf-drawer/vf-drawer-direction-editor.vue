@@ -10,12 +10,13 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { toRefs } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
   import { Bottom, Top, Back, Right } from '@element-plus/icons-vue'
 
   export default {
     name: "vf-drawer-direction-editor",
-    mixins: [i18n],
     components: {
       Back, Right, Bottom, Top
     },
@@ -24,8 +25,13 @@
       selectedWidget: Object,
       optionModel: Object,
     },
-    computed: {
-      //
+    setup(props){
+     const { i18nt }=useI18n();
+
+      return {
+        i18nt,
+        ...toRefs(props)
+      }
     }
   }
 </script>

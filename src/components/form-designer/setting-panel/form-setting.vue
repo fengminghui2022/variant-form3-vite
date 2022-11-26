@@ -140,13 +140,13 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
+	import { ref,onMounted,getCurrentInstance , inject , reactive,toRefs } from 'vue'
+  import { useI18n } from '@/utils/i18n'
   import CodeEditor from '@/components/code-editor/index'
   import {deepClone, insertCustomCssToHead, insertGlobalFunctionsToHtml} from "@/utils/util"
 
   export default {
     name: "form-setting",
-    mixins: [i18n],
     components: {
       CodeEditor,
     },
@@ -154,10 +154,18 @@
       designer: Object,
       formConfig: Object,
     },
-    inject: ['getDesignerConfig'],
-    data() {
-      return {
-        designerConfig: this.getDesignerConfig(),
+    setup(props){
+      
+      const { i18nt }=useI18n();
+      const getDesignerConfig=inject('getDesignerConfig')
+      
+      const { proxy } = getCurrentInstance()
+
+      const ecEditor=ref(null)
+      const gfEditor=ref(null)
+
+      const data=reactive({
+        designerConfig: getDesignerConfig(),
 
         formActiveCollapseNames: ['1', '2'],
 
@@ -187,48 +195,41 @@
           //'onFormValidate':     'onFormValidate() {',
         },
 
-      }
-    },
-    created() {
-      //导入表单JSON后需要重新加载自定义CSS样式！！！
-      this.designer.handleEvent('form-json-imported', () => {
-        this.formCssCode = this.formConfig.cssCode
-        insertCustomCssToHead(this.formCssCode)
-        this.extractCssClass()
-        this.designer.emitEvent('form-css-updated', deepClone(this.cssClassList))
       })
-    },
-    mounted() {
-      /* SettingPanel和FormWidget为兄弟组件, 在FormWidget加载formConfig时，
-         此处SettingPanel可能无法获取到formConfig.cssCode, 故加个延时函数！ */
-      setTimeout(() => {
-        this.formCssCode = this.formConfig.cssCode
-        insertCustomCssToHead(this.formCssCode)
-        this.extractCssClass()
-        this.designer.emitEvent('form-css-updated', deepClone(this.cssClassList))
-      }, 1200)
-    },
-    methods: {
-      getFormEventHandled(eventName) {
-        return !!this.formConfig[eventName] && (this.formConfig[eventName].length > 0)
-      },
 
-      showEventCollapse() {
-        if (this.designerConfig['eventCollapse'] === undefined) {
+
+      onMounted(()=>{
+          /* SettingPanel和FormWidget为兄弟组件, 在FormWidget加载formConfig时，
+              此处SettingPanel可能无法获取到formConfig.cssCode, 故加个延时函数！ */
+          setTimeout(() => {
+              data.formCssCode = props.formConfig.cssCode
+              insertCustomCssToHead(data.formCssCode)
+              extractCssClass()
+              props.designer.emitEvent('form-css-updated', deepClone(data.cssClassList))
+          }, 1200)
+      })
+
+
+      const getFormEventHandled=(eventName)=> {
+        return !!props.formConfig[eventName] && (props.formConfig[eventName].length > 0)
+      }
+
+      const showEventCollapse=()=> {
+        if (data.designerConfig['eventCollapse'] === undefined) {
           return true
         }
 
-        return !!this.designerConfig['eventCollapse']
-      },
+        return !!data.designerConfig['eventCollapse']
+      }
 
-      editFormCss() {
-        this.formCssCode = this.designer.formConfig.cssCode
-        this.showEditFormCssDialogFlag = true
-      },
+      const editFormCss=()=> {
+        data.formCssCode = props.designer.formConfig.cssCode
+        data.showEditFormCssDialogFlag = true
+      }
 
-      extractCssClass() {
+      const extractCssClass=() =>{
         let regExp = /\..*{/g
-        let result = this.formCssCode.match(regExp)
+        let result = data.formCssCode.match(regExp)
         let cssNameArray = []
 
         if (!!result && result.length > 0) {
@@ -261,27 +262,27 @@
           })
         }
 
-        //this.cssClassList.length = 0
-        this.cssClassList.splice(0, this.cssClassList.length)  //清除数组必须用splice，length=0不会响应式更新！！
-        this.cssClassList = Array.from( new Set(cssNameArray) )  //数组去重
-      },
+        //data.cssClassList.length = 0
+        data.cssClassList.splice(0, data.cssClassList.length)  //清除数组必须用splice，length=0不会响应式更新！！
+        data.cssClassList = Array.from( new Set(cssNameArray) )  //数组去重
+      }
 
-      saveFormCss() {
-        this.extractCssClass()
-        this.designer.formConfig.cssCode = this.formCssCode
-        insertCustomCssToHead(this.formCssCode)
-        this.showEditFormCssDialogFlag = false
+      const saveFormCss=()=> {
+        extractCssClass()
+        props.designer.formConfig.cssCode = data.formCssCode
+        insertCustomCssToHead(data.formCssCode)
+        data.showEditFormCssDialogFlag = false
 
-        this.designer.emitEvent('form-css-updated', deepClone(this.cssClassList))
-      },
+        props.designer.emitEvent('form-css-updated', deepClone(data.cssClassList))
+      }
 
-      editGlobalFunctions() {
-        this.functionsCode = this.designer.formConfig.functions
-        this.showEditFunctionsDialogFlag = true
-      },
+      const editGlobalFunctions=() =>{
+        data.functionsCode = props.designer.formConfig.functions
+        data.showEditFunctionsDialogFlag = true
+      }
 
-      saveGlobalFunctions() {
-        const codeHints = this.$refs.gfEditor.getEditorAnnotations()
+      const saveGlobalFunctions=()=> {
+        const codeHints = gfEditor.getEditorAnnotations()
         let syntaxErrorFlag = false
         if (!!codeHints && (codeHints.length > 0)) {
           codeHints.forEach((chItem) => {
@@ -291,24 +292,24 @@
           })
 
           if (syntaxErrorFlag) {
-            this.$message.error(this.i18nt('designer.setting.syntaxCheckWarning'))
+            proxy.$message.error(i18nt('designer.setting.syntaxCheckWarning'))
             return
           }
         }
 
-        this.designer.formConfig.functions = this.functionsCode
-        insertGlobalFunctionsToHtml(this.functionsCode)
-        this.showEditFunctionsDialogFlag = false
-      },
+        props.designer.formConfig.functions = data.functionsCode
+        insertGlobalFunctionsToHtml(data.functionsCode)
+        data.showEditFunctionsDialogFlag = false
+      }
 
-      editFormEventHandler(eventName) {
-        this.curEventName = eventName
-        this.formEventHandlerCode = this.formConfig[eventName]
-        this.showFormEventDialogFlag = true
-      },
+      const editFormEventHandler=(eventName)=> {
+        data.curEventName = eventName
+        data.formEventHandlerCode = props.formConfig[eventName]
+        data.showFormEventDialogFlag = true
+      }
 
-      saveFormEventHandler() {
-        const codeHints = this.$refs.ecEditor.getEditorAnnotations()
+      const saveFormEventHandler=()=> {
+        const codeHints = ecEditor.getEditorAnnotations()
         let syntaxErrorFlag = false
         if (!!codeHints && (codeHints.length > 0)) {
           codeHints.forEach((chItem) => {
@@ -318,16 +319,43 @@
           })
 
           if (syntaxErrorFlag) {
-            this.$message.error(this.i18nt('designer.setting.syntaxCheckWarning'))
+            proxy.$message.error(i18nt('designer.setting.syntaxCheckWarning'))
             return
           }
         }
 
-        this.formConfig[this.curEventName] = this.formEventHandlerCode
-        this.showFormEventDialogFlag = false
-      },
+        props.formConfig[data.curEventName] = data.formEventHandlerCode
+        data.showFormEventDialogFlag = false
+      }
 
+
+
+      //导入表单JSON后需要重新加载自定义CSS样式！！！
+      props.designer.handleEvent('form-json-imported', () => {
+        data.formCssCode = props.formConfig.cssCode
+        insertCustomCssToHead(data.formCssCode)
+        extractCssClass()
+        props.designer.emitEvent('form-css-updated', deepClone(data.cssClassList))
+      })
+      return {
+        i18nt,
+        ...toRefs(data),
+        
+        ecEditor,
+        gfEditor, 
+
+        getFormEventHandled,
+        showEventCollapse,
+        editFormCss,
+        extractCssClass,
+        saveFormCss,
+        editGlobalFunctions,
+        saveGlobalFunctions,
+        editFormEventHandler,
+        saveFormEventHandler
+      }
     }
+      
   }
 </script>
 
