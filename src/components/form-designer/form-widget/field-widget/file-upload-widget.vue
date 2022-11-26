@@ -217,7 +217,7 @@
             let mountFunc = new Function('result', 'file', 'fileList', props.field.options.onUploadSuccess)
             customResult = mountFunc.call(proxy, res, file, fileList)
           }
-          file.url=res.url
+          
           updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
           if (!!customResult && !!customResult.name) {
             file.name = customResult.name
