@@ -1,5 +1,5 @@
-import {translate} from "@/utils/i18n"
-import emitter from '@/utils/emitter'
+import { translate } from "@/utils/i18n"
+import { useEmitter } from '@/utils/emitter'
 
 export const createInputTextEditor = function (propName, propLabelKey) {
   return {
@@ -146,10 +146,11 @@ export const createEventHandlerEditor = function (eventPropName, eventParams) {
     props: {
       optionModel: Object,
     },
-    mixins: [emitter],
     methods: {
       editEventHandler() {
-        this.dispatch('SettingPanel', 'editEventHandler', [eventPropName, [...eventParams]])
+        const { proxy } = getCurrentInstance()
+        const emitter = useEmitter(proxy);
+        emitter.dispatch('SettingPanel', 'editEventHandler', [eventPropName, [...eventParams]])
       },
     },
     render(h) {

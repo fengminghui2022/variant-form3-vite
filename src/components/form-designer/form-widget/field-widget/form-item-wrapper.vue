@@ -64,7 +64,7 @@
 <script>
   import SvgIcon from '@/components/svg-icon'
   import { useI18n } from '@/utils/i18n'
-  import { computed,inject,toRefs,nextTick  } from 'vue-demi';
+  import { computed,inject,toRefs,nextTick  } from 'vue';
 
   export default {
     name: "form-item-wrapper",
@@ -221,7 +221,8 @@
     }
 
     return {
-       i18nt,i18n2t,
+       i18nt,
+       i18n2t,
         ...toRefs(props),
 
         formConfig, 

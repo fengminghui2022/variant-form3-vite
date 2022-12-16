@@ -21,7 +21,6 @@
 <script>
 	import { computed, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
   import FormItemWrapper from './form-item-wrapper'
-  import emitter from '@/utils/emitter'
   import { useEmitter } from '@/utils/emitter'
   import { useI18n } from '@/utils/i18n'
 
@@ -81,7 +80,7 @@
 
       const editorOption=computed(()=> {
         return {
-          placeholder: this.field.options.placeholder,
+          placeholder: props.field.options.placeholder,
           modules: {
             //toolbar: this.customToolbar
           }
@@ -104,18 +103,18 @@
       fieldMixin.handleOnCreated()
 
       const handleRichEditorChangeEvent=()=> {
-        this.valueChangedFlag = true
-        this.syncUpdateFormModel(this.fieldModel)
+        data.valueChangedFlag = true
+        fieldMixin.syncUpdateFormModel(fieldMixin.fieldModel)
       }
 
       const handleRichEditorFocusEvent=()=> {
-        this.oldFieldValue = deepClone(this.fieldModel)
+        data.oldFieldValue = deepClone(fieldMixin.fieldModel)
       }
 
       const handleRichEditorBlurEvent=()=> {
-        if (this.valueChangedFlag) {
-          this.emitFieldDataChange(this.fieldModel, this.oldFieldValue)
-          this.valueChangedFlag = false
+        if (data.valueChangedFlag) {
+          fieldMixin.emitFieldDataChange(data.fieldModel, data.oldFieldValue)
+          data.valueChangedFlag = false
         }
       }
 

@@ -8,7 +8,7 @@
 <script>
 	import { toRefs } from 'vue'
   import { useI18n } from '@/utils/i18n'
-  import useProperty from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
+  import { useProperty } from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 
   export default {
     name: "number-defaultValue-editor",
@@ -24,7 +24,7 @@
       return {
         i18nt,
         ...toRefs(props),
-        ...toRefs(properyMixins)
+        ...properyMixins
       }
     }    
   }

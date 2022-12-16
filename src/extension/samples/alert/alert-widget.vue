@@ -10,15 +10,17 @@
 </template>
 
 <script>
+  import { toRefs , getCurrentInstance,onBeforeUnmount  } from 'vue'
   import StaticContentWrapper from '@/components/form-designer/form-widget/field-widget/static-content-wrapper'
-  import emitter from '@/utils/emitter'
-  import i18n from "@/utils/i18n"
-  import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin_old"
+ 
+	import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+  import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin"
 
   export default {
     name: "alert-widget",
-    componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件
-    mixins: [emitter, fieldMixin, i18n],
+    componentName: 'FieldWidget',  //必须固定为FieldWidget，用于接收父级组件的broadcast事件  
     props: {
       field: Object,
       parentWidget: Object,
@@ -48,21 +50,33 @@
     components: {
       StaticContentWrapper,
     },
-    created() {
-      this.registerToRefList()
-      this.initEventHandler()
-    },
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-    methods: {
-      handleCloseCustomEvent() {
+    setup(props){
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
+      const refMixin = useRef(props);
+      const fieldMixin= useField(props,{});
+      const emitter = useEmitter(props);
+
+      onBeforeUnmount(()=> {
+        fieldMixin.unregisterFromRefList()
+      })
+
+      fieldMixin.registerToRefList()
+      fieldMixin.initEventHandler()
+
+      const handleCloseCustomEvent=(()=>{
         if (!!this.field.options.onClose) {
           let changeFn = new Function(this.field.options.onClose)
           changeFn.call(this)
         }
-      }
+      })
 
+      return {
+        i18nt,
+        ...toRefs(props),
+        
+        handleCloseCustomEvent
+      }
     }
   }
 </script>

@@ -5,7 +5,7 @@
 </template>
 
 <script>
-	import { toRefs } from 'vue'
+	import { toRefs,computed } from 'vue'
   import { useI18n } from '@/utils/i18n'
 
   export default {

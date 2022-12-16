@@ -2,7 +2,7 @@
   <el-config-provider :locale="elLocale">
   <div id="app">
     <VFormDesigner ref="vFormRef" :designer-config="designerConfig" :global-dsv="globalDsv" />
-    <test :designer="()=>{return vFormRef}"></test>
+    <!-- <test :designer="()=>{return vFormRef}"></test> -->
   </div>
   </el-config-provider>
 </template>
@@ -17,12 +17,12 @@ import VFormDesigner from './components/form-designer/index.vue'
 import zhCNLang from 'element-plus/lib/locale/lang/zh-cn'
 import enUSLang from 'element-plus/lib/locale/lang/en'
 
-import test from './test'
+// import test from './test'
 export default {
   name: 'App',
   components: {
     VFormDesigner,
-    test
+    // test
   },
   setup(){    
     const { proxy } = getCurrentInstance()

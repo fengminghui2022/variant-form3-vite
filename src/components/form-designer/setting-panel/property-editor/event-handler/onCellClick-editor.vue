@@ -25,8 +25,9 @@
     },    
     setup(props){
      const { i18nt }=useI18n();
+      const { proxy } = getCurrentInstance()
 
-     const emitterMixin= useEmitterMixin()
+      const emitterMixin= useEmitterMixin(proxy)
 
      const data=reactive({
         eventParams: ['row', 'column', 'cell', 'event'],

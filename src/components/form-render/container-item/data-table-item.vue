@@ -104,7 +104,6 @@
   export default {
     name: "DataTableItem",
     componentName: 'ContainerItem',  //必须固定为ContainerItem，用于接收父级组件的broadcast事件
-    // mixins: [emitter, i18n, refMixin, containerItemMixin],
 	components: {
 		ContainerItemWrapper,
 		TableColumnCustomRender,

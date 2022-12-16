@@ -8,7 +8,7 @@
   <el-form-item :label="i18nt('designer.setting.valueKeyName')">
     <el-input v-model="optionModel.valueKey"></el-input>
   </el-form-item>
-  <el-form-item v-if="hasConfig('childrenKey')" :label="i18nt('designer.setting.childrenKeyName')">
+  <el-form-item v-if="designer.hasConfig('childrenKey')" :label="i18nt('designer.setting.childrenKeyName')">
     <el-input v-model="optionModel.childrenKey"></el-input>
   </el-form-item>
   <el-form-item :label="i18nt('designer.setting.dsEnabled')">
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-	import { toRefs } from 'vue'
+	import { reactive, computed , toRefs,watch  } from 'vue'
   import { useI18n } from '@/utils/i18n'
   import { useProperty } from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 

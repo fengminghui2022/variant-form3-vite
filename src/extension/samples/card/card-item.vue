@@ -44,18 +44,20 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "@/utils/i18n"
-  import refMixin from "@/components/form-render/refMixin"
-  import ContainerItemWrapper from '@/components/form-render/container-item/container-item-wrapper'
-  import containerItemMixin from "@/components/form-render/container-item/containerItemMixin"
+
+  import { inject, toRefs, computed, getCurrentInstance, onBeforeUnmount  } from 'vue'
+  import { useEmitter } from '@/utils/emitter'
+  import { useI18n } from '@/utils/i18n'
+  import { useRef } from "@/components/form-render/refMixin"
+	import { useContainer } from "@/components/form-render/container-item/containerItemMixin"
+
+import ContainerItemWrapper from '@/components/form-render/container-item/container-item-wrapper'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 
   export default {
     name: "card-item",
     componentName: 'ContainerItem',
-    mixins: [emitter, i18n, refMixin, containerItemMixin],
     components: {
       ContainerItemWrapper,
       ...FieldComponents,
@@ -78,25 +80,45 @@
         default: ''
       },
     },
-    inject: ['refList', 'sfRefList', 'globalModel'],
-    computed: {
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+    setup(props){
+      const { i18nt }= useI18n();
+  		const { proxy } = getCurrentInstance()
+      
+      const refList=inject('refList')
+      const sfRefList=inject('sfRefList')
+      const globalModel=inject('globalModel')
 
-    },
-    created() {
-      this.initRefList()
-    },
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-    methods: {
-      toggleCard() {
-        this.widget.options.folded = !this.widget.options.folded
-      },
+      const refMixin = useRef(props);
+      const containerMixin= useContainer(props,{},{});
 
-    },
+
+      const customClass=computed(()=>{
+        return props.widget.options.customClass || ''
+      });
+      
+
+      beforeUnmount(()=> {
+        containerMixin.unregisterFromRefList()
+      })
+
+      const toggleCard=()=> {
+        props.widget.options.folded = !props.widget.options.folded
+      }
+
+      refMixin.initRefList()
+
+
+      return {
+        i18nt,
+        ...toRefs(props),
+        ...refMixin,
+
+        customClass,
+
+        toggleCard
+      }
+
+    }
   }
 </script>
 

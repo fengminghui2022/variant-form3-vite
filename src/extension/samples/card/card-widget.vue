@@ -39,18 +39,20 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
+  import { inject, toRefs, computed  } from 'vue'
+
+  import { useI18n } from '@/utils/i18n'
+  import { useEmitter } from '@/utils/emitter'
+	import { useContainer } from "@/components/form-designer/form-widget/container-widget/containerMixin"
+  import { useDesignRef } from "@/components/form-designer/refMixinDesign"
+
   import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
-  import refMixinDesign from "@/components/form-designer/refMixinDesign"
   import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 
   export default {
     name: "card-widget",
     componentName: 'ContainerWidget',
-    mixins: [i18n, containerMixin, refMixinDesign],
-    inject: ['refList'],
     components: {
       ContainerWrapper,
       ...FieldComponents,
@@ -64,39 +66,55 @@
       indexOfParentList: Number,
       designer: Object,
     },
-    computed: {
-      selected() {
-        return this.widget.id === this.designer.selectedId
-      },
+    setup(props){
 
-      customClass() {
-        return this.widget.options.customClass || ''
-      },
+      const refList=inject("refList");
+      const i18n=useI18n();
+      const designRef=useDesignRef(refList,props.widget);
+      const containerMixin=useContainer();
 
-    },
-    created() {
-      this.initRefList()
-    },
-    methods: {
+      const selected=computed(()=>{
+        return props.widget.id === props.designer.selectedId
+      })
+
+      const customClass=computed(()=>{
+        return props.widget.options.customClass || ''
+      })
+
       /**
        * 检查接收哪些组件拖放，如不接受某些组件拖放，则根据组件类型判断后返回false
        * @param evt
        * @returns {boolean}
        */
-      checkContainerMove(evt) {
+      const checkContainerMove=(evt)=> {
         return true
-      },
+      }
 
-      toggleCard() {
+      const toggleCard=()=> {
         this.widget.options.folded = !this.widget.options.folded
-      },
+      }
 
       /**
        * 设置折叠/打开状态
        * @param folded
        */
-      setFolded(folded) {
+      const setFolded=(folded)=> {
         this.widget.options.folded = !!folded
+      }
+
+      designRef.initRefList()
+
+      return {
+        ...toRefs(props),
+        ...containerMixin,
+
+        selected,
+        customClass,
+
+        checkContainerMove,
+        toggleCard,
+        setFolded
+
       }
 
     }

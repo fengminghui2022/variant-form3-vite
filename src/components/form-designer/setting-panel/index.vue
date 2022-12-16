@@ -86,7 +86,7 @@
 
     <div v-if="showWidgetEventDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
       <el-dialog :title="i18nt('designer.setting.editWidgetEventHandler')" v-model="showWidgetEventDialogFlag"
-                 :show-close="true" custom-class="drag-dialog small-padding-dialog" append-to-body
+                 :show-close="true" class="drag-dialog small-padding-dialog" append-to-body
                  :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
         <el-alert type="info" :closable="false" :title="eventHeader"></el-alert>
         <code-editor :mode="'javascript'" :readonly="false" v-model="eventHandlerCode" ref="ecEditor"></code-editor>
@@ -153,8 +153,8 @@
     },
     setup(props){
       const { i18nt }=useI18n();
-      const emitter = useEmitter();
       const { proxy } = getCurrentInstance()
+      const emitter = useEmitter(proxy);
       let $current=proxy;
 
       const getDesignerConfig=inject("getDesignerConfig");
@@ -233,7 +233,7 @@
 
 
       const getEventHandled=(eventName)=> {
-        return !!optionModel[eventName] && (optionModel[eventName].length > 0)
+        return !!optionModel.value[eventName] && (optionModel.value[eventName].length > 0)
       }
 
       const showEventCollapse=()=> {
@@ -290,13 +290,12 @@
 
       const editEventHandler=(eventName, eventParams)=> {
         //debugger
-
         data.curEventName = eventName
-        data.eventHeader = `${optionModel.name}.${eventName}(${eventParams.join(', ')}) {`
+        data.eventHeader = `${optionModel.value.name}.${eventName}(${eventParams.join(', ')}) {`
         data.eventHandlerCode = props.selectedWidget.options[eventName] || ''
 
         // 设置字段校验函数示例代码
-        if ((eventName === 'onValidate') && (!optionModel['onValidate'])) {
+        if ((eventName === 'onValidate') && (!optionModel.value['onValidate'])) {
           data.eventHandlerCode = "  /* sample code */\n  /*\n  if ((value > 100) || (value < 0)) {\n    callback(new Error('error message'))  //fail\n  } else {\n    callback();  //pass\n  }\n  */"
         }
 
@@ -304,7 +303,7 @@
       }
 
       const saveEventHandler=() =>{
-        const codeHints = ecEditor.getEditorAnnotations()
+        const codeHints = ecEditor.value.getEditorAnnotations()
         let syntaxErrorFlag = false
         if (!!codeHints && (codeHints.length > 0)) {
           codeHints.forEach((chItem) => {
@@ -323,9 +322,6 @@
         data.showWidgetEventDialogFlag = false
       }
 
-
-
-      console.log("props",props.selectedWidget)
       watch(()=>props.selectedWidget, (newValue, oldValue) => {
           if (!!newValue) {
             data.activeTab = "1"
@@ -348,7 +344,7 @@
 
       return {
         i18nt,
-
+        ...emitter,
         ...toRefs(data),
 
         /* 组件引用 */

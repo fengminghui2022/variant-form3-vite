@@ -4,20 +4,22 @@ import { useI18n } from '@/utils/i18n'
 
 export function useDesignRef(refList,widget) {
   
-  const { i18nt }=useI18n();
+  const { i18nt }=useI18n()
   const { proxy } = getCurrentInstance()
-  let $current=proxy;
+  let $current=proxy
+  let _refList=refList
+  let _widget=widget
 
 
   const methods= {
     initRefList() {
-      if ((refList !== null) && !!widget.options.name) {
-        refList[widget.options.name] = $current
+      if ((_refList !== null) && !!_widget.options.name) {
+        _refList[_widget.options.name] = $current
       }
     },
 
     getWidgetRef(widgetName, showError) {
-      let foundRef = refList[widgetName]
+      let foundRef = _refList[widgetName]
       if (!foundRef && !!showError) {
         $current.$message.error(i18nt('render.hint.refNotFound') + widgetName)
       }
@@ -26,11 +28,11 @@ export function useDesignRef(refList,widget) {
 
     /* 该方法用于组件重名检查！！ */
     registerToRefList(oldRefName) {
-      if ((refList !== null) && !!widget.options.name) {
+      if ((_refList !== null) && !!_widget.options.name) {
         if (!!oldRefName) {
-          delete refList[oldRefName]
+          delete _refList[oldRefName]
         }
-        refList[widget.options.name] = $current
+        _refList[_widget.options.name] = $current
       }
     },
 
@@ -40,32 +42,3 @@ export function useDesignRef(refList,widget) {
   }
 }
 
-
-export default {
-  methods: {
-    initRefList() {
-      if ((this.refList !== null) && !!this.widget.options.name) {
-        this.refList[this.widget.options.name] = this
-      }
-    },
-
-    getWidgetRef(widgetName, showError) {
-      let foundRef = this.refList[widgetName]
-      if (!foundRef && !!showError) {
-        this.$message.error(this.i18nt('render.hint.refNotFound') + widgetName)
-      }
-      return foundRef
-    },
-
-    /* 该方法用于组件重名检查！！ */
-    registerToRefList(oldRefName) {
-      if ((this.refList !== null) && !!this.widget.options.name) {
-        if (!!oldRefName) {
-          delete this.refList[oldRefName]
-        }
-        this.refList[this.widget.options.name] = this
-      }
-    },
-
-  }
-}

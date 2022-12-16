@@ -238,7 +238,7 @@
 
   <div v-if="showTestDataSourceDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
     <el-dialog :title="i18nt('designer.setting.testDataSource')" v-model="showTestDataSourceDialogFlag"
-               :show-close="true" custom-class="drag-dialog small-padding-dialog" append-to-body
+               :show-close="true" class="drag-dialog small-padding-dialog" append-to-body
                :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
       <el-alert type="info" :closable="false" :title="i18nt('designer.setting.dsvTitle')"></el-alert>
       <code-editor :mode="'json'" :readonly="false" v-model="dsvJson" class="dsv-json-editor"></code-editor>
@@ -255,7 +255,7 @@
 
   <div v-if="showImportDSDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
     <el-dialog :title="i18nt('designer.setting.importDataSource')" v-model="showImportDSDialogFlag"
-               :show-close="true" custom-class="drag-dialog small-padding-dialog" center
+               :show-close="true" class="drag-dialog small-padding-dialog" center
                append-to-body :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
       <el-alert type="info" :title="i18nt('designer.hint.importDSHint')" show-icon class="alert-padding"></el-alert>
       <code-editor :mode="'json'" :readonly="false" v-model="importDSTemplate"></code-editor>
@@ -273,7 +273,7 @@
 
   <div v-if="showExportDSDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
     <el-dialog :title="i18nt('designer.setting.exportDataSource')" v-model="showExportDSDialogFlag"
-               :show-close="true" custom-class="drag-dialog small-padding-dialog" center
+               :show-close="true" class="drag-dialog small-padding-dialog" center
                :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
       <el-tabs type="border-card" class="no-box-shadow no-padding" v-model="activeExportTab" @tab-click="handleExportTabClick">
         <el-tab-pane :label="i18nt('designer.setting.selectDataSourceForExport')" name="setting">

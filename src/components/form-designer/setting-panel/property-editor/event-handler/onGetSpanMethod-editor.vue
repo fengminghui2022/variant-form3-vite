@@ -7,7 +7,7 @@
 </template>
 
 <script>
-	import { reactive, toRefs } from 'vue'
+	import { reactive, toRefs, getCurrentInstance} from 'vue'
 
   import { useI18n } from '@/utils/i18n'
   import { useEmitterMixin } from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
@@ -25,8 +25,9 @@
     },
     setup(props){
       const { i18nt }=useI18n();
+      const { proxy } = getCurrentInstance()
 
-      const emitterMixin= useEmitterMixin()
+      const emitterMixin= useEmitterMixin(proxy)
 
       const data=reactive({
           eventParams: ['row', 'column', 'rowIndex', 'columnIndex'],
