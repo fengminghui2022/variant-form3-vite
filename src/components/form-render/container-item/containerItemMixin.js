@@ -8,10 +8,12 @@ import {deepClone, traverseFieldWidgetsOfContainer, traverseWidgetsOfContainer} 
 
 
 export function useContainer(props,data,widgetMethods={}){
-  const refList= inject('refList')
+  const refList= inject('refList')  
+  const globalModel=inject('globalModel')
   const refMixin = useRef(props);
   const { i18nt }= useI18n();
   const { proxy } = getCurrentInstance()
+
 
 
   const customClass=computed(()=>{
@@ -21,7 +23,7 @@ export function useContainer(props,data,widgetMethods={}){
   const formModel=computed({
     cache:false,
     get:()=>{
-      return props.globalModel.formModel
+      return globalModel.formModel
     }
   })
 

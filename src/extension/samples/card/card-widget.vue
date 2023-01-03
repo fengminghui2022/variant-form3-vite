@@ -91,7 +91,7 @@
       }
 
       const toggleCard=()=> {
-        this.widget.options.folded = !this.widget.options.folded
+        props.widget.options.folded = !props.widget.options.folded
       }
 
       /**
@@ -99,7 +99,7 @@
        * @param folded
        */
       const setFolded=(folded)=> {
-        this.widget.options.folded = !!folded
+        props.widget.options.folded = !!folded
       }
 
       designRef.initRefList()

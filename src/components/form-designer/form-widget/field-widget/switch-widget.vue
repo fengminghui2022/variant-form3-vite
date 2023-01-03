@@ -71,11 +71,11 @@
 
 
       const contentForReadMode=computed(()=> {
-        if (!!this.fieldModel) {
-          return this.field.options.activeText ||  this.i18nt('render.hint.defaultActiveText')
+        if (!!data.fieldModel) {
+          return props.field.options.activeText ||  i18nt('render.hint.defaultActiveText')
         }
 
-        return this.field.options.inactiveText || this.i18nt('render.hint.defaultInactiveText')
+        return props.field.options.inactiveText || i18nt('render.hint.defaultInactiveText')
       })
 
 

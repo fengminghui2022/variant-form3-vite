@@ -26,7 +26,7 @@
 
   import { useField } from "@/components/form-designer/form-widget/field-widget/fieldMixin";
 
-
+  import { deepClone } from "@/utils/util"
   import { Quill, quillEditor } from 'vue3-quill'
 
   export default {

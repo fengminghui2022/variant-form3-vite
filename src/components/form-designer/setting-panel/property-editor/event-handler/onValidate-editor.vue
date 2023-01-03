@@ -10,7 +10,9 @@
 	import { reactive, toRefs, getCurrentInstance} from 'vue'
 
   import { useI18n } from '@/utils/i18n'
+  import { useEmitter } from '@/utils/emitter'
   import { useEmitterMixin } from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
+
 
   export default {
     name: "onValidate-editor",
@@ -27,7 +29,8 @@
       const { i18nt }=useI18n();
       const { proxy } = getCurrentInstance()
 
-      const emitterMixin= useEmitterMixin(proxy)
+      const emitter=useEmitter();
+      const emitterMixin= useEmitterMixin(emitter)
 
       const data=reactive({
           eventParams: ['rule', 'value', 'callback'],

@@ -6,6 +6,7 @@
 </template>
 
 <script>
+  import { computed } from 'vue'
   export default {
     name: 'SvgIcon',
     props: {
@@ -21,16 +22,22 @@
         default: ''
       }
     },
-    computed: {
-      iconName() {
-        return `#icon-${this.iconClass}`
-      },
-      svgClass() {
-        if (this.className) {
-          return 'svg-icon ' + this.className
+    setup(props){
+      const iconName=computed(()=> {
+        return `#icon-${props.iconClass}`
+      })
+
+      const svgClass=computed(()=> {
+        if (props.className) {
+          return 'svg-icon ' + props.className
         } else {
           return 'svg-icon'
         }
+      })
+
+      return {
+        iconName,
+        svgClass
       }
     }
   }

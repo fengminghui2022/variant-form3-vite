@@ -64,6 +64,7 @@
   		const { proxy } = getCurrentInstance()
 
       const dFormRef=ref(null);
+      const drawerRef=ref(null);
       const data=reactive( {
         dialogVisible: false,
       })
@@ -78,44 +79,44 @@
       })
 
       const show=()=> {
-        this.drawerVisible = true
+        data.drawerVisible = true
 
         //设置readMode模式
         nextTick(() => {
-          if (!!this.options.readMode) {
+          if (!!props.options.readMode) {
             dFormRef.value.setReadMode(true)
           }
 
-          dFormRef.value.setDialogOrDrawerRef(this)
-          this.parentFormRef.setChildFormRef(dFormRef.value)
+          dFormRef.value.setDialogOrDrawerRef(proxy)
+          props.parentFormRef.setChildFormRef(dFormRef.value)
         })
       }
 
       const close=()=> {
-        if (!!this.options.onDrawerBeforeClose) {
-          let customFn = new Function(this.options.onDrawerBeforeClose)
-          let closeResult = customFn.call(this)
+        if (!!props.options.onDrawerBeforeClose) {
+          let customFn = new Function(props.options.onDrawerBeforeClose)
+          let closeResult = customFn.call(proxy)
           if (closeResult === false) {
             return
           }
         }
 
-        this.drawerVisible = false
-        this.$refs['drawerRef'].handleClose()
-        setTimeout(this.deleteWrapperNode, 150)
+        data.drawerVisible = false
+        drawerRef.handleClose()
+        setTimeout(deleteWrapperNode, 150)
       }
 
       const deleteWrapperNode=()=> {
-        let wrapperNode = document.getElementById('vf-dynamic-drawer-wrapper' + this.wrapperId)
+        let wrapperNode = document.getElementById('vf-dynamic-drawer-wrapper' + props.wrapperId)
         if (!!wrapperNode) {
           document.body.removeChild(wrapperNode)
         }
       }
 
       const handleBeforeClose=(done)=> {
-        if (!!this.options.onDrawerBeforeClose) {
-          let customFn = new Function(this.options.onDrawerBeforeClose)
-          let closeResult = customFn.call(this)
+        if (!!props.options.onDrawerBeforeClose) {
+          let customFn = new Function(props.options.onDrawerBeforeClose)
+          let closeResult = customFn.call(proxy)
           return (closeResult === false) ? closeResult : done()
         }
 
@@ -123,45 +124,45 @@
       }
 
       const handleCloseEvent=()=> {
-        this.drawerVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
+        data.drawerVisible = false
+        setTimeout(deleteWrapperNode, 150)
       }
 
       const handleOpenedEvent=()=> {
-        if (!!this.options.onDrawerOpened) {
-          let customFn = new Function(this.options.onDrawerOpened)
-          customFn.call(this)
+        if (!!props.options.onDrawerOpened) {
+          let customFn = new Function(props.options.onDrawerOpened)
+          customFn.call(proxy)
         }
       }
 
       const handleCancelClick=()=> {
-        if (!!this.options.onCancelButtonClick) {
-          let customFn = new Function(this.options.onCancelButtonClick)
-          let clickResult = customFn.call(this)
+        if (!!props.options.onCancelButtonClick) {
+          let customFn = new Function(props.options.onCancelButtonClick)
+          let clickResult = customFn.call(proxy)
           if (clickResult === false) {
             return
           }
         }
 
-        this.drawerVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
+        data.drawerVisible = false
+        setTimeout(deleteWrapperNode, 150)
       }
 
       const handleOkClick=()=> {
-        if (!!this.options.onOkButtonClick) {
-          let customFn = new Function(this.options.onOkButtonClick)
-          let clickResult = customFn.call(this)
+        if (!!props.options.onOkButtonClick) {
+          let customFn = new Function(props.options.onOkButtonClick)
+          let clickResult = customFn.call(proxy)
           if (clickResult === false) {
             return
           }
         }
 
-        this.drawerVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
+        data.drawerVisible = false
+        setTimeout(deleteWrapperNode, 150)
       }
 
       const getParentFormRef=()=> {
-        return this.parentFormRef
+        return props.parentFormRef
       }
 
       const getFormRef=()=> {
@@ -173,7 +174,7 @@
       }
 
       const getExtraData=()=> {
-        return this.extraData
+        return props.extraData
       }
 
 
@@ -187,6 +188,7 @@
         ...toRefs(props),
 
         dFormRef,
+        drawerRef,
 
         cancelBtnLabel,
         okBtnLabel,

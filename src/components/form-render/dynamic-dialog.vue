@@ -100,7 +100,7 @@
         }
 
         data.dialogVisible = false
-        setTimeout(this.deleteWrapperNode, 150)
+        setTimeout(deleteWrapperNode, 150)
       }
 
       const deleteWrapperNode=()=> {

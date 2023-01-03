@@ -169,13 +169,13 @@
       const getWidgetRef=(widgetName, showError = false)=>{
         let foundRef = data.widgetRefList[widgetName]
         if (!foundRef && !!showError) {
-          $current.$message.error(this.i18nt('designer.hint.refNotFound') + widgetName)
+          $current.$message.error(i18nt('designer.hint.refNotFound') + widgetName)
         }
         return foundRef
       }
 
       const getSelectedWidgetRef=()=> {
-        let wName = this.designer.selectedWidgetName
+        let wName = props.designer.selectedWidgetName
         return getWidgetRef(wName)
       }
 

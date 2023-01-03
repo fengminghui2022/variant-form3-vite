@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  import { createVNode,computed , render,provide , reactive,ref,toRefs,getCurrentInstance,onMounted   } from 'vue'
+  import { createVNode,computed , render,provide , reactive,ref,toRefs,getCurrentInstance,onMounted ,nextTick  } from 'vue'
   //import ElForm from 'element-ui/packages/form/src/form.vue'  /* 用于源码调试Element UI */
 	import { useEmitter } from '@/utils/emitter'
   import { useI18n,changeLocale } from '@/utils/i18n'
@@ -166,31 +166,31 @@
         })
 
         const labelPosition=computed(()=> {
-          if (!!formConfig && !!formConfig.labelPosition) {
-            return formConfig.labelPosition
+          if (!!formConfig.value && !!formConfig.value.labelPosition) {
+            return formConfig.value.labelPosition
           }
 
           return 'left'
         })
 
         const labelWidth=computed(()=> {
-          if (!!formConfig && !!formConfig.labelWidth) {
-            return formConfig.labelWidth + 'px'
+          if (!!formConfig.value && !!formConfig.value.labelWidth) {
+            return formConfig.value.labelWidth + 'px'
           }
 
           return '80px'
         })
 
         const size=computed(()=> {
-          if (!!formConfig && !!formConfig.size) {
-            return formConfig.size
+          if (!!formConfig.value && !!formConfig.value.size) {
+            return formConfig.value.size
           }
 
           return 'default'
         })
 
         const customClass=computed(()=> {
-          return !!formConfig && !!formConfig.customClass ? formConfig.customClass : ''
+          return !!formConfig.value && !!formConfig.value.customClass ? formConfig.value.customClass : ''
         })
 
         onMounted(()=>{
@@ -239,13 +239,13 @@
       }
 
       const insertCustomStyleAndScriptNode=()=> {
-        if (!!formConfig && !!formConfig.cssCode) {
-          insertCustomCssToHead(formConfig.cssCode,
+        if (!!formConfig.value && !!formConfig.value.cssCode) {
+          insertCustomCssToHead(formConfig.value.cssCode,
               !!props.previewState ? '' : data.formId)
         }
 
-        if (!!formConfig && !!formConfig.functions) {
-          insertGlobalFunctionsToHtml(formConfig.functions,
+        if (!!formConfig.value && !!formConfig.value.functions) {
+          insertGlobalFunctionsToHtml(formConfig.value.functions,
               !!props.previewState ? '' : data.formId)
         }
       }
@@ -374,23 +374,23 @@
       }
 
       const handleFieldDataChange=(fieldName, newValue, oldValue, subFormName, subFormRowIndex)=> {
-        if (!!formConfig && !!formConfig.onFormDataChange) {
+        if (!!formConfig.value && !!formConfig.value.onFormDataChange) {
           let customFunc = new Function('fieldName', 'newValue', 'oldValue', 'formModel', 'subFormName', 'subFormRowIndex',
-              formConfig.onFormDataChange)
+              formConfig.value.onFormDataChange)
           customFunc.call(proxy, fieldName, newValue, oldValue, data.formDataModel, subFormName, subFormRowIndex)
         }
       }
 
       const handleOnCreated=()=> {
-        if (!!formConfig && !!formConfig.onFormCreated) {
-          let customFunc = new Function(formConfig.onFormCreated)
+        if (!!formConfig.value && !!formConfig.value.onFormCreated) {
+          let customFunc = new Function(formConfig.value.onFormCreated)
           customFunc.call(proxy)
         }
       }
 
       const handleOnMounted=()=> {
-        if (!!formConfig && !!formConfig.onFormMounted) {
-          let customFunc = new Function(formConfig.onFormMounted)
+        if (!!formConfig.value && !!formConfig.value.onFormMounted) {
+          let customFunc = new Function(formConfig.value.onFormMounted)
           customFunc.call(proxy)
         }
       }
@@ -476,7 +476,7 @@
 
         if (dsNameSet.size > 0) {
           dsNameSet.forEach(async (dsName) => {
-            let curDS = getDSByName(formConfig, dsName)
+            let curDS = getDSByName(formConfig.value, dsName)
             if (!!curDS) {
               let localDsv = new Object({})
               overwriteObj(localDsv, props.globalDsv || {})

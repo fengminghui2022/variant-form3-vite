@@ -65,18 +65,25 @@
         default: 'default'
       },
     },
-    methods: {
-      handleSelectionChange(val) {
-        this.$emit('handleSelectionChange', val);
-      },
-      handleSizeChange(val) {
-        this.$emit('handleSizeChange', val);
-      },
-      handleCurrentChange(val) {
-        this.$emit('handleCurrentChange', val);
-      },
-      formatterValue(row, column, cellValue) {
+    setup(props,ctx){
+      const handleSelectionChange=(val)=> {
+        ctx.emit('handleSelectionChange', val);
+      }
+      const handleSizeChange=(val)=> {
+        ctx.emit('handleSizeChange', val);
+      }
+      const handleCurrentChange=(val)=> {
+        ctx.emit('handleCurrentChange', val);
+      }
+      const formatterValue=(row, column, cellValue)=> {
         return cellValue;
+      }
+
+      return {
+        handleSelectionChange,
+        handleSizeChange,
+        handleCurrentChange,
+        formatterValue
       }
     }
   }

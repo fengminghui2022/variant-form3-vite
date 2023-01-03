@@ -81,10 +81,10 @@
       const fieldMixin = useField(props,data);
 
       const inputType=computed(()=> {
-        if (this.field.options.type === 'number') {
+        if (props.field.options.type === 'number') {
           return 'text'  //当input的type设置为number时，如果输入非数字字符，则v-model拿到的值为空字符串，无法实现输入校验！故屏蔽之！！
         }
-        return this.field.options.type
+        return props.field.options.type
       })
       
       onMounted(()=>{

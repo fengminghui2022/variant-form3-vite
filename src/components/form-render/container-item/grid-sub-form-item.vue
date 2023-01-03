@@ -131,7 +131,7 @@
       const initRowIdData=(initFlag)=> {
         if (props.widget.type === 'grid-sub-form') {
           data.rowIdData.splice(0, data.rowIdData.length)  //清除数组必须用splice，length=0不会响应式更新！！
-          let subFormModel = containerMixin.formModel[props.widget.options.name]
+          let subFormModel = containerMixin.formModel.value[props.widget.options.name]
           if (!!subFormModel && (subFormModel.length > 0)) {
             subFormModel.forEach(() => {
               data.rowIdData.push('id' + generateId())
@@ -231,7 +231,7 @@
         }
 
         if (!!props.widget.options.showBlankRow && (data.rowIdData.length === 1)) {
-          let oldSubFormData = containerMixin.formModel[props.widget.options.name] || []
+          let oldSubFormData = containerMixin.formModel.value[props.widget.options.name] || []
 
           //确认组件创建成功后触发事件!!
           nextTick(() => {
@@ -249,7 +249,7 @@
           }
         })
 
-        let oldSubFormData = containerMixin.formModel[props.widget.options.name] || []
+        let oldSubFormData = containerMixin.formModel.value[props.widget.options.name] || []
         oldSubFormData.push(newSubFormDataRow)
         addToRowIdData()
         addToWidgetSchemaData()
@@ -269,7 +269,7 @@
           }
         })
 
-        let oldSubFormData = containerMixin.formModel[props.widget.options.name] || []
+        let oldSubFormData = containerMixin.formModel.value[props.widget.options.name] || []
         oldSubFormData.splice(beforeFormRowIndex, 0, newSubFormDataRow)
         insertToRowIdData(beforeFormRowIndex)
         addToWidgetSchemaData(beforeFormRowIndex)
@@ -286,7 +286,7 @@
           confirmButtonText: i18nt('render.hint.confirm'),
           cancelButtonText: i18nt('render.hint.cancel')
         }).then(() => {
-          let oldSubFormData = containerMixin.formModel[props.widget.options.name] || []
+          let oldSubFormData = containerMixin.formModel.value[props.widget.options.name] || []
           let deletedDataRow = deepClone(oldSubFormData[formRowIndex])
           oldSubFormData.splice(formRowIndex, 1)
           deleteFromRowIdData(formRowIndex)
@@ -377,6 +377,7 @@
 
       return {
         i18nt,
+        ...refMixin,
         ...toRefs(props),
         ...toRefs(data),
 

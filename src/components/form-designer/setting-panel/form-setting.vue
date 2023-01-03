@@ -282,7 +282,7 @@
       }
 
       const saveGlobalFunctions=()=> {
-        const codeHints = gfEditor.getEditorAnnotations()
+        const codeHints = gfEditor.value.getEditorAnnotations()
         let syntaxErrorFlag = false
         if (!!codeHints && (codeHints.length > 0)) {
           codeHints.forEach((chItem) => {
@@ -309,7 +309,7 @@
       }
 
       const saveFormEventHandler=()=> {
-        const codeHints = ecEditor.getEditorAnnotations()
+        const codeHints = ecEditor.value.getEditorAnnotations()
         let syntaxErrorFlag = false
         if (!!codeHints && (codeHints.length > 0)) {
           codeHints.forEach((chItem) => {

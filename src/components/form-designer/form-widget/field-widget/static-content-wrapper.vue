@@ -29,7 +29,7 @@
 </template>
 
 <script>
-	import { computed, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
+	import { computed, toRefs, nextTick} from 'vue'
 
   import SvgIcon from '@/components/svg-icon'
   import { useI18n } from '@/utils/i18n'
@@ -84,13 +84,13 @@
       const selectField=(field)=> {
         if (!!props.designer) {
           props.designer.setSelected(field)
-          props.designer.emitEvent('field-selected', this.parentWidget)  //发送选中组件的父组件对象
+          props.designer.emitEvent('field-selected', props.parentWidget)  //发送选中组件的父组件对象
         }
       }
 
       const selectParentWidget=()=> {
-        if (this.parentWidget) {
-          props.designer.setSelected(this.parentWidget)
+        if (props.parentWidget) {
+          props.designer.setSelected(props.parentWidget)
         } else {
           props.designer.clearSelected()
         }
@@ -110,8 +110,8 @@
         if (!!props.parentList) {
           let nextSelected = null
           if (props.parentList.length === 1) {
-            if (!!this.parentWidget) {
-              nextSelected = this.parentWidget
+            if (!!props.parentWidget) {
+              nextSelected = props.parentWidget
             }
           } else if (props.parentList.length === (1 + props.indexOfParentList)) {
             nextSelected = props.parentList[props.indexOfParentList - 1]
@@ -119,7 +119,7 @@
             nextSelected = props.parentList[props.indexOfParentList + 1]
           }
 
-          this.$nextTick(() => {
+          nextTick(() => {
             props.parentList.splice(props.indexOfParentList, 1)
             //if (!!nextSelected) {
             props.designer.setSelected(nextSelected)

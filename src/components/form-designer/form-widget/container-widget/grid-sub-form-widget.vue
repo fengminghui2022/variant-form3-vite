@@ -84,12 +84,10 @@
         }
 
         props.designer.emitHistoryChange()
-        console.log('test', 'onSubFormDragAdd')
         props.designer.emitEvent('field-selected', props.widget)
       }
 
       const onSubFormDragEnd=(evt)=>{
-        console.log('sub form drag end: ', evt)
       }
 
       designRefMixin.initRefList()

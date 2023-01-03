@@ -36,7 +36,7 @@
     setup(props){
       const { i18nt }=useI18n();
       const formConfig=computed(()=>{
-        return this.designer.formConfig
+        return props.designer.formConfig
       })
 
       return {

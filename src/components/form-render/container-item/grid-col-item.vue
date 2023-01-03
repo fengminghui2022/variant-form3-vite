@@ -118,7 +118,7 @@
             data.layoutProps.sm = undefined
             data.layoutProps.xs = undefined
 
-            let lyType = this.formConfig.layoutType
+            let lyType = formConfig.layoutType
             if (lyType === 'H5') {
               data.layoutProps.span = props.widget.options.xs || 12
             } else if (lyType === 'Pad') {

@@ -89,15 +89,13 @@
           return data.fieldModel[0] + ' - ' + data.fieldModel[1]
         }
       })
+      
+      fieldMixin.registerToRefList()
+      fieldMixin.initFieldModel()
+      fieldMixin.initEventHandler()
+      fieldMixin.buildFieldRules()
 
-      
-      onMounted(()=>{
-        fieldMixin.handleOnMounted()
-      })
-      
-      onBeforeUnmount(()=>{
-        fieldMixin.unregisterFromRefList()
-      })
+      fieldMixin.handleOnCreated()
 
       return {
         i18nt,

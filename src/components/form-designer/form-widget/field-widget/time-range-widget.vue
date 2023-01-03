@@ -74,10 +74,10 @@
       const fieldMixin = useField(props,data);
 
       const contentForReadMode=computed(()=>{
-          if (!this.fieldModel) {
+          if (!data.fieldModel) {
             return '--'
           } else {
-            return this.fieldModel[0] + ' - ' + this.fieldModel[1]
+            return data.fieldModel[0] + ' - ' + data.fieldModel[1]
           }
       })
 

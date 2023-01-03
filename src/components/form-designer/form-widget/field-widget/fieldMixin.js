@@ -1,6 +1,6 @@
 import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
-import { inject ,ref,toRefs,computed,getCurrentInstance  } from "vue"
+import { inject ,ref,toRefs,computed,getCurrentInstance,nextTick  } from "vue"
 
 import { useEmitter } from '@/utils/emitter'
 import { useI18n,translate } from '@/utils/i18n'
@@ -10,7 +10,7 @@ import { useI18n,translate } from '@/utils/i18n'
 export function useField(props,data){
   
   const { i18nt }=useI18n();
-  const emitter =useEmitter();
+  const emitter = useEmitter();
   const { proxy } = getCurrentInstance()
 
   const refList=inject('refList')
@@ -42,7 +42,6 @@ export function useField(props,data){
   const formModel=computed({
     cache: false,
     get() {
-      console.log("globalModel",globalModel)
       return globalModel.formModel
     }
   })
@@ -106,6 +105,7 @@ export function useField(props,data){
             (subFormData[props.subFormRowIndex][props.field.options.name] === undefined)) &&
             (props.field.options.defaultValue !== undefined)) {
           data.fieldModel = props.field.options.defaultValue
+          debugger
           subFormData[props.subFormRowIndex][props.field.options.name] = props.field.options.defaultValue
         } else if (subFormData[props.subFormRowIndex][props.field.options.name] === undefined) {
           data.fieldModel = null

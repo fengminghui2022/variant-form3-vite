@@ -65,9 +65,9 @@
       fieldMixin.initEventHandler()
 
       const handleCloseCustomEvent=(()=>{
-        if (!!this.field.options.onClose) {
-          let changeFn = new Function(this.field.options.onClose)
-          changeFn.call(this)
+        if (!!props.field.options.onClose) {
+          let changeFn = new Function(props.field.options.onClose)
+          changeFn.call(proxy)
         }
       })
 

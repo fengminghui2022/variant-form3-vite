@@ -14,8 +14,10 @@ function _broadcast(componentName, eventName, params) {
 }
 
 
-import { toRefs,reactive } from 'vue'
-export function useEmitter(proxy){
+import { toRefs,reactive,getCurrentInstance } from 'vue'
+export function useEmitter(){
+  
+  const { proxy } = getCurrentInstance()
   const data=reactive({
       vfEvents: {}
   })

@@ -259,7 +259,7 @@
             return
           }
 
-          this.setFormJson(res.data)
+          setFormJson(res.data)
           $current.$message.success(i18nt('designer.hint.sampleLoadedSuccess'))
         }).catch(error => {
           $current.$message.error(i18nt('designer.hint.sampleLoadedFail') + ':' + error)
@@ -399,7 +399,7 @@
        */
       const getFieldWidgets=(widgetList = null, staticWidgetsIncluded = false)=> {
         return !!widgetList ? getAllFieldWidgets(widgetList, staticWidgetsIncluded) :
-            getAllFieldWidgets(this.designer.widgetList, staticWidgetsIncluded)
+            getAllFieldWidgets(data.designer.widgetList, staticWidgetsIncluded)
       }
 
       /**
@@ -408,7 +408,7 @@
        * @returns {*[]}
        */
       const getContainerWidgets=(widgetList = null)=> {
-        return !!widgetList ? getAllContainerWidgets(widgetList) : getAllContainerWidgets(this.designer.widgetList)
+        return !!widgetList ? getAllContainerWidgets(widgetList) : getAllContainerWidgets(data.designer.widgetList)
       }
 
       /**

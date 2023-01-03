@@ -23,7 +23,7 @@
     setup(props){
       const { i18nt }=useI18n();
       const noLabelSetting=computed(()=> {
-        return (this.selectedWidget.type === 'static-text') || (this.selectedWidget.type === 'html-text')
+        return (props.selectedWidget.type === 'static-text') || (props.selectedWidget.type === 'html-text')
         //|| (this.selectedWidget.type === 'divider')
       })
 

@@ -36,6 +36,7 @@
       return {
         i18nt,
         ...toRefs(props),
+        ...toRefs(data)
       }
     }
   }

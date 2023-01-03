@@ -1,9 +1,5 @@
-import { useEmitter } from '@/utils/emitter'
-
-export function useEmitterMixin(proxy){
-  const editEventHandler=(eventName, eventParams)=> {
-    const emitter= useEmitter(proxy);
-    
+export function useEmitterMixin(emitter){
+  const editEventHandler=(eventName, eventParams)=> {    
     emitter.dispatch('SettingPanel', 'editEventHandler', [eventName, [...eventParams]])
   }
 
