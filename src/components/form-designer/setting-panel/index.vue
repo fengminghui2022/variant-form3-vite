@@ -217,7 +217,6 @@
 
       /* 设置事件 */
       emitter.on$('editEventHandler', (eventParams) => {
-        //debugger
         $current.editEventHandler(eventParams[0], eventParams[1])
       })
 
@@ -289,7 +288,6 @@
       }
 
       const editEventHandler=(eventName, eventParams)=> {
-        //debugger
         data.curEventName = eventName
         data.eventHeader = `${optionModel.value.name}.${eventName}(${eventParams.join(', ')}) {`
         data.eventHandlerCode = props.selectedWidget.options[eventName] || ''

@@ -67,9 +67,8 @@ export function useContainer(props,data,widgetMethods={}){
     setHidden(flag) {
       props.widget.options.hidden = flag
 
-      /* 容器被隐藏后，需要同步清除容器内部字段组件的校验规则 */
-      let clearRulesFn = (fieldWidget) => {
-        let fwName = fieldWidget.options.name
+      const fwHandler = (fw) => {
+        let fwName = fw.options.name
         let fwRef = refMixin.getWidgetRef(fwName)
         if (flag && !!fwRef && !!fwRef.clearFieldRules) {
           fwRef.clearFieldRules()
@@ -80,7 +79,37 @@ export function useContainer(props,data,widgetMethods={}){
         }
       }
 
-      traverseFieldWidgetsOfContainer(props.widget, clearRulesFn)
+      let sfArray = []
+      const cwHandler = (cw) => {
+        if ((cw.type === 'sub-form') || (cw.type === 'grid-sub-form')) {
+          sfArray.push(cw)
+        }
+      }
+      traverseWidgetsOfContainer(props.widget, fwHandler, cwHandler)
+
+      sfArray.forEach(sf => {
+        const sfRef = refMixin.getWidgetRef(sf.options.name)
+        if (!!sfRef) {
+          const rowIds = sfRef.getRowIdData()
+          const sfwHandler = (sfw) => {
+            if (!!rowIds && (rowIds.length > 0)) {
+              rowIds.forEach(rid => {
+                const sfwName = sfw.options.name + '@row' + rid
+                const sfwRef = refMixin.getWidgetRef(sfwName)
+                if (flag && !!sfwRef && !!sfwRef.clearFieldRules) {
+                  sfwRef.clearFieldRules()
+                }
+
+                if (!flag && !!sfwRef && !!sfwRef.buildFieldRules) {
+                  sfwRef.buildFieldRules()
+                }
+              })
+            }
+          }
+
+          traverseFieldWidgetsOfContainer(sfRef.widget, sfwHandler)
+        }
+      })
     },
 
     /**
@@ -96,6 +125,10 @@ export function useContainer(props,data,widgetMethods={}){
         }
       }
       const cwHandler = (cw) => {
+        if (cw.id === props.widget.id) {  //避免死循环！！！
+          return
+        }
+
         const cwName = cw.options.name
         const cwRef = refMixin.getWidgetRef(cwName)
         if (!!cwRef && !!cwRef.setDisabled) {
@@ -293,12 +326,16 @@ export function useContainer(props,data,widgetMethods={}){
     },
 
     getSubFormValues(needValidation = true) {
-      if (props.widget.type === 'sub-form') {
+      if (props.widget.type === 'sub-form' || (props.widget.type === 'grid-sub-form')) {
         //TODO: 逐行校验子表单！！
         return formModel[props.widget.options.name]
       } else {
         proxy.$message.error(i18nt('render.hint.nonSubFormType'))
       }
+    },
+    
+    setSubFormValues(subFormValues) {
+      //在sub-form-item、grid-sub-form-item中实现！！
     },
 
     // validateField(fieldName) { //逐行校验子表单字段

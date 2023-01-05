@@ -32,7 +32,8 @@ export default {
       'grid-col':       'GridCol',
       'table-cell':     'TableCell',
       'tab-pane':       'TabPane',
-      'data-table':     'DataTable',
+      'data-table':     'DataTable',      
+			tree:             'Tree',
       'vf-dialog':      'Dialog',
       'vf-drawer':      'Drawer',
 
@@ -452,6 +453,33 @@ export default {
       dsRequestBooleanTypeError: 'Boolean value error',
       dsValidationError: 'Datasource check failure.',
       dsDuplicatedNameError: 'Duplicate datasource name.',
+      
+      // tree
+      showTreeCheckBox:'Show CheckBox',
+      lazy:'Lazy',
+      treeDataEdit:'Tree Data Edit',
+      defaultExpandAllNode:'Default Expand All',
+      expandRetractAllNode:'Expand/Retract All',
+      selectClearAllNode:'Check/Uncheck All',
+      nodeEdit:"Node Edit",
+      expandAllNode:'Expand All',
+      retractAllNode:'Retract All',
+      selectAllNode:'Check All',
+      clearAllNode:'Uncheck All',
+ 
+      draggable:'Node Draggable',
+      filter:'Filter',
+      expandOnClickNode:'Expand On Click',
+      inputNodeName:'Input Name Of Node',
+      deleteNode:'Delete this node?',
+			nodeDeleted:'Node deleted',
+      tips:'Tips',
+      onNodeCheckRemark:'On Node Check',
+      onNodeClickRemark:'On Node Click',
+      onNodeContextmenuRemark:'ON Node Contextmenu',
+      enterForQuery:'Enter For Query',
+      add:'Add',
+      delete:'Delete',
     }
 
   }

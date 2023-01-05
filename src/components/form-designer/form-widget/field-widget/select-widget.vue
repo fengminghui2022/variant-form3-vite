@@ -70,7 +70,6 @@
       const { i18nt }=useI18n();
       const emitterMixin =useEmitter();
 
-      const fieldEditor=ref(null)
 
       const data=reactive({
         oldFieldValue: null, //field组件change之前的值
@@ -101,7 +100,7 @@
       fieldMixin.handleOnCreated()
 
       const getSelectedLabel=()=> {
-        return fieldEditor.selectedLabel
+        return fieldMixin.fieldEditor.value.selectedLabel
       }
 
       return {
@@ -109,8 +108,6 @@
         ...toRefs(props),
         ...toRefs(data),
         ...fieldMixin,
-
-        fieldEditor,
 
         allowDefaultFirstOption,
 

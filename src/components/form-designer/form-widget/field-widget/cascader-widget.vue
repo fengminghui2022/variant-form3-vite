@@ -94,7 +94,6 @@
 
       const contentForReadMode=computed(()=> {
         if (!!props.field.options.multiple) {
-          //console.log('test======', props.$refs.fieldEditor.presentTags)
           const curTags = fieldEditor.presentTags
           if (!curTags || (curTags.length <= 0)) {
             return '--'

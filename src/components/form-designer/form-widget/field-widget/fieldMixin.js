@@ -26,6 +26,9 @@ export function useField(props,data){
 
 
   data.fieldReadonlyFlag=ref(false)
+  data.dataSetLoadedFlag=ref(false)
+
+  const fieldEditor=ref(null)
 
   const formConfig=computed(()=> {
     return getFormConfig()
@@ -173,6 +176,7 @@ export function useField(props,data){
       /* 监听从数据集加载选项事件 */
       emitter.on$('loadOptionItemsFromDataSet', (dsName) => {
         methods.loadOptionItemsFromDataSet(dsName)
+        data.dataSetLoadedFlag.value = true
       })
 
       emitter.on$('reloadOptionItems', (widgetNames) => {
@@ -258,8 +262,10 @@ export function useField(props,data){
             } catch(err) {
               proxy.$message.error(err.message)
             }
+          } else if (!!curDS && !!curDSetName && !data.dataSetLoadedFlag.value) {
+            loadOptionItemsFromDataSet(curDSName)
           }
-
+          
           return;
         }
 
@@ -415,7 +421,6 @@ export function useField(props,data){
     //--------------------- 组件内部方法 end ------------------//
 
     //--------------------- 事件处理 begin ------------------//
-
     emitFieldDataChange(newValue, oldValue) {
       emitter.emit$('field-value-changed', [newValue, oldValue])
 
@@ -573,7 +578,8 @@ export function useField(props,data){
     },
 
     getFieldEditor() { //获取内置的el表单组件
-      return this.$refs['fieldEditor']
+      return fieldEditor.value
+      
     },
 
     /*
@@ -594,11 +600,14 @@ export function useField(props,data){
     },
 
     getValue() {
-      /* if ((props.field.type === 'picture-upload') || (props.field.type === 'file-upload')) {
-        return data.fileList
-      } else */ {
         return data.fieldModel
-      }
+    },
+    
+    /**
+     * 返回选项类字段的当前选中项的label值
+     */
+    getSelectedLabel() {
+      //TODO: 待实现！！
     },
 
     resetField() {
@@ -610,7 +619,7 @@ export function useField(props,data){
 
       //清空上传组件文件列表
       if ((props.field.type === 'picture-upload') || (props.field.type === 'file-upload')) {
-        this.$refs['fieldEditor'].clearFiles()
+        fieldEditor.value.clearFiles()
         data.fileList.splice(0, data.fileList.length)
       }
     },
@@ -808,6 +817,7 @@ export function useField(props,data){
 
   return {
     refList,
+    fieldEditor,
     getFormConfig,
     globalOptionData,
     globalModel,

@@ -451,6 +451,17 @@
         }
         traverseFieldWidgets(widgetList, handlerFn)
 
+        Object.keys(data.subFormRefList).forEach(sfName => {
+          const fwHandler = (fw) => {
+            if (fw.options.name === widgetName) {
+              subFormName = sfName
+            }
+          }
+
+          const sfRef = data.subFormRefList[sfName]
+          traverseFieldWidgetsOfContainer(sfRef.widget, fwHandler)
+        })
+
         if (!!subFormName) {
           let subFormRef = getWidgetRef(subFormName)
           if (!!subFormRef) {
@@ -656,11 +667,14 @@
 
       const getSubFormValues=(subFormName, needValidation = true)=> {
         let foundSFRef = data.subFormRefList[subFormName]
-        // if (!foundSFRef) {
-        //   return data.formDataModel[subFormName]
-        // }
         return foundSFRef.getSubFormValues(needValidation)
       }
+      
+      const setSubFormValues=(subFormName, subFormValues) => {
+        let foundSFRef = data.subFormRefList[subFormName]
+        return foundSFRef.setSubFormValues(subFormValues)
+      }
+
 
       const disableForm=()=> {
         let wNameList = Object.keys(data.widgetRefList)
@@ -854,7 +868,7 @@
        * @param dsName
        * @param localDsv
        */
-      const executeDataSource=async (dsName, localDsv)=> {
+      const executeDataSource=async (dsName, localDsv = {})=> {
         let ds = getDSByName(data.formJsonObj.formConfig, dsName)
         let newDsv = new Object({})
         overwriteObj(newDsv, props.globalDsv)
@@ -1072,6 +1086,7 @@
             getFieldValue,
             setFieldValue,
             getSubFormValues,
+            setSubFormValues,
             disableForm,
             enableForm,
             resetForm,

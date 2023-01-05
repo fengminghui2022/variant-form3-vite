@@ -623,7 +623,7 @@
       }
 
       const saveFormData=()=>{
-        saveAsFile(data.htmlCode, `formData${generateId()}.json`)
+        saveAsFile(data.formDataJson, `formData${generateId()}.json`)
       }
 
       const resetForm=()=>{

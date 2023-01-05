@@ -392,6 +392,22 @@
       const setDeleteDisabled=(flag)=> {
         data.deleteDisabled = flag
       }
+      
+      /**
+       * 单独给子表单赋值
+       * 注意：该方法仅触发组件的onChange事件以及子表单的onFormRowChange事件，不会触发表单的onFormDataChange等其他事件！！
+       * @param subFormValues
+       */
+      const setSubFormValues=(subFormValues)=> {
+        globalModel.formModel[props.widget.options.name] = subFormValues
+        initRowIdData(false)
+        initWidgetSchemaData()
+
+        setTimeout(() => {  //延时触发SubFormRowChange事件, 便于更新计算字段！！
+          handleSubFormRowChange(subFormValues)
+        }, 800)
+      }
+
 
 
       refMixin.initRefList()
@@ -430,7 +446,8 @@
         handleSubFormRowDelete,
         setDisabled,
         setInsertDisabled,
-        setDeleteDisabled
+        setDeleteDisabled,
+        setSubFormValues
       }
 
     }

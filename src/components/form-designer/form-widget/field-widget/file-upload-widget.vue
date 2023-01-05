@@ -115,6 +115,7 @@
         let uploadURL = props.field.options.uploadURL
         if (!!uploadURL && ((uploadURL.indexOf('DSV.') > -1) || (uploadURL.indexOf('DSV[') > -1))) {
           let DSV = fieldMixin.getGlobalDsv()
+          console.log('test DSV: ', DSV)  //防止DSV被打包工具优化！！！
           return eval(props.field.options.uploadURL)
         }
 

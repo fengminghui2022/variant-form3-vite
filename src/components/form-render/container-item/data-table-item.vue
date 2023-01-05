@@ -5,11 +5,12 @@
 			<el-table ref="dataTable" :data="widget.options.tableData" :class="[customClass]"
 								:height="tableHeight" :style="{'width': widget.options.tableWidth}"
 								:border="widget.options.border" :show-summary="widget.options.showSummary"
-								:row-key="widget.options.rowKey" :tree-props="{ children: widget.options.childrenKey }"
+								:row-key="tableRowKey" :tree-props="{ children: widget.options.childrenKey }"
 								:size="widgetSize" :stripe="widget.options.stripe"
 								:highlight-current-row="singleRowSelectFlag"
 								:row-class-name="getRowClassName"
 								:span-method="getSpanMethod"
+								v-loading="loadingFlag"
 								@current-change="handleCurrentChange"
 								@selection-change="handleSelectionChange"
 								@sort-change="handleSortChange"
@@ -152,7 +153,9 @@
 			total: props.widget.options.pagination.total,
 
 			//是否跳过selectionChange事件
-			skipSelectionChangeEvent: false
+			skipSelectionChangeEvent: false,
+
+			loadingFlag: false,
 		})
 		
       const refMixin = useRef(props);
@@ -193,6 +196,14 @@
 
 		const selectionWidth=computed(()=> {
 			return !props.widget.options.showSummary ? (!props.widget.options.treeDataEnabled ? 42 : 70): 53
+		})
+		
+		const getDataTableRef=computed(()=> {
+			return proxy
+		})
+
+		const tableRowKey=computed(()=> {
+			return !props.widget.options.treeDataEnabled ? null : props.widget.options.rowKey
 		})
 
 
@@ -595,10 +606,13 @@
 				overwriteObj(newDsv, gDsv)
 				overwriteObj(newDsv, localDsv)
 				newDsv.widgetName = props.widget.options.name
+				data.loadingFlag.value = true
 				runDataSourceRequest(curDS, newDsv, refMixin.getFormRef(), false, proxy.$message).then(res => {
 					setTableColumns(res)
+					data.loadingFlag.value = false
 				}).catch(err => {
 					proxy.$message.error(err.message)
+					data.loadingFlag.value = false
 				})
 			}
 		}
@@ -636,7 +650,9 @@
 		 * @param tableData
 		 */
 		const setTableData=(tableData)=> {
+			data.loadingFlag.value = true
 			props.widget.options.tableData = tableData
+			data.loadingFlag.value = false
 		}
 
 		/**
@@ -656,14 +672,17 @@
 				newDsv.widgetName = props.widget.options.name
 				newDsv.pageSize = data.pageSize
 				newDsv.currentPage = data.currentPage
+				data.loadingFlag.value = true
 				runDataSourceRequest(curDS, newDsv, refMixin.getFormRef(), false, proxy.$message).then(res => {
 					if (!!curDSetName && res.hasOwnProperty(curDSetName)) {
 						setTableData(res[curDSetName])
 					} else {
 						setTableData(res)
 					}
+					data.loadingFlag.value = false
 				}).catch(err => {
 					proxy.$message.error(err.message)
+					data.loadingFlag.value = false
 				})
 			}
 		}
@@ -691,6 +710,14 @@
 			if (pagination.total !== undefined) {
 				data.total = pagination.total
 				props.widget.options.pagination.total = pagination.total
+			}
+		}
+		
+		const getPagination=()=> {
+			return {
+				currentPage: props.widget.options.pagination.currentPage,
+				pageSize: props.widget.options.pagination.pageSize,
+				total: props.widget.options.pagination.total
 			}
 		}
 
@@ -731,6 +758,8 @@
 			buttonsColumnFixed,
 			tableHeight,
 			selectionWidth,
+			getDataTableRef,
+			tableRowKey,
 
 			selectWidget,
 			renderHeader,
@@ -770,6 +799,7 @@
 			setTableData,
 			loadDataFromDS,
 			setPagination,
+			getPagination,
 			getSelectedRow,
 			getSelectedIndex,
 		}

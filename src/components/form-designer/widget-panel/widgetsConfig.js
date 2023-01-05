@@ -303,6 +303,79 @@ export const containers = [
     }
   },
 
+	{
+	  type: 'tree',
+	  icon: 'tree',
+		category: 'container',
+    widgetList: [],
+	  options: {
+			name: '',
+			label: '',
+			filter:true,// 过滤框
+			draggable:false,// 可拖拽
+			defaultExpandAllNode:true,// 默认展开所有节点
+			selectClearAllNode:true,// 显示展开/收缩所有节点功能
+			expandRetractAllNode:true,// 显示展开/收缩所有节点功能
+			showCheckBox:true,// 展示复选框
+			expandOnClickNode:true,// 点击节点收缩
+			lazy:false,// 懒加载
+			treeDataEdit:true,// 编辑树节点数据
+			nodeEdit:true,// 节点编辑
+			size: 'default',
+			disabled: false,
+			hidden: false,
+      dsEnabled: false, //是否使用数据源数据
+      dsName: '',  //数据源名称
+      dataSetName: '',  //数据集名称
+			//-------------------
+			customClass: '',  //自定义css类名
+			//-------------------
+      onCreated: '',
+      onMounted: '',
+			onNodeClick:'',
+			onNodeCheck:'',
+			onNodeContextmenu:'',
+      onCheckChange: '',
+			treeData:[
+				{
+					label: '一级 1',
+					children: [{
+						label: '二级 1-1',
+						children: [{
+							label: '三级 1-1-1'
+						}]
+					}]
+				}, {
+					label: '一级 2',
+					children: [{
+						label: '二级 2-1',
+						children: [{
+							label: '三级 2-1-1'
+						}]
+					}, {
+						label: '二级 2-2',
+						children: [{
+							label: '三级 2-2-1'
+						}]
+					}]
+				}, {
+					label: '一级 3',
+					children: [{
+						label: '二级 3-1',
+						children: [{
+							label: '三级 3-1-1'
+						}]
+					}, {
+						label: '二级 3-2',
+						children: [{
+							label: '三级 3-2-1'
+						}]
+					}]
+				},
+			]
+	  }
+	},
+	
   {
     type: 'vf-dialog',
     category: 'container',
