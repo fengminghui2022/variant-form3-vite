@@ -529,7 +529,7 @@
        *   title: '表单模板名称',
        *   imgUrl: '模板缩略图URL',
        *   jsonStr: '表单模板json字符串',  //优先级高于jsonUrl
-       *   jsonUrl: '表单模板对象读取URL'  //优先级低于jsonStr
+       *   jsonUrl: '表单模板对象读取URL',  //优先级低于jsonStr
        *   description: ‘表单模板描述文字’,
        *   i18n: {  //优先级高于title和description
        *      'zh-CN': {

@@ -1,3 +1,5 @@
+import {traverseWidgetsOfContainer} from "@/utils/util";
+
 export default {
   inject: ['getFormConfig', 'getGlobalDsv'],
   computed: {
@@ -69,6 +71,15 @@ export default {
     removeWidget() {
       if (!!this.parentList) {
         const widgetRefName = this.designer.selectedWidgetName
+        const childrenRefNames = []
+        const fwHandler = (fw) => {
+          childrenRefNames.push( fw.options.name )
+        }
+        const cwHandler = (cw) => {
+          childrenRefNames.push( cw.options.name )
+        }
+        traverseWidgetsOfContainer(this.designer.selectedWidget, fwHandler, cwHandler)
+
         let nextSelected = null
         if (this.parentList.length === 1) {
           if (!!this.parentWidget) {
@@ -85,6 +96,7 @@ export default {
           this.designer.setSelected(nextSelected)
 
           this.designer.formWidget.deleteWidgetRef(widgetRefName)  //删除组件ref！！！
+          this.designer.formWidget.deletedChildrenRef(childrenRefNames)  //删除容器组件的所有内嵌组件ref！！！
           this.designer.emitHistoryChange()
         })
       }

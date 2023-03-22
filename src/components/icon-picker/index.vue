@@ -9,6 +9,7 @@
     <el-option class="icon-picker-option" :value="modelValue">
       <div>
         <ul>
+          <li class="clear-icon"><span @click="clearHandle">{{i18nt('designer.toolbar.clear')}}</span></li>
           <li v-for="iconClass in icons" :key="iconClass" @click="iconClick(iconClass)">
             <span><el-icon :size="16"><component :is="iconClass" /></el-icon></span>
           </li>
@@ -22,9 +23,11 @@
 <script>
   import {eleIcons} from "@/utils/el-icons";
   import SvgIcon from '@/components/svg-icon'
+  import i18n from "@/utils/i18n";
 
   export default {
     name: "icon-picker",
+    mixins: [i18n],
     props: ['modelValue'],
     emits: ['update:modelValue'],
     components: {
@@ -50,6 +53,10 @@
 <style scoped>
   .clearfix {
     clear: both;
+  }
+
+  .clear-icon span {
+    font-size: 12px;
   }
 
   .icon-picker-option.el-select-dropdown__item {

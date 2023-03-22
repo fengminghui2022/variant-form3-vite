@@ -1233,7 +1233,7 @@ export const advancedFields = [
       labelTooltip: null,
       minLength: null,
       maxLength: null,
-      showWordLimit: false,
+      //showWordLimit: false,
       //-------------------
       onCreated: '',
       onMounted: '',

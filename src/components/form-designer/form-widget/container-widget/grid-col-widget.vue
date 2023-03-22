@@ -47,6 +47,7 @@
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import SvgIcon from '@/components/svg-icon'
   import refMixinDesign from "@/components/form-designer/refMixinDesign"
+  import {traverseWidgetsOfContainer} from "@/utils/util";
 
   export default {
     name: "GridColWidget",
@@ -190,7 +191,7 @@
             this.layoutProps.span = this.widget.options.md || 12
           }
         } else {
-          this.layoutProps.spn = this.widget.options.span
+          this.layoutProps.span = this.widget.options.span
         }
       },
 
@@ -243,6 +244,16 @@
 
       removeWidget() {
         if (!!this.parentList) {
+          const widgetRefName = this.designer.selectedWidgetName
+          const childrenRefNames = []
+          const fwHandler = (fw) => {
+            childrenRefNames.push( fw.options.name )
+          }
+          const cwHandler = (cw) => {
+            childrenRefNames.push( cw.options.name )
+          }
+          traverseWidgetsOfContainer(this.designer.selectedWidget, fwHandler, cwHandler)
+
           let nextSelected = null
           if (this.parentList.length === 1) {
             if (!!this.parentWidget) {
@@ -256,10 +267,10 @@
 
           this.$nextTick(() => {
             this.parentList.splice(this.indexOfParentList, 1)
-            //if (!!nextSelected) {
             this.designer.setSelected(nextSelected)
-            //}
 
+            this.designer.formWidget.deleteWidgetRef(widgetRefName)  //删除组件ref！！！
+            this.designer.formWidget.deletedChildrenRef(childrenRefNames)  //删除容器组件的所有内嵌组件ref！！！
             this.designer.emitHistoryChange()
           })
         }

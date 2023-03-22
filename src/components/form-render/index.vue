@@ -57,7 +57,7 @@
     overwriteObj,
     getContainerWidgetByName,
     traverseFieldWidgetsOfContainer,
-    cloneFormConfigWithoutEventHandler
+    cloneFormConfigWithoutEventHandler, getDefaultFormConfig
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
@@ -610,6 +610,10 @@
       },
 
       setFormData(formData) { //设置表单数据
+        let formDataObj = formData
+        if (typeof formData === 'string') {
+          formDataObj = JSON.parse(formData)
+        }
         Object.keys(this.formDataModel).forEach(propName => {
           if (!!formData && formData.hasOwnProperty(propName)) {
             this.formDataModel[propName] = deepClone( formData[propName] )
@@ -1018,6 +1022,17 @@
             })
           }
         })
+      },
+
+      /**
+       * 清空表单所有组件（包含全局函数、自定义CSS代码）
+       */
+      setBlankFormJson() {
+        let blankFormJson = {
+          widgetList: [],
+          formConfig: getDefaultFormConfig()
+        }
+        this.setFormJson(blankFormJson)
       },
 
       //--------------------- 以上为组件支持外部调用的API方法 end ------------------//

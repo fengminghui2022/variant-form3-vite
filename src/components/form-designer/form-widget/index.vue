@@ -193,6 +193,13 @@
         delete this.widgetRefList[widgetRefName]
       },
 
+      /* 删除容器组件的所有内嵌组件ref */
+      deletedChildrenRef(childrenRefNames) {
+        childrenRefNames.forEach((childRefName) => {
+          delete this.widgetRefList[childRefName]
+        })
+      },
+
     }
   }
 </script>

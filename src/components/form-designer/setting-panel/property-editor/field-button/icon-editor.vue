@@ -1,9 +1,4 @@
 <template>
-  <!--
-  <el-form-item :label="i18nt('designer.setting.buttonIcon')">
-    <el-input type="text" v-model="optionModel.icon"></el-input>
-  </el-form-item>
-  -->
   <el-form-item :label="i18nt('designer.setting.buttonIcon')">
     <icon-picker v-model="optionModel.icon"></icon-picker>
   </el-form-item>
