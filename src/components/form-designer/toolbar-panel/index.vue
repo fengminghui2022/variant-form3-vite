@@ -304,7 +304,7 @@
 
     },
     mounted() {
-     
+
     },
     methods: {
       showToolButton(configName) {
@@ -519,6 +519,8 @@
       },
 
       exportCode() {
+        this.formJson.widgetList = deepClone(this.designer.widgetList)
+        this.formJson.formConfig = deepClone(this.designer.formConfig)
         this.vueCode = generateCode(this.formJson)
         this.htmlCode = generateCode(this.formJson, 'html')
         this.showExportCodeDialogFlag = true

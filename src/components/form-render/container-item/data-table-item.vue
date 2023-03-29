@@ -43,6 +43,7 @@
 						<template #default="scope">
 							<template v-if="item.formatS === 'render' && !!item.render">
 								<table-column-custom-render :row="scope.row" :column="item" :data-table-ref="getDataTableRef"
+																						:row-index="scope.$index" :column-index="index"
 																						:renderFn="getColumnRender(scope.row, item)" />
 							</template>
 							<template v-else-if="!!item.formatS && (item.formatS !== 'renders')">

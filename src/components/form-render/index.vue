@@ -615,8 +615,8 @@
           formDataObj = JSON.parse(formData)
         }
         Object.keys(this.formDataModel).forEach(propName => {
-          if (!!formData && formData.hasOwnProperty(propName)) {
-            this.formDataModel[propName] = deepClone( formData[propName] )
+          if (!!formDataObj && formDataObj.hasOwnProperty(propName)) {
+            this.formDataModel[propName] = deepClone( formDataObj[propName] )
           }
         })
 
