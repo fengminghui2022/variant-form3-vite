@@ -1,5 +1,5 @@
 <template>
-  <el-select :value="modelValue" clearable @clear="clearHandle">
+  <el-select v-model="modelValue" clearable @clear="clearHandle">
     <template #prefix>
     <span class="icon-picker-selected" v-if="modelValue !== '' && modelValue != null">
       <el-icon :size="16"><component :is="modelValue" /></el-icon>
@@ -9,7 +9,6 @@
     <el-option class="icon-picker-option" :value="modelValue">
       <div>
         <ul>
-          <li class="clear-icon"><span @click="clearHandle">{{i18nt('designer.toolbar.clear')}}</span></li>
           <li v-for="iconClass in icons" :key="iconClass" @click="iconClick(iconClass)">
             <span><el-icon :size="16"><component :is="iconClass" /></el-icon></span>
           </li>
@@ -53,10 +52,6 @@
 <style scoped>
   .clearfix {
     clear: both;
-  }
-
-  .clear-icon span {
-    font-size: 12px;
   }
 
   .icon-picker-option.el-select-dropdown__item {

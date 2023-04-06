@@ -4,7 +4,7 @@
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <div class="full-width-input" :class="{'readonly-mode-cascader' : isReadMode}">
       <el-cascader ref="fieldEditor" :options="field.options.optionItems" v-model="fieldModel"
-                   :disabled="field.options.disabled"
+                   :disabled="field.options.disabled || isReadMode"
                    :clearable="field.options.clearable"
                    :filterable="field.options.filterable"
                    :placeholder="field.options.placeholder || i18nt('render.hint.selectPlaceholder')"

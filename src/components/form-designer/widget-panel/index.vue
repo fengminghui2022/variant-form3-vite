@@ -69,7 +69,7 @@
 
         <template v-for="(ft, idx) in formTemplates">
           <el-card :bord-style="{ padding: '0' }" shadow="hover" class="ft-card">
-            <el-popover placement="right" trigger="hover">
+            <el-popover placement="right" trigger="hover" popper-class="image-popover">
               <template #reference>
                 <img :src="ft.imgUrl" style="width: 200px">
               </template>
@@ -418,7 +418,11 @@
     .clear-fix:after {
       clear: both;
     }
-
+  }
+</style>
+<style lang="scss">
+  .image-popover {
+    width: 750px !important;
   }
 
 </style>

@@ -1,6 +1,6 @@
 import {buildClassAttr, buildContainerWidget, buildFieldWidget} from '@/utils/sfc-generator'
 
-export const cardTemplateGenerator = function (cw, formConfig) {
+export const cardTemplateGenerator = function (cw, formConfig, vue3Flag = false) {
   const wop = cw.options
   //const headerAttr = `header="${wop.label}"`
   const classAttr = buildClassAttr(cw)
@@ -20,9 +20,9 @@ export const cardTemplateGenerator = function (cw, formConfig) {
     ${
       cw.widgetList.map(wItem => {
         if (wItem.category === 'container') {
-          return buildContainerWidget(wItem, formConfig)
+          return buildContainerWidget(wItem, formConfig, vue3Flag)
         } else {
-          return buildFieldWidget(wItem, formConfig)
+          return buildFieldWidget(wItem, formConfig, vue3Flag)
         }
       }).join('')
     }
@@ -32,7 +32,7 @@ export const cardTemplateGenerator = function (cw, formConfig) {
   return cardTemplate
 }
 
-export const alertTemplateGenerator = function(fw, formConfig) {
+export const alertTemplateGenerator = function(fw, formConfig, vue3Flag = false) {
   const wop = fw.options
   const titleAttr = `title="${wop.title}"`
   const typeAttr = `type=${wop.type}`

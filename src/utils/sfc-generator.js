@@ -60,7 +60,7 @@ const rowId = () => {
 };
 
 const containerTemplates = {  //容器组件属性
-  'grid': (ctn, formConfig) => {
+  'grid': (ctn, formConfig, vue3Flag = false) => {
     const gridClassAttr = buildClassAttr(ctn)
     const gridTemplate =
 `<el-row ${gridClassAttr}>
@@ -77,9 +77,9 @@ ${ctn.cols.map(col => {
   return `<el-col ${spanAttr} ${mdAttr} ${smAttr} ${xsAttr} ${offsetAttr} ${pushAttr} ${pullAttr} ${colClassAttr}>
     ${col.widgetList.map(cw => {
         if (cw.category === 'container') {
-          return buildContainerWidget(cw, formConfig)
+          return buildContainerWidget(cw, formConfig, vue3Flag)
         } else {
-          return buildFieldWidget(cw, formConfig)
+          return buildFieldWidget(cw, formConfig, vue3Flag)
         }
       }).join('')
     }
@@ -91,7 +91,7 @@ ${ctn.cols.map(col => {
     return gridTemplate
   },
 
-  'table': (ctn, formConfig) => {
+  'table': (ctn, formConfig, vue3Flag = false) => {
     const tableClassAttr = buildClassAttr(ctn, 'table-layout')
     const tableTemplate =
 `<div class="table-container">
@@ -111,9 +111,9 @@ ${ctn.cols.map(col => {
 
             return `<td ${tdClassAttr} ${colspanAttr} ${rowspanAttr} ${tdStyleAttr}>${td.widgetList.map(tw => {
                           if (tw.category === 'container') {
-                            return buildContainerWidget(tw, formConfig)
+                            return buildContainerWidget(tw, formConfig, vue3Flag)
                           } else {
-                            return buildFieldWidget(tw, formConfig)
+                            return buildFieldWidget(tw, formConfig, vue3Flag)
                           }
                         }).join('')
                         }
@@ -127,7 +127,7 @@ ${ctn.cols.map(col => {
     return tableTemplate
   },
 
-  'tab': (ctn, formConfig) => {
+  'tab': (ctn, formConfig, vue3Flag = false) => {
     const tabClassAttr = buildClassAttr(ctn)
     const vModel = ctn.tabs && (ctn.tabs.length > 0) ? `v-model="${ctn.options.name}ActiveTab"` : ''
     const tabTemplate =
@@ -139,9 +139,9 @@ ${ctn.cols.map(col => {
       return `<el-tab-pane name="${tabOpt.name}" label="${tabOpt.label}" ${disabledAttr}>
         ${tab.widgetList.map(tw => {
           if (tw.category === 'container') {
-            return buildContainerWidget(tw, formConfig)
+            return buildContainerWidget(tw, formConfig, vue3Flag)
           } else {
-            return buildFieldWidget(tw, formConfig)
+            return buildFieldWidget(tw, formConfig, vue3Flag)
           }
         }).join('')
       }</el-tab-pane>`
