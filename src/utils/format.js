@@ -47,7 +47,7 @@ export function formatDate4(date) {
 		return date;
 	}
 	date = new Date(Date.parse(date)); //转换成Date
-	return date.toLocaleString()
+	return date.toLocaleString().replace(/\//g, '-')
 }
 
 export function formatDate5(date) {
@@ -55,7 +55,7 @@ export function formatDate5(date) {
 		return date;
 	}
 	date = new Date(Date.parse(date)); //转换成Date
-	return date.toLocaleString('chinese', { hour12: false })
+	return date.toLocaleString('chinese', { hour12: false }).replace(/\//g, '-')
 }
 
 // ###,###,###,##0.######

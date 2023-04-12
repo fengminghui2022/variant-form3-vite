@@ -238,7 +238,7 @@
 					return ''
 				}
 
-				if(!!column.formatS) {
+				if(!!column.formatS && !!column.show) {
 					switch(column.formatS) {
 						case 'd1':
 								return formatDate1(cellValue);

@@ -186,6 +186,10 @@
 			},
 
 			formatterValue(row, column, cellValue) {
+				if (!cellValue) {
+					return ''
+				}
+
 				if(!!column.formatS && !!column.show) {
 					switch(column.formatS) {
 						case 'd1':
