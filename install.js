@@ -42,6 +42,7 @@ import StaticContentWrapper from '@/components/form-designer/form-widget/field-w
 import FormItemWrapper from '@/components/form-designer/form-widget/field-widget/form-item-wrapper'
 import emitter from '@/utils/emitter'
 import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin"
+import eventMixin from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
 // sdk import end
 
 
@@ -122,6 +123,7 @@ const VFormSDK = {
   FormItemWrapper,
   emitter,
   fieldMixin,
+  eventMixin,
 }
 
 export default {
