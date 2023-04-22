@@ -93,7 +93,6 @@
     },
     methods: {
       onTabClick(evt) {
-        console.log('onTabClick', evt)
         let paneName = evt.paneName
         this.widget.tabs.forEach((tp) => {
           tp.options.active = tp.options.name === paneName;
