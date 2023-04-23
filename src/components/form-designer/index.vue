@@ -660,7 +660,7 @@
         left: 258px;
         border-radius: 0 8px 8px 0;
         background: #fff;
-        z-index: 9999;
+        z-index: 8;
         padding-top: 16px;
 
         i {
@@ -690,7 +690,7 @@
         right: 298px;
         border-radius: 8px 0 0 8px;
         background: #fff;
-        z-index: 9999;
+        z-index: 8;
         padding-top: 16px;
         padding-right: -5px !important;
 
