@@ -65,7 +65,7 @@
 		<el-form-item :label="i18nt('designer.setting.treeDataEnabled')">
 			<el-switch v-model="optionModel.treeDataEnabled" @change="handleTDEChange"></el-switch>
 		</el-form-item>
-		<el-form-item v-if="!!optionModel.treeDataEnabled" :label="i18nt('designer.setting.rowKeyOfTreeData')">
+		<el-form-item :label="i18nt('designer.setting.rowKeyOfTreeData')">
 			<el-input v-model="optionModel.rowKey"></el-input>
 		</el-form-item>
 		<el-form-item v-if="!!optionModel.treeDataEnabled" :label="i18nt('designer.setting.childrenKeyOfTreeData')">

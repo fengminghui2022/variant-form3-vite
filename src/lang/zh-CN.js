@@ -383,7 +383,7 @@ export default {
       deleteTableColumn: '删除列',
       onlyOneColumnCannotBeDeleted: '表格只有一列时不可删除.',
       treeDataEnabled: '允许加载树形数据',
-      rowKeyOfTreeData: '树形数据ID键',
+      rowKeyOfTreeData: '行数据Key',
       childrenKeyOfTreeData: '树形数据子节点键',
       showButtonsColumn: '显示操作按钮列',
       buttonsColumnEdit: '操作按钮编辑',

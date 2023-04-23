@@ -190,7 +190,7 @@
 			},
 
 			tableRowKey() {
-				return !this.widget.options.treeDataEnabled ? null : this.widget.options.rowKey
+				return !this.widget.options.rowKey ? null : this.widget.options.rowKey
 			},
 
 		},
