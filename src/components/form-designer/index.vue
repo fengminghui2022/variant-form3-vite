@@ -36,9 +36,16 @@
     </el-header>
 
     <el-container class="main-content">
-      <el-aside class="side-panel">
+      <el-aside v-show="leftAsideVisible" class="side-panel">
         <widget-panel :designer="designer" />
       </el-aside>
+
+      <div class="left-aside-toggle-bar" :class="{'aside-hidden': !leftAsideVisible}" @click="toggleLeftAside">
+        <el-icon :size="18">
+          <CaretLeft v-if="leftAsideVisible" />
+          <CaretRight v-else />
+        </el-icon>
+      </div>
 
       <el-container class="center-layout-container">
         <el-header class="toolbar-header">
@@ -55,7 +62,15 @@
           </el-scrollbar>
         </el-main>
       </el-container>
-      <el-aside class="setting-panel">
+
+      <div class="right-aside-toggle-bar" :class="{'aside-hidden': !rightAsideVisible}" @click="toggleRightAside">
+        <el-icon :size="18">
+          <CaretRight v-if="rightAsideVisible" />
+          <CaretLeft v-else />
+        </el-icon>
+      </div>
+
+      <el-aside v-show="rightAsideVisible" class="setting-panel">
         <setting-panel :designer="designer" :selected-widget="designer.selectedWidget" :global-dsv="globalDsv"
                        :form-config="designer.formConfig" @edit-event-handler="testEEH" />
       </el-aside>
@@ -83,6 +98,7 @@
     clearFormTemplates,
     getAllFormTemplates
   } from "@/components/form-designer/widget-panel/templatesConfig";
+  import { CaretLeft, CaretRight } from '@element-plus/icons-vue'
 
   export default {
     name: "VFormDesigner",
@@ -94,6 +110,8 @@
       ToolbarPanel,
       SettingPanel,
       VFormWidget,
+      CaretLeft,
+      CaretRight,
     },
     props: {
       /* 后端字段列表API */
@@ -173,6 +191,9 @@
         fieldList: [],
 
         externalComponents:  {},  //外部组件实例集合
+
+        leftAsideVisible: true,
+        rightAsideVisible: true,
       }
     },
     provide() {
@@ -546,7 +567,15 @@
        */
       addFormTemplate(newFormTemplate) {
         addFormTemplate(newFormTemplate)
-      }
+      },
+
+      toggleLeftAside() {
+        this.leftAsideVisible = !this.leftAsideVisible
+      },
+
+      toggleRightAside() {
+        this.rightAsideVisible =!this.rightAsideVisible
+      },
 
       //TODO: 增加更多方法！！
 
@@ -620,9 +649,71 @@
           }
         }
       }
+
+      .left-aside-toggle-bar {
+        display: block;
+        cursor: pointer;
+        height: 36px;
+        width: 12px;
+        position: absolute;
+        top: calc(50% - 18px);
+        left: 258px;
+        border-radius: 0 8px 8px 0;
+        background: #fff;
+        z-index: 9999;
+        padding-top: 16px;
+
+        i {
+          font-size: 18px;
+          color: #909399;
+          margin-left: -3px;
+        }
+      }
+
+      .left-aside-toggle-bar:hover {
+        i {
+          color: $--color-primary;
+        }
+      }
+
+      .left-aside-toggle-bar.aside-hidden {
+        left: -2px;
+      }
+
+      .right-aside-toggle-bar {
+        display: block;
+        cursor: pointer;
+        height: 36px;
+        width: 12px;
+        position: absolute;
+        top: calc(50% - 18px);
+        right: 298px;
+        border-radius: 8px 0 0 8px;
+        background: #fff;
+        z-index: 9999;
+        padding-top: 16px;
+        padding-right: -5px !important;
+
+        i {
+          font-size: 18px;
+          color: #909399;
+          position: relative;
+          top: 3px;
+          left: -4px;
+        }
+      }
+
+      .right-aside-toggle-bar:hover {
+        i {
+          color: $--color-primary;
+        }
+      }
+
+      .right-aside-toggle-bar.aside-hidden {
+        right: -2px;
+      }
     }
   }
-
 
   .el-container.main-container {
     background: #fff;
