@@ -13,6 +13,8 @@ import 'virtual:svg-icons-register'
 import ContainerWidgets from '@/components/form-designer/form-widget/container-widget/index'
 import ContainerItems from '@/components/form-render/container-item/index'
 import VFormRender from '@/components/form-render/index'
+import TableMultiLevelColumn from '@/components/form-designer/form-widget/table-multi-level-column'
+import TableHighLevelColumn from '@/components/form-render/table-high-level-column'
 
 import { addDirective } from '@/utils/directive'
 import { loadExtension } from '@/extension/extension-loader'
@@ -31,6 +33,8 @@ addDirective(vfApp)
 vfApp.use(ContainerWidgets)
 vfApp.use(ContainerItems)
 vfApp.component('VFormRender', VFormRender)
+vfApp.component('TableMultiLevelColumn', TableMultiLevelColumn)
+vfApp.component('TableHighLevelColumn', TableHighLevelColumn)
 loadExtension(vfApp)
 
 vfApp.mount('#app')

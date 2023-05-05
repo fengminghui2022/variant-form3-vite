@@ -400,6 +400,14 @@ export default {
       addOperationButton: '增加按钮',
       deleteOperationButtonHint: '确定删除该按钮？',
       operationButtonDuplicatedNameError: '按钮名称不可重复',
+      tableHeader: '表头',
+      insertTableHeader: '插入表头',
+      insertTableSubHeader: '插入下级表头',
+      tableDataColumn: '数据列',
+      insertTableDataColumn: '插入数据列',
+      insertTableSubDataColumn: '插入下级数据列',
+      onlyDragBetweenSiblingNodes: '只能在同级节点之间进行拖拽排序！',
+      getHeaderLevelTitle: function(level) { return level + '级表头'},
 
       //data-source
       dsEnabled: '使用数据源',

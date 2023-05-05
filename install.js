@@ -11,6 +11,9 @@ import '@/iconfont/iconfont.css'
 import ContainerWidgets from '@/components/form-designer/form-widget/container-widget/index'
 import ContainerItems from '@/components/form-render/container-item/index'
 
+import TableMultiLevelColumn from '@/components/form-designer/form-widget/table-multi-level-column'
+import TableHighLevelColumn from '@/components/form-render/table-high-level-column'
+
 import { addDirective } from '@/utils/directive'
 import { loadExtension } from '@/extension/extension-loader'
 
@@ -56,6 +59,8 @@ VFormDesigner.install = function (app) {
   registerIcon(app)
   app.component('draggable', Draggable)
   app.component(VFormDesigner.name, VFormDesigner)
+  app.component(TableMultiLevelColumn.name, TableMultiLevelColumn)
+  app.component(TableHighLevelColumn.name, TableHighLevelColumn)
 }
 
 VFormRender.install = function (app) {
@@ -65,11 +70,14 @@ VFormRender.install = function (app) {
 
   registerIcon(app)
   app.component(VFormRender.name, VFormRender)
+  app.component(TableHighLevelColumn.name, TableHighLevelColumn)
 }
 
 const components = [
   VFormDesigner,
-  VFormRender
+  VFormRender,
+  TableMultiLevelColumn,
+  TableHighLevelColumn
 ]
 
 const install = (app) => {

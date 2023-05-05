@@ -28,32 +28,8 @@
 												 :width="selectionWidth"  fixed="left"></el-table-column>
 
 				<template v-for="(item, index) in widget.options.tableColumns">
-					<el-table-column
-													 v-if="item.show !== false"
-													 :key="index"
-													 :prop="item.prop"
-													 :label="item.label"
-													 :sortable="item.sortable"
-													 :fixed="!item.fixed ? false : item.fixed"
-													 :align="item.align ? item.align:'center'"
-													 :formatter="formatterValue"
-													 :format="item.format"
-													 :show-overflow-tooltip="true"
-													 :min-width="item.width">
-						<template #default="scope">
-							<template v-if="item.formatS === 'render' && !!item.render">
-								<table-column-custom-render :row="scope.row" :column="item" :data-table-ref="getDataTableRef"
-																						:row-index="scope.$index" :column-index="index"
-																						:renderFn="getColumnRender(scope.row, item)" />
-							</template>
-							<template v-else-if="!!item.formatS && (item.formatS !== 'renders')">
-								<span>{{formatterValue(scope.row, item, scope.row[item.prop])}}</span>
-							</template>
-							<template v-else>
-								<span>{{scope.row[item.prop]}}</span>
-							</template>
-						</template>
-					</el-table-column>
+					<table-high-level-column :column-schema="item" :data-table-ref="getDataTableRef" :column-index="index">
+					</table-high-level-column>
 				</template>
 
 				<template v-if="!!widget.options.showButtonsColumn">
@@ -100,12 +76,14 @@
 	import containerItemMixin from "@/components/form-render/container-item/containerItemMixin"
 	import TableColumnCustomRender from '@/components/form-render/table-column-custom-render'
 	import {deepClone, getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
+	import TableHighLevelColumn from "@/components/form-render/table-high-level-column";
 
   export default {
     name: "DataTableItem",
     componentName: 'ContainerItem',  //必须固定为ContainerItem，用于接收父级组件的broadcast事件
     mixins: [emitter, i18n, refMixin, containerItemMixin],
 		components: {
+			TableHighLevelColumn,
 		  ContainerItemWrapper,
 			TableColumnCustomRender,
 		  ...FieldComponents,

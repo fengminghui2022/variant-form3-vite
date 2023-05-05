@@ -18,19 +18,7 @@
 												 :width="selectionWidth" fixed="left"></el-table-column>
 
 				<template v-for="(item, index) in widget.options.tableColumns">
-					<el-table-column v-if="item.show !== false"
-													 :key="index"
-													 :prop="item.prop"
-													 :label="item.label"
-													 :sortable="item.sortable"
-													 :fixed="!item.fixed ? false : item.fixed"
-													 :align="item.align ? item.align:'center'"
-													 :formatter="formatterValue"
-													 :format="item.format"
-													 :show-overflow-tooltip="true"
-													 :width="item.width">
-						<template #header>{{item.label}}</template>
-					</el-table-column>
+					<table-multi-level-column :column-schema="item"></table-multi-level-column>
 				</template>
 
 				<template v-if="!!widget.options.showButtonsColumn">
@@ -78,6 +66,7 @@
 	import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 	import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
 	import refMixinDesign from "@/components/form-designer/refMixinDesign"
+	import TableMultiLevelColumn from "@/components/form-designer/form-widget/table-multi-level-column";
 
   export default {
     name: "DataTableWidget",
@@ -85,6 +74,7 @@
     mixins: [i18n, containerMixin, refMixinDesign],
 		inject: ['refList'],
 		components: {
+			TableMultiLevelColumn,
 		  ContainerWrapper,
 		  ...FieldComponents,
 		},
@@ -227,6 +217,10 @@
 
 			handleCurrentPageChange(currentPage) {
 				//
+			},
+
+			refreshLayout() { // 刷新表格显示，防止行列显示错位！！
+				this.$refs['dataTable'].doLayout()
 			},
 
 			getTableColumns() {

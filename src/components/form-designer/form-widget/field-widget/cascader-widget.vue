@@ -85,15 +85,12 @@
       },
 
       contentForReadMode() {
-        if (!!this.field.options.multiple) {
-          const curTags = this.$refs.fieldEditor.presentTags
-          if (!curTags || (curTags.length <= 0)) {
-            return '--'
-          } else {
-            return curTags.map(tagItem => tagItem.text).join(', ')
-          }
+        let onlyLeafFlag = !this.field.options.checkStrictly
+        let checkedNodes = this.$refs.fieldEditor.getCheckedNodes(onlyLeafFlag)
+        if (!checkedNodes || (checkedNodes.length <= 0)) {
+          return '--'
         } else {
-          return this.$refs.fieldEditor.presentText || '--'
+          return checkedNodes.map(nodeItem => nodeItem.text).join(", ")
         }
       },
 

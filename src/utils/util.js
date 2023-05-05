@@ -574,8 +574,8 @@ export async function runDataSourceRequest(dataSource, DSV, VFR, isSandbox, $mes
     return dhFn.call(null, result, isSandbox, DSV, VFR)
   } catch (err) {
     let ehFn = new Function('error', 'isSandbox', 'DSV', '$message', 'VFR', dataSource.errorHandlerCode)
-    ehFn.call(null, err, isSandbox, DSV, $message, VFR)
     console.error(err)
+    return ehFn.call(null, err, isSandbox, DSV, $message, VFR)
   }
 }
 

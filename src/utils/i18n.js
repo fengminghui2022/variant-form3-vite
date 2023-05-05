@@ -78,6 +78,10 @@ export default {
       return i18n.$st(key)
     },
 
+    i18ntp(key, params) {
+      return i18n.$st(key, params)
+    },
+
     /* 如果key1不存在，则查找key2 */
     i18n2t(key1, key2) {
       return i18n.$st2(key1, key2)

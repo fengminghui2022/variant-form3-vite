@@ -359,7 +359,7 @@
           text-overflow: ellipsis;
           overflow: hidden;
           background: #fff;
-          border: 1px solid #e8e9eb;
+          border: 1px solid #DCDFE6;
           border-radius: 4px;
           padding: 0 8px;
         }

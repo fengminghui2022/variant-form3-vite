@@ -72,7 +72,7 @@
 			<el-input v-model="optionModel.childrenKey"></el-input>
 		</el-form-item>
 		<el-form-item :label="i18nt('designer.setting.showButtonsColumn')">
-			<el-switch v-model="optionModel.showButtonsColumn"></el-switch>
+			<el-switch v-model="optionModel.showButtonsColumn" @change="handleShowButtonsColumnChange"></el-switch>
 		</el-form-item>
 		<el-form-item :label="i18nt('designer.setting.buttonsColumnEdit')" v-if="!!optionModel.showButtonsColumn">
 			<el-button type="primary" plain round @click="editButtonsColumn">{{i18nt('designer.setting.editAction')}}</el-button>
@@ -97,17 +97,26 @@
 			<el-dialog :title="i18nt('designer.setting.tableColEdit')" v-model="dialogVisible"
 				:show-close="true" class="drag-dialog small-padding-dialog" append-to-body
 				:close-on-click-modal="false" :close-on-press-escape="false"
-				:destroy-on-close="true" width="1250px">
+				:destroy-on-close="true" width="1420px">
 				<el-table :data="optionModel.tableColumns" style="width: 100%"
 									:cell-style="{padding:'3px 0'}" height="500" border row-key="columnId" ref="singleTable" stripe>
 					<el-table-column type="index" width="42" fixed="left"></el-table-column>
-					<el-table-column label="" width="30">
-						<i class="iconfont icon-drag drag-option"></i>
-					</el-table-column>
-					<el-table-column label="columnId" prop="columnId" width="150" v-if="false"></el-table-column>
-					<el-table-column :label="i18nt('designer.setting.columnName')" width="150" prop="prop">
+
+					<el-table-column width="160" prop="columnId">
 						<template #default="scope">
-							<el-input v-model="scope.row.prop"></el-input>
+							<span v-if="!scope.row.headerFlag">{{i18nt('designer.setting.tableDataColumn')}}</span>
+							<span v-else>{{getHeaderSpace(scope.row)}}</span>
+						</template>
+					</el-table-column>
+
+					<el-table-column label="" width="30">
+						<i class="iconfont icon-drag drag-option column-drag-handler"></i>
+					</el-table-column>
+
+					<el-table-column :label="i18nt('designer.setting.columnName')" width="150" prop="prop" class-name="placeholder-hide">
+						<template #default="scope">
+							<el-input v-if="!scope.row.headerFlag" v-model="scope.row.prop"></el-input>
+							<span v-else>{{getHeaderTitle(scope.row)}}</span>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.columnLabel')" width="150" prop="label">
@@ -117,25 +126,25 @@
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.columnWidth')" width="100" prop="width">
 						<template #default="scope">
-							<el-input v-model="scope.row.width"></el-input>
+							<el-input v-if="!scope.row.headerFlag" v-model="scope.row.width"></el-input>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.visibleColumn')" width="70" prop="show">
 						<template #default="scope">
-							<el-switch v-model="scope.row.show"></el-switch>
+							<el-switch v-if="!scope.row.headerFlag" v-model="scope.row.show"></el-switch>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.sortableColumn')" width="70" prop="sortable">
 						<template #default="scope">
-							<el-switch v-model="scope.row.sortable"></el-switch>
+							<el-switch v-if="!scope.row.headerFlag" v-model="scope.row.sortable"></el-switch>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.fixedColumn')" width="100" prop="fixed">
 						<template #default="scope">
-							<el-select v-model="scope.row.fixed">
-								<el-option value="">false</el-option>
-								<el-option value="left">left</el-option>
-								<el-option value="right">right</el-option>
+							<el-select v-if="!scope.row.headerFlag" v-model="scope.row.fixed">
+								<el-option key="false" value="" label="false"></el-option>
+								<el-option key="left" value="left" label="left"></el-option>
+								<el-option key="right" value="right" label="right"></el-option>
 							</el-select>
 						</template>
 					</el-table-column>
@@ -157,7 +166,7 @@
 					</el-table-column> -->
 					<el-table-column :label="i18nt('designer.setting.formatOfColumn')" width="200" prop="formatS">
 						<template #default="scope">
-							<el-select v-model="scope.row.formatS" clearable>
+							<el-select v-if="!scope.row.headerFlag" v-model="scope.row.formatS" clearable>
 								<el-option-group :label="i18nt('designer.setting.customRenderGroup')" key="custom-render-group">
 									<el-option value="render" label="render"></el-option>
 								</el-option-group>
@@ -183,8 +192,22 @@
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.actionColumn')" width="100" fixed="right" align="center">
 						<template #default="scope">
+							<!--
 							<el-button :title="i18nt('designer.setting.addTableColumn')" size="small" circle
-										@click="addCol" icon="el-icon-plus"></el-button>
+										@click="addCol(scope.$index)" icon="el-icon-plus"></el-button>
+										-->
+							<el-dropdown @command="(command) => handleAddColCommand(command, scope.$index, scope.row)">
+								<el-button :title="i18nt('designer.setting.addTableColumn')" size="small" circle icon="el-icon-plus">
+								</el-button>
+								<template #dropdown>
+									<el-dropdown-menu>
+										<el-dropdown-item command="column">{{i18nt('designer.setting.insertTableDataColumn')}}</el-dropdown-item>
+										<el-dropdown-item :disabled="disableDropdownItem(scope.row, 'header')" command="sub-column">{{i18nt('designer.setting.insertTableSubDataColumn')}}</el-dropdown-item>
+										<el-dropdown-item command="header">{{i18nt('designer.setting.insertTableHeader')}}</el-dropdown-item>
+										<el-dropdown-item :disabled="disableDropdownItem(scope.row, 'sub-header')" command="sub-header">{{i18nt('designer.setting.insertTableSubHeader')}}</el-dropdown-item>
+									</el-dropdown-menu>
+								</template>
+							</el-dropdown>
 							<el-button :title="i18nt('designer.setting.deleteTableColumn')" size="small" circle
 								@click="handleDelete(scope.$index, scope.row)" icon="el-icon-minus"></el-button>
 						</template>
@@ -192,8 +215,7 @@
 				</el-table>
 				<template #footer>
 					<div class="dialog-footer">
-						<el-button size="default" type="primary" @click="colSubmit">{{i18nt('designer.hint.confirm')}}</el-button>
-						<el-button size="default" @click="dialogVisible = false">{{i18nt('designer.hint.cancel')}}</el-button>
+						<el-button size="default" @click="colSubmit">{{i18nt('designer.hint.closePreview')}}</el-button>
 					</div>
 				</template>
 			</el-dialog>
@@ -407,6 +429,7 @@
 				showRenderDialogFlag: false,
 				renderJson: '',
 				currentTableColumn: null,
+				tableColumnRows: null,
 
 				nameRules: [
 					{ required: true, trigger: ['blur', 'change'], message: this.i18nt('designer.setting.fieldValueRequired') },
@@ -444,37 +467,120 @@
       })
     },
 		mounted(){
-			// this.dragSort()
+    	//
 		},
     methods: {
+    	treeColumnsToArray() {  // 展开树形数据为扁平数组
+    		const resultArray = []
+    		const expandFn = (treeData, level) => {
+					treeData.map(col => {
+						let newCol = deepClone(col)
+						newCol.nodeLevel = level
+            resultArray.push(newCol)
+
+						if (col.children) {
+							expandFn(col.children, level + 1)
+						}
+					})
+				}
+
+				expandFn(this.optionModel.tableColumns, 1)
+				return resultArray
+			},
+
+			getParentArrayOfTableColumn(columns, columnId) {
+    		let foundFlag = false
+    		columns.forEach(tc => {
+					if (tc.columnId === columnId) {
+						foundFlag = true
+					}
+				})
+
+				if (foundFlag) {
+					return columns
+				}
+
+				let resultArray = []
+				columns.forEach((tc) => {
+					if (tc.children) {
+						let tmpArray = this.getParentArrayOfTableColumn(tc.children, columnId)
+						if (tmpArray.length > 0) {
+							resultArray = tmpArray
+						}
+					}
+				})
+
+				return resultArray
+			},
+
+			// getIndexOfTableColumn(columns, columnId) {
+			// 	let foundFlag = false
+			// 	let foundIndex = -1
+			// 	columns.forEach((tc, idx) => {
+			// 		if (tc.columnId === columnId) {
+			// 			foundFlag = true
+			// 			foundIndex = idx
+			// 		}
+			// 	})
+			//
+			// 	if (foundFlag) {
+			// 		return foundIndex
+			// 	}
+			//
+			// 	let resultIndex = -1
+			// 	columns.forEach((tc) => {
+			// 		if (tc.children) {
+			// 			let tmpIndex = this.getIndexOfTableColumn(tc.children, columnId)
+			// 			if (tmpIndex > -1) {
+			// 				resultIndex = tmpIndex
+			// 			}
+			// 		}
+			// 	})
+			//
+			// 	return resultIndex
+			// },
+
 			//表格拖动排序
 			dragSort() {
 				//debugger
 				const el = this.$refs.singleTable.$el.querySelectorAll('.el-table__body-wrapper .el-table__body > tbody')[0]
-				let tableData = this.optionModel.tableColumns;
 				this.sortable = Sortable.create(el, {
+					handle: '.column-drag-handler',
 					ghostClass: 'sortable-ghost',
 					setData: function (dataTransfer) {
 						dataTransfer.setData('Text', '')
 					},
+
+					// 开始拖拽时触发
+					onStart: e => {
+						this.tableColumnRows = this.treeColumnsToArray()
+					},
+
+					// 拖拽节点移动时触发
+					onMove: ({ dragged, related }) => {
+						const oldCol = this.tableColumnRows[dragged.rowIndex]
+						const newCol = this.tableColumnRows[related.rowIndex]
+						if (oldCol.nodeLevel !== newCol.nodeLevel) {
+							this.$message.warning(this.i18nt('designer.setting.onlyDragBetweenSiblingNodes'))
+							return false
+						}
+					},
+
+					// 结束拖拽时触发
 					onEnd: e => {
-					  //e.oldIndex为拖动一行原来的位置，e.newIndex为拖动后新的位置
-						const targetRow = tableData.splice(e.oldIndex, 1)[0];
-						tableData.splice(e.newIndex, 0, targetRow);
-						let dragId = tableData[e.newIndex].id;//拖动行的id
-						let oneId,twoId
-						//拖动行的前一行
-						if( tableData[e.newIndex-1]){
-						 oneId = tableData[e.newIndex-1].id;}
-						else {
-						 oneId = ""
+						const oldCol = this.tableColumnRows[e.oldIndex]
+						const newCol = this.tableColumnRows[e.newIndex]
+						if ((oldCol.nodeLevel !== newCol.nodeLevel) || (e.oldIndex === e.newIndex)) {
+							return
 						}
-						//拖动行的后一行
-						if( tableData[e.newIndex+1]){
-						 twoId = tableData[e.newIndex+1].id;}
-						else {
-						 twoId = ""
-						}
+
+						const oldColumnId = oldCol.columnId
+						const newColumnId = newCol.columnId
+						let tcArray = this.getParentArrayOfTableColumn(this.optionModel.tableColumns, oldColumnId)
+						let oldIndexOfTcArray = tcArray.findIndex(tc => tc.columnId === oldColumnId)
+						let newIndexOfTcArray = tcArray.findIndex(tc => tc.columnId === newColumnId)
+						tcArray.splice(newIndexOfTcArray, 0, deepClone(tcArray[oldIndexOfTcArray]))
+						tcArray.splice(oldIndexOfTcArray + 1, 1)
 					}
 				})
 
@@ -498,6 +604,51 @@
 				this.dialogVisible = true;
 				this.$nextTick(()=>{
 					this.dragSort()
+					this.expandAllTableColumns(this.optionModel.tableColumns)
+				})
+			},
+
+			getHeaderSpace(row) {
+				let headerLevel = this.getHeaderLevel(this.optionModel.tableColumns, row.columnId, 1)
+				return '|' + '-'.repeat(headerLevel > 6 ? 0 : 6 - headerLevel)
+			},
+
+			getHeaderTitle(row) {
+				let headerLevel = this.getHeaderLevel(this.optionModel.tableColumns, row.columnId, 1)
+				return this.i18ntp('designer.setting.getHeaderLevelTitle', headerLevel)
+			},
+
+			getHeaderLevel(columns, columnId, currentLevel) {
+				let foundFlag = false
+				columns.forEach((tc) => {
+					if (tc.columnId === columnId) {
+						foundFlag = true
+					}
+				})
+
+				if (foundFlag) {
+					return currentLevel
+				}
+
+				let resultLevel = -1
+				columns.forEach((tc) => {
+					if (tc.children) {
+						let childLevel = this.getHeaderLevel(tc.children, columnId, currentLevel + 1)
+						if (childLevel > -1) {
+							resultLevel = childLevel
+						}
+					}
+				})
+
+				return resultLevel
+			},
+
+			expandAllTableColumns(columns) {
+				columns.forEach(tc => {
+					this.$refs.singleTable.toggleRowExpansion(tc, true)
+					if (tc.children) {
+						this.expandAllTableColumns(tc.children)
+					}
 				})
 			},
 
@@ -506,18 +657,90 @@
 				this.dialogVisible = false;
 			},
 
-			addCol(){
+			addCol(index) {
 				let newRow = {columnId: new Date().getTime(), show: false};
-				this.optionModel.tableColumns.push(newRow);
+				this.optionModel.tableColumns.splice(index, 0, newRow);
 				this.designer.emitHistoryChange()
 			},
 
-			handleDelete(index,row){
+			handleAddColCommand(command, index, row) {
+				if (command === 'column') {
+					let newColumn = {columnId: new Date().getTime(), show: false}
+					this.insertTableColumnById(this.optionModel.tableColumns, row.columnId, newColumn, false)
+					this.designer.emitHistoryChange()
+				}	else if (command === 'sub-column') {
+					let newColumn = {columnId: new Date().getTime(), show: false}
+					this.insertTableColumnById(this.optionModel.tableColumns, row.columnId, newColumn, true)
+					this.designer.emitHistoryChange()
+				} else if (command === 'header') {
+					let newHeader = {columnId: new Date().getTime(), prop: '~', headerFlag: true, label: 'header', align: 'center', children: []}
+					this.insertTableColumnById(this.optionModel.tableColumns, row.columnId, newHeader, false)
+					this.designer.emitHistoryChange()
+				}	else if (command === 'sub-header') {
+					let newHeader = {columnId: new Date().getTime(), prop: '~', headerFlag: true, label: 'header', align: 'center', children: []}
+					this.insertTableColumnById(this.optionModel.tableColumns, row.columnId, newHeader, true)
+					this.designer.emitHistoryChange()
+				}
+
+				this.$nextTick(() => {
+					this.$refs.singleTable.toggleRowExpansion(row, true)
+				})
+			},
+
+			insertTableColumnById(columns, columnId, newColumn, childrenFlag) {
+				let foundIdx = -1
+				columns.forEach((tc, idx) => {
+					if (tc.columnId === columnId) {
+						foundIdx = idx
+					}
+
+					if (tc.children) {
+						this.insertTableColumnById(tc.children, columnId, newColumn, childrenFlag)
+					}
+				})
+
+				if (foundIdx > -1) {
+					if (childrenFlag) {
+						columns[foundIdx].children.push(newColumn)
+					} else {
+						columns.splice(foundIdx + 1, 0, newColumn)
+					}
+				}
+			},
+
+			disableDropdownItem(row, columnType) {
+				if (row.children) {
+					return false
+				} else {
+					return true
+				}
+      },
+
+			handleDelete(index, row){
 				if(this.optionModel.tableColumns.length === 1){
 					this.$message.warning(this.i18nt('designer.setting.onlyOneColumnCannotBeDeleted'))
 					 return false;
 				}
-				this.optionModel.tableColumns.splice(index,1)
+
+				this.deleteTableColumnById(this.optionModel.tableColumns, row.columnId)
+				this.designer.emitHistoryChange()
+			},
+
+			deleteTableColumnById(columns, columnId) {
+				let foundIdx = -1
+				columns.forEach((tc, idx) => {
+					if (tc.columnId === columnId) {
+						foundIdx = idx
+					}
+
+					if (tc.children) {
+						this.deleteTableColumnById(tc.children, columnId)
+					}
+				})
+
+				if (foundIdx > -1) {
+          columns.splice(foundIdx, 1)
+        }
 			},
 
 			showRenderDialog(tableColumn) {
@@ -529,6 +752,12 @@
 			saveColumnRender() {
 				this.currentTableColumn.render = this.renderJson
 				this.showRenderDialogFlag = false
+			},
+
+			handleShowButtonsColumnChange(value) { // 刷新表格显示，防止行列显示错位！！
+				if (!!value) {
+					this.refreshTableLayout()
+				}
 			},
 
 			onButtonNameFocus(event) {
@@ -576,6 +805,15 @@
 					hidden: false,
 					disabled: false,
 				})
+			},
+
+			refreshTableLayout() {
+				const dataTableInDesign = this.designer.formWidget.getSelectedWidgetRef()
+				if (!!dataTableInDesign && !!dataTableInDesign.refreshLayout) {
+					this.$nextTick(() => {
+						dataTableInDesign.refreshLayout()
+					})
+				}
 			},
 
 			loadDataSet(dsName) {
@@ -670,4 +908,10 @@
 		cursor: move;
 	}
 
+</style>
+
+<style>
+	.placeholder-hide .el-table__placeholder {
+		width: 0 !important;
+	}
 </style>

@@ -400,6 +400,14 @@ export default {
       addOperationButton: 'Add New Button',
       deleteOperationButtonHint: 'Delete this button?',
       operationButtonDuplicatedNameError: 'Duplicate button name.',
+      tableHeader: 'Header',
+      insertTableHeader: 'Insert Header',
+      insertTableSubHeader: 'Insert Sub Header',
+      tableDataColumn: 'Data Col',
+      insertTableDataColumn: 'Insert DataColumn',
+      insertTableSubDataColumn: 'Insert Sub DataColumn',
+      onlyDragBetweenSiblingNodes: 'You can only drag between sibling nodes!',
+      getHeaderLevelTitle: function(level) { return 'Level ' + level + ' Header'},
 
       //data-source
       dsEnabled: 'Use Datasource',
