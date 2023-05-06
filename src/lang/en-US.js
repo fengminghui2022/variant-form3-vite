@@ -373,6 +373,7 @@ export default {
       columnWidth: 'Width(px/%)',
       visibleColumn: 'Visible',
       sortableColumn: 'Sortable',
+      customSortColumn: 'Custom Sort',
       fixedColumn: 'Fixed',
       alignTypeOfColumn: 'Align',
       formatOfColumn: 'Format',

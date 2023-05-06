@@ -703,7 +703,7 @@
         })
       },
 
-      resetForm() {  //重置表单
+      resetForm(disableChangeEvent = false) {  //重置表单
         let subFormNames = Object.keys(this.subFormRefList)
         subFormNames.forEach(sfName => {
           if (!!this.subFormRefList[sfName].resetSubForm) {
@@ -715,7 +715,7 @@
         wNameList.forEach(wName => {
           let foundW = this.getWidgetRef(wName)
           if (!!foundW && !foundW.subFormItemFlag && !!foundW.resetField) { // 跳过子表单字段！！
-            foundW.resetField()
+            foundW.resetField(disableChangeEvent)
           }
         })
 

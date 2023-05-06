@@ -302,6 +302,8 @@ export const containers = [
       onPageSizeChange: '',
       //当前页改变事件
       onCurrentPageChange: '',
+      //列排序改变事件（必须设置为后端排序才生效）
+      onSortChange: '',
       //选择项改变事件
       onSelectionChange: '',
 

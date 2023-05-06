@@ -165,6 +165,7 @@ const EVENT_PROPERTIES = {
   'onSubFormRowChange'        :            'onSubFormRowChange-editor',
   'onPageSizeChange'          :            'onPageSizeChange-editor',
   'onCurrentPageChange'       :            'onCurrentPageChange-editor',
+  'onSortChange'              :            'onSortChange-editor',
   'onSelectionChange'         :            'onSelectionChange-editor',
   'onHideOperationButton'     :            'onHideOperationButton-editor',
   'onDisableOperationButton'  :            'onDisableOperationButton-editor',

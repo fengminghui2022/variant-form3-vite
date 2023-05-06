@@ -373,6 +373,7 @@ export default {
       columnWidth: '列宽(px/%)',
       visibleColumn: '是否显示',
       sortableColumn: '是否排序',
+      customSortColumn: '后端排序',
       fixedColumn: '是否固定',
       alignTypeOfColumn: '对齐方式',
       formatOfColumn: '格式化',

@@ -10,7 +10,7 @@
                    :key="columnSchema.columnId"
                    :prop="columnSchema.prop"
                    :label="columnSchema.label"
-                   :sortable="columnSchema.sortable"
+                   :sortable="getSortable(columnSchema)"
                    :fixed="!columnSchema.fixed ? false : columnSchema.fixed"
                    :align="columnSchema.align ? columnSchema.align:'center'"
                    :formatter="formatterValue"
@@ -62,6 +62,10 @@
       TableColumnCustomRender,
     },
     methods: {
+      getSortable(column) {
+        return !column.sortable ? false : (!!column.customSort ? 'custom' : true)
+      },
+
       formatterValue(row, column, cellValue) {
         if (!cellValue) {
           return ''

@@ -398,7 +398,7 @@ export default {
     //--------------------- 组件内部方法 end ------------------//
 
     //--------------------- 事件处理 begin ------------------//
-		
+
     emitFieldDataChange(newValue, oldValue) {
       this.emit$('field-value-changed', [newValue, oldValue])
 
@@ -589,9 +589,9 @@ export default {
       //TODO: 待实现！！
     },
 
-    resetField() {
+    resetField(disableChangeEvent = false) {
       let defaultValue = this.field.options.defaultValue
-      this.setValue(defaultValue)
+      this.setValue(defaultValue, disableChangeEvent)
       this.$nextTick(() => {
         //
       })

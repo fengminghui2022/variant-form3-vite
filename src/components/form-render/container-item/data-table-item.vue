@@ -330,10 +330,14 @@
 			},
 
 			handleSortChange({column, prop, order}) {
-				// this.dispatch('VFormRender', 'dataTableSortChange',
-				// 				[this, column, prop, order, this.pageSize, this.currentPage])
-				//
-				// console.log('test====', prop)
+				if (!!this.widget.options.onSortChange) {
+					let customFn = new Function('column', 'prop', 'order', 'pageSize', 'currentPage', this.widget.options.onSortChange)
+					customFn.call(this, column, prop, order, this.pageSize, this.currentPage)
+				} else {
+					/* 必须调用mixins中的dispatch方法逐级向父组件发送消息！！ */
+					this.dispatch('VFormRender', 'dataTableSortChange',
+									[this, column, prop, order, this.pageSize, this.currentPage])
+				}
 			},
 
 			handlePageSizeChange(pageSize) {
@@ -457,35 +461,35 @@
 				}
 			},
 
-			toggleSelection(row, flag, selectedRows) {
+			toggleSelection(row, flag, curSelectedRows) {
 				if (row) {
 					this.$refs.dataTable.toggleRowSelection(row, flag)
 
 					if (flag) {
-						selectedRows.push(row)
+						curSelectedRows.push(row)
 						return
 					}
 
 					let foundRowIdx = -1
 					let rowKey = this.widget.options.rowKey || 'id'
-					selectedRows.forEach((sr, idx) => {
+					curSelectedRows.forEach((sr, idx) => {
 						if (sr[rowKey] === row[rowKey]) {
 							foundRowIdx = idx
 						}
 					})
 
 					if (foundRowIdx > -1) {
-						selectedRows.splice(foundRowIdx, 1)
+						curSelectedRows.splice(foundRowIdx, 1)
 					}
 				}
 			},
 
-			setChildrenSelected(children, flag, selectedRows) {
+			setChildrenSelected(children, flag, curSelectedRows) {
 				let childrenKey = this.widget.options.childrenKey || 'children'
 				children.map(child => {
-					this.toggleSelection(child, flag, selectedRows)
+					this.toggleSelection(child, flag, curSelectedRows)
 					if (child[childrenKey]) {
-						this.setChildrenSelected(child[childrenKey], flag, selectedRows)
+						this.setChildrenSelected(child[childrenKey], flag, curSelectedRows)
 					}
 				})
 			},
@@ -493,23 +497,23 @@
 			handleRowSelect(selection, row) {
 				this.skipSelectionChangeEvent = true
 
-				let selectedRows = deepClone(selection)
+				let selectedRowsClone = deepClone(selection)
 				let rowKey = this.widget.options.rowKey || 'id'
 				let childrenKey = this.widget.options.childrenKey || 'children'
 				if (selection.some(el => { return row[rowKey] === el[rowKey] })) {
 					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], true, selectedRows)
+						this.setChildrenSelected(row[childrenKey], true, selectedRowsClone)
 					}
 				} else {
 					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], false, selectedRows)
+						this.setChildrenSelected(row[childrenKey], false, selectedRowsClone)
 					}
 				}
 
 				this.skipSelectionChangeEvent = false
 				// 一次性处理多行选中或取消选中，只触发一次事件！！！
 				this.$nextTick(() => {
-					this.handleSelectionChange(selectedRows)
+					this.handleSelectionChange(selectedRowsClone)
 				})
 			},
 

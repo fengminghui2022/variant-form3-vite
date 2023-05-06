@@ -97,7 +97,7 @@
 			<el-dialog :title="i18nt('designer.setting.tableColEdit')" v-model="dialogVisible"
 				:show-close="true" class="drag-dialog small-padding-dialog" append-to-body
 				:close-on-click-modal="false" :close-on-press-escape="false"
-				:destroy-on-close="true" width="1420px">
+				:destroy-on-close="true" width="1500px">
 				<el-table :data="optionModel.tableColumns" style="width: 100%"
 									:cell-style="{padding:'3px 0'}" height="500" border row-key="columnId" ref="singleTable" stripe>
 					<el-table-column type="index" width="42" fixed="left"></el-table-column>
@@ -137,6 +137,11 @@
 					<el-table-column :label="i18nt('designer.setting.sortableColumn')" width="70" prop="sortable">
 						<template #default="scope">
 							<el-switch v-if="!scope.row.headerFlag" v-model="scope.row.sortable"></el-switch>
+						</template>
+					</el-table-column>
+					<el-table-column :label="i18nt('designer.setting.customSortColumn')" width="90" prop="customSort">
+						<template #default="scope">
+							<el-switch v-if="!scope.row.headerFlag" v-model="scope.row.customSort"></el-switch>
 						</template>
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.fixedColumn')" width="100" prop="fixed">
