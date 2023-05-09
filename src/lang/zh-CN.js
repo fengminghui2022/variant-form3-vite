@@ -409,6 +409,7 @@ export default {
       insertTableSubDataColumn: '插入下级数据列',
       onlyDragBetweenSiblingNodes: '只能在同级节点之间进行拖拽排序！',
       getHeaderLevelTitle: function(level) { return level + '级表头'},
+      lineNumber: '序号',
 
       //data-source
       dsEnabled: '使用数据源',

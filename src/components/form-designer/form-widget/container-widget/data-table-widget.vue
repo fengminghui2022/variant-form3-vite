@@ -13,7 +13,8 @@
 								@select="handleRowSelect" @select-all="handleAllSelect"
 								:cell-style="{padding: widget.options.rowSpacing + 'px 0'}">
 
-				<el-table-column v-if="widget.options.showIndex" type="index" width="50" fixed="left"></el-table-column>
+				<el-table-column v-if="widget.options.showIndex" type="index" width="60" fixed="left"
+												 :label="i18nt('designer.setting.lineNumber')"></el-table-column>
 				<el-table-column v-if="widget.options.showCheckBox" type="selection"
 												 :width="selectionWidth" fixed="left"></el-table-column>
 

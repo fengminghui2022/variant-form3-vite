@@ -19,11 +19,10 @@
 								@row-dblclick="handleRowDoubleClick"
 								@cell-click="handleCellClick"
 								@cell-dblclick="handleCellDoubleClick"
-								@select="handleRowSelect"
-								@select-all="handleAllSelect"
 								:cell-style="{padding: widget.options.rowSpacing + 'px 0'}" >
 
-				<el-table-column v-if="widget.options.showIndex" type="index" width="50" fixed="left"></el-table-column>
+				<el-table-column v-if="widget.options.showIndex" type="index" width="60" fixed="left"
+				                 :label="i18nt('designer.setting.lineNumber')"></el-table-column>
 				<el-table-column v-if="widget.options.showCheckBox" type="selection"
 												 :width="selectionWidth"  fixed="left"></el-table-column>
 
@@ -279,7 +278,14 @@
 				}
 			},
 
+			/**
+			 * 单选时触发该事件
+			 * @param currentRow
+			 * @param oldCurrentRow
+			 */
 			handleCurrentChange(currentRow, oldCurrentRow) {
+				console.info('11111111')
+
 				if (!!this.skipSelectionChangeEvent) {
 					return
 				}
@@ -304,10 +310,12 @@
 			},
 
 			/**
-			 * 注意：加载树形数据后，选中行如包含子节点则会触发两次该事件！！
+			 * 多选时触发该事件
 			 * @param selection
 			 */
 			handleSelectionChange(selection) {
+				console.info('2222222')
+
 				if (!!this.skipSelectionChangeEvent) {
 					return
 				}
@@ -459,84 +467,6 @@
 					let customFn = new Function('row', 'column', 'cell', 'event', this.widget.options.onCellDoubleClick)
 					return customFn.call(this, row, column, cell, event)
 				}
-			},
-
-			toggleSelection(row, flag, curSelectedRows) {
-				if (row) {
-					this.$refs.dataTable.toggleRowSelection(row, flag)
-
-					if (flag) {
-						curSelectedRows.push(row)
-						return
-					}
-
-					let foundRowIdx = -1
-					let rowKey = this.widget.options.rowKey || 'id'
-					curSelectedRows.forEach((sr, idx) => {
-						if (sr[rowKey] === row[rowKey]) {
-							foundRowIdx = idx
-						}
-					})
-
-					if (foundRowIdx > -1) {
-						curSelectedRows.splice(foundRowIdx, 1)
-					}
-				}
-			},
-
-			setChildrenSelected(children, flag, curSelectedRows) {
-				let childrenKey = this.widget.options.childrenKey || 'children'
-				children.map(child => {
-					this.toggleSelection(child, flag, curSelectedRows)
-					if (child[childrenKey]) {
-						this.setChildrenSelected(child[childrenKey], flag, curSelectedRows)
-					}
-				})
-			},
-
-			handleRowSelect(selection, row) {
-				this.skipSelectionChangeEvent = true
-
-				let selectedRowsClone = deepClone(selection)
-				let rowKey = this.widget.options.rowKey || 'id'
-				let childrenKey = this.widget.options.childrenKey || 'children'
-				if (selection.some(el => { return row[rowKey] === el[rowKey] })) {
-					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], true, selectedRowsClone)
-					}
-				} else {
-					if (row[childrenKey]) {
-						this.setChildrenSelected(row[childrenKey], false, selectedRowsClone)
-					}
-				}
-
-				this.skipSelectionChangeEvent = false
-				// 一次性处理多行选中或取消选中，只触发一次事件！！！
-				this.$nextTick(() => {
-					this.handleSelectionChange(selectedRowsClone)
-				})
-			},
-
-			setSelectedFlag(data, flag) {
-				let childrenKey = this.widget.options.childrenKey || 'children'
-				data.forEach(row => {
-					this.$refs.dataTable.toggleRowSelection(row, flag)
-					if (row[childrenKey]) {
-						this.setSelectedFlag(row[childrenKey], flag)
-					}
-				})
-			},
-
-			handleAllSelect(selection) {
-				this.skipSelectionChangeEvent = true
-				this.selectAllFlag = !this.selectAllFlag
-				this.setSelectedFlag(this.widget.options.tableData, this.selectAllFlag)
-
-				this.skipSelectionChangeEvent = false
-				// 一次性处理多行选中或取消选中，只触发一次事件！！！
-				this.$nextTick(() => {
-					this.handleSelectionChange(selection)
-				})
 			},
 
 			getOperationButtonType(operationButton) {

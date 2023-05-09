@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 function validateDate(dateStr) {
 	let date = new Date( Date.parse(dateStr) )
 	return (date instanceof Date) && !isNaN(date.getTime())
@@ -7,55 +9,40 @@ export function formatDate1(date) {
 	if (!validateDate(date)) {
 		return date;
 	}
-	date = new Date(Date.parse(date)); //转换成Date
-	let y = date.getFullYear();
-	let m = date.getMonth() + 1;
-	m = m < 10 ? '0' + m : m;
-	let d = date.getDate();
-	d = d < 10 ? ('0' + d) : d;
-	return y + '-' + m + '-' + d;
+
+	return dayjs(date).format('YYYY-MM-DD')
 }
 
 export function formatDate2(date) {
 	if (!validateDate(date)) {
 		return date;
 	}
-	date = new Date(Date.parse(date)); //转换成Date
-	let y = date.getFullYear();
-	let m = date.getMonth() + 1;
-	m = m < 10 ? '0' + m : m;
-	let d = date.getDate();
-	d = d < 10 ? ('0' + d) : d;
-	return y + '/' + m + '/' + d;
+
+	return dayjs(date).format('YYYY/MM/DD')
 }
 
 export function formatDate3(date) {
 	if (!validateDate(date)) {
 		return date;
 	}
-	date = new Date(Date.parse(date)); //转换成Date
-	let y = date.getFullYear();
-	let m = date.getMonth() + 1;
-	m = m < 10 ? '0' + m : m;
-	let d = date.getDate();
-	d = d < 10 ? ('0' + d) : d;
-	return y + '年' + m + '月' + d +'日';
+
+	return dayjs(date).format('YYYY年MM月DD日')
 }
 
 export function formatDate4(date) {
 	if (!validateDate(date)) {
 		return date;
 	}
-	date = new Date(Date.parse(date)); //转换成Date
-	return date.toLocaleString().replace(/\//g, '-')
+
+	return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 }
 
 export function formatDate5(date) {
 	if (!validateDate(date)) {
 		return date;
 	}
-	date = new Date(Date.parse(date)); //转换成Date
-	return date.toLocaleString('chinese', { hour12: false }).replace(/\//g, '-')
+
+	return dayjs(date).format('YYYY-MM-DD hh:mm:ss')
 }
 
 // ###,###,###,##0.######

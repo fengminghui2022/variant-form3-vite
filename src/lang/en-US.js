@@ -409,6 +409,7 @@ export default {
       insertTableSubDataColumn: 'Insert Sub DataColumn',
       onlyDragBetweenSiblingNodes: 'You can only drag between sibling nodes!',
       getHeaderLevelTitle: function(level) { return 'Level ' + level + ' Header'},
+      lineNumber: 'Line Num',
 
       //data-source
       dsEnabled: 'Use Datasource',
