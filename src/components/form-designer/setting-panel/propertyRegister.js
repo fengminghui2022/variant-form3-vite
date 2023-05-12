@@ -184,10 +184,12 @@ const EVENT_PROPERTIES = {
   'onDialogBeforeClose'       :            'onDialogBeforeClose-editor',
   'onDrawerOpened'            :            'onDrawerOpened-editor',
   'onDrawerBeforeClose'       :            'onDrawerBeforeClose-editor',
-	//tree
-	'onNodeClick' 				:						  'onNodeClick-editor',
-	'onNodeCheck' 				:							'onNodeCheck-editor',
-	'onNodeContextmenu' 	:							'onNodeContextmenu-editor',
+  'onButtonGroupClick'        :            'onButtonGroupClick-editor',
+
+  //tree
+  'onNodeClick' 				:						  'onNodeClick-editor',
+  'onNodeCheck' 				:							'onNodeCheck-editor',
+  'onNodeContextmenu' 	:							'onNodeContextmenu-editor',
   'onCheckChange' 	    :							'onCheckChange-editor',
 }
 

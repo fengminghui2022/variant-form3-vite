@@ -404,6 +404,50 @@ export const containers = [
 	},
 
   {
+    type: 'button-group', // 按钮组
+    icon: 'button-group',
+    category: 'container',
+    widgetList: [],
+    options: {
+      name: '',
+      size: 'default',
+      hidden: false,
+      disabled: false,
+      customClass: '',
+      buttons: [
+        {
+          name: 'detail',
+          label: '详情',
+          icon: '',
+          type: '',
+          round: false,
+          hidden: true,
+          disabled: false,
+        }, {
+          name: 'edit',
+          label: '编辑',
+          icon: '',
+          type: '',
+          round: false,
+          hidden: false,
+          disabled: false,
+        }, {
+          name: 'delete',
+          label: '删除',
+          icon: '',
+          type: '',
+          round: false,
+          hidden: false,
+          disabled: false,
+        },
+      ],
+      onCreated: '',
+      onMounted: '',
+      onButtonGroupClick: '',
+    }
+  },
+
+  {
     type: 'vf-dialog',
     category: 'container',
     icon: 'vf-dialog',

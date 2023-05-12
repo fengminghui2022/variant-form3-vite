@@ -6,7 +6,6 @@ import 'element-plus/dist/index.css'
 import '@/styles/index.scss'
 import '@/iconfont/iconfont.css'
 import Draggable from '@/../lib/vuedraggable/dist/vuedraggable.umd.js'
-//import Draggable from 'vuedraggable'
 import {registerIcon} from '@/utils/el-icons'
 import 'virtual:svg-icons-register'
 
@@ -33,8 +32,8 @@ addDirective(vfApp)
 vfApp.use(ContainerWidgets)
 vfApp.use(ContainerItems)
 vfApp.component('VFormRender', VFormRender)
-vfApp.component('TableMultiLevelColumn', TableMultiLevelColumn)
-vfApp.component('TableHighLevelColumn', TableHighLevelColumn)
+vfApp.component(TableMultiLevelColumn.name, TableMultiLevelColumn)
+vfApp.component(TableHighLevelColumn.name, TableHighLevelColumn)
 loadExtension(vfApp)
 
 vfApp.mount('#app')

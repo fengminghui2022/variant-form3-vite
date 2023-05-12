@@ -284,8 +284,6 @@
 			 * @param oldCurrentRow
 			 */
 			handleCurrentChange(currentRow, oldCurrentRow) {
-				console.info('11111111')
-
 				if (!!this.skipSelectionChangeEvent) {
 					return
 				}
@@ -314,8 +312,6 @@
 			 * @param selection
 			 */
 			handleSelectionChange(selection) {
-				console.info('2222222')
-
 				if (!!this.skipSelectionChangeEvent) {
 					return
 				}

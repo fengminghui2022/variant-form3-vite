@@ -197,10 +197,6 @@
 					</el-table-column>
 					<el-table-column :label="i18nt('designer.setting.actionColumn')" width="100" fixed="right" align="center">
 						<template #default="scope">
-							<!--
-							<el-button :title="i18nt('designer.setting.addTableColumn')" size="small" circle
-										@click="addCol(scope.$index)" icon="el-icon-plus"></el-button>
-										-->
 							<el-dropdown @command="(command) => handleAddColCommand(command, scope.$index, scope.row)">
 								<el-button :title="i18nt('designer.setting.addTableColumn')" size="small" circle icon="el-icon-plus">
 								</el-button>
@@ -281,6 +277,7 @@
 								<el-col :span="4">
 									<el-form-item :prop="'operationButtons.' + bIdx + '.type'" :label="i18nt('designer.setting.operationButtonType')">
 										<el-select v-model="btn.type" :placeholder="i18nt('designer.setting.operationButtonType')">
+											<el-option value="">default</el-option>
 											<el-option value="text">text</el-option>
 											<el-option value="primary">primary</el-option>
 											<el-option value="success">success</el-option>
@@ -598,11 +595,11 @@
 
 			saveTableData(){
 				try {
-					  this.optionModel.tableData = JSON.parse(this.tableDataOptions)
-					  this.dataDialogVisible = false
-					} catch (ex) {
-					  this.$message.error(this.i18nt('designer.hint.invalidOptionsData') + ex.message)
-					}
+					this.optionModel.tableData = JSON.parse(this.tableDataOptions)
+					this.dataDialogVisible = false
+				} catch (ex) {
+					this.$message.error(this.i18nt('designer.hint.invalidOptionsData') + ex.message)
+				}
 			},
 
 			openSetting(){
@@ -766,7 +763,7 @@
 			},
 
 			onButtonNameFocus(event) {
-				console.log('test', event)
+				//console.log('test', event)
 				this.oldButtonName = event.target.value
 			},
 

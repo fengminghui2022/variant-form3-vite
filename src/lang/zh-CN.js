@@ -33,6 +33,7 @@ export default {
       'table-cell':     '单元格',
       'tab-pane':       '选项卡页',
       'data-table':     '数据表格',
+      'button-group':   '按钮组',
       tree:             '树形',
       'vf-dialog':      '弹出窗口',
       'vf-drawer':      '侧滑抽屉',
@@ -299,6 +300,7 @@ export default {
       showRowNumber: '显示行号',
       actionColumnPosition: '操作列位置',
       contentHeight: '内容区高度',
+      groupButtonsEdit: '按钮编辑',
 
       insertColumnToLeft: '插入左侧列',
       insertColumnToRight: '插入右侧列',

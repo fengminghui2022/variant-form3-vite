@@ -34,6 +34,7 @@ export default {
       'tab-pane':       'TabPane',
       'data-table':     'DataTable',
       tree:             'Tree',
+      'button-group':   'ButtonGroup',
       'vf-dialog':      'Dialog',
       'vf-drawer':      'Drawer',
 
@@ -299,6 +300,7 @@ export default {
       showRowNumber: 'Show Row Number',
       actionColumnPosition: 'Position Of Buttons Column',
       contentHeight: 'Content Area Height',
+      groupButtonsEdit: 'Edit Buttons',
 
       insertColumnToLeft: 'insert column to left',
       insertColumnToRight: 'insert column to right',
