@@ -231,6 +231,10 @@
             file.url = file.url || res.url
           }
           this.fileList = deepClone(fileList)
+
+          this.$nextTick(() => {
+            this.clearValidate()
+          })
         }
       },
 

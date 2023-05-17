@@ -598,7 +598,9 @@ export default {
 
       //清空上传组件文件列表
       if ((this.field.type === 'picture-upload') || (this.field.type === 'file-upload')) {
-        this.$refs['fieldEditor'].clearFiles()
+        if (!!this.$refs['fieldEditor']) { //如果组件未隐藏
+          this.$refs['fieldEditor'].clearFiles()
+        }
         this.fileList.splice(0, this.fileList.length)
       }
     },

@@ -219,6 +219,10 @@
 
           this.updateFieldModelAndEmitDataChangeForUpload(fileList, customResult, res)
           this.fileList = deepClone(fileList)
+
+          this.$nextTick(() => {
+            this.clearValidate()
+          })
         }
       },
 

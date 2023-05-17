@@ -320,4 +320,8 @@
 	  padding: 10px 12px;
 	}
 
+	:deep(.el-table__body-wrapper .el-scrollbar__view) {
+		display: inline !important;  /* 解决设计状态下固定显示列在滚动后错位的问题！！ */
+	}
 </style>
+
