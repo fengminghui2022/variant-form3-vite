@@ -581,8 +581,13 @@
 						let tcArray = this.getParentArrayOfTableColumn(this.optionModel.tableColumns, oldColumnId)
 						let oldIndexOfTcArray = tcArray.findIndex(tc => tc.columnId === oldColumnId)
 						let newIndexOfTcArray = tcArray.findIndex(tc => tc.columnId === newColumnId)
-						tcArray.splice(newIndexOfTcArray, 0, deepClone(tcArray[oldIndexOfTcArray]))
-						tcArray.splice(oldIndexOfTcArray + 1, 1)
+						if (oldIndexOfTcArray > newIndexOfTcArray) { // 节点从下面移动到上面
+							tcArray.splice(newIndexOfTcArray, 0, deepClone(tcArray[oldIndexOfTcArray]))
+							tcArray.splice(oldIndexOfTcArray + 1, 1)
+						} else { // 节点从上面移动到下面
+							tcArray.splice(newIndexOfTcArray + 1, 0, deepClone(tcArray[oldIndexOfTcArray]))
+							tcArray.splice(oldIndexOfTcArray, 1)
+						}
 					}
 				})
 
