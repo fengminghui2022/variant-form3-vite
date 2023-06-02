@@ -1,7 +1,13 @@
 <template>
   <el-config-provider :locale="elLocale">
   <div id="app">
-    <VFormDesigner :designer-config="designerConfig" :global-dsv="globalDsv" />
+    <VFormDesigner :designer-config="designerConfig" :global-dsv="globalDsv" ref="vfdRef">
+      <!--
+      <template #customToolButtons>
+        <el-button link @click="doTest">test</el-button>
+      </template>
+      -->
+    </VFormDesigner>
   </div>
   </el-config-provider>
 </template>
@@ -46,6 +52,9 @@ export default {
 
   },
   methods: {
+    doTest() {
+      console.info('form data schema is: ' + JSON.stringify( this.$refs.vfdRef.buildFormDataSchema() ))
+    },
 
   }
 }

@@ -69,6 +69,8 @@
         },
         getSubFormFieldFlag: () => false,
         getSubFormName: () => '',
+        getObjectFieldFlag: () => false,  //是否对象容器字段
+        getObjectName: () => '',  //返回对象容器的名称
         getDSResultCache: () => this.dsResultCache,
       }
     },

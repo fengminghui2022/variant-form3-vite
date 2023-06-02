@@ -4,7 +4,7 @@
              :show-close="options.showClose" :close-on-click-modal="options.closeOnClickModal"
              :close-on-press-escape="options.closeOnPressEscape"
              :before-close="handleBeforeClose" @close="handleCloseEvent" @opened="handleOpenedEvent">
-    <VFormRender ref="dFormRef" :form-json="formJson" :form-data="formData"
+    <VFormRender ref="dFormRef" :form-json="formJson"
                  :option-data="optionData" :global-dsv="globalDsv" :parent-form="parentFormRef"
                  :disabled-mode="options.disabledMode" :dynamic-creation="true">
     </VFormRender>
@@ -85,9 +85,12 @@
 
         //设置readMode模式
         this.$nextTick(() => {
-          if (!!this.options.readMode) {
-            this.$refs['dFormRef'].setReadMode(true)
-          }
+          this.$refs['dFormRef'].setFormData(this.formData)
+          this.$nextTick(() => {
+            if (!!this.options.readMode) {
+              this.$refs['dFormRef'].setReadMode(true)
+            }
+          })
 
           this.$refs['dFormRef'].setDialogOrDrawerRef(this)
           this.parentFormRef.setChildFormRef(this.$refs['dFormRef'])

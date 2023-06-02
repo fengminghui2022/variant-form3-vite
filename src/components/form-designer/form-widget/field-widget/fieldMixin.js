@@ -3,7 +3,8 @@ import FormValidators from '@/utils/validators'
 
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData',
-    'getGlobalDsv', 'getReadMode', 'getSubFormFieldFlag', 'getSubFormName', 'getDSResultCache'],
+    'getGlobalDsv', 'getReadMode', 'getSubFormFieldFlag', 'getSubFormName', 'getDSResultCache',
+    'getObjectFieldFlag', 'getObjectName'],
   data() {
     return {
       fieldReadonlyFlag: false,
@@ -72,6 +73,8 @@ export default {
     getPropName() {
       if (this.subFormItemFlag && !this.designState) {
         return this.subFormName + "." + this.subFormRowIndex + "." + this.field.options.name + ""
+      } else if (this.getObjectFieldFlag() && !this.designState) {
+        return this.getObjectName() + '.' + this.field.options.name
       } else {
         return this.field.options.name
       }
@@ -79,6 +82,30 @@ export default {
 
     initFieldModel() {
       if (!this.field.formItemFlag) {
+        return
+      }
+
+      if (!!this.getObjectFieldFlag() && !this.designState) { //处理对象容器内部组件
+        let objectChains = this.getObjectName().split('.')
+        let objectModel = this.formModel
+        objectChains.forEach(key => {
+          if (!key) return
+
+          if (objectModel[key] === undefined) {
+            objectModel[key] = {}
+          }
+          objectModel = objectModel[key]
+        })
+
+        if (objectModel[this.field.options.name] === undefined) {
+          this.fieldModel = null
+        } else {
+          this.fieldModel = objectModel[this.field.options.name]
+        }
+
+        this.oldFieldValue = deepClone(this.fieldModel)
+        this.initFileList()  //处理图片上传、文件上传字段
+
         return
       }
 
@@ -412,12 +439,24 @@ export default {
         return
       }
 
-      if (!!this.subFormItemFlag) {
+      if (!!this.subFormItemFlag) { // 如果是子表单内部字段
         let subFormData = this.formModel[this.subFormName] || [{}]
         let subFormDataRow = subFormData[this.subFormRowIndex]
         if (!!subFormDataRow) { // 重置表单后subFormDataRow为undefined，应跳过！！
           subFormDataRow[this.field.options.name] = value
         }
+      } else if (!!this.getObjectFieldFlag()) { // 如果是对象容器内部字段
+        let objectChains = this.getObjectName().split('.')
+        let objectModel = this.formModel
+        objectChains.forEach(key => {
+          if (!key) return
+
+          if (objectModel[key] === undefined) {
+            objectModel[key] = {}
+          }
+          objectModel = objectModel[key]
+        })
+        objectModel[this.field.options.name] = value
       } else {
         this.formModel[this.field.options.name] = value
       }

@@ -197,7 +197,7 @@
     copyToClipboard,
     generateId,
     getQueryParam,
-    traverseAllWidgets, addWindowResizeHandler
+    traverseAllWidgets, addWindowResizeHandler, evalFn
   } from "@/utils/util"
   import i18n from '@/utils/i18n'
   import {generateCode} from "@/utils/code-generator"
@@ -425,6 +425,8 @@
       clearFormWidget() {
         this.designer.clearDesigner()
         this.designer.formWidget.clearWidgetRefList()
+
+        this.designer.emitEvent('form-json-imported', [])  //通知其他组件
       },
 
       previewForm() {

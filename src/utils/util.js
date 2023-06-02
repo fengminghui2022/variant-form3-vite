@@ -38,6 +38,71 @@ export const evalFn = function (fn, DSV = null, VFR = null) {
   return f(DSV, VFR);
 };
 
+export const trimEx = function (str, char, type) {
+  if (char) {
+    if (type === 'left') {
+      return str.replace(new RegExp('^\\'+char+'+', 'g'), '');
+    } else if (type === 'right') {
+      return str.replace(new RegExp('\\'+char+'+$', 'g'), '');
+    }
+
+    return str.replace(new RegExp('^\\'+char+'+|\\'+char+'+$', 'g'), '');
+  }
+
+  return str.replace(/^\s+|\s+$/g, '');
+}
+
+export const hasPropertyOfObject = function(obj, propPath) {
+  const keys = propPath.split('.')
+  let tmpObj = obj
+  let result = true
+
+  for (const key of keys) {
+    if (!tmpObj.hasOwnProperty(key)) {
+      result = false
+      break
+    } else {
+      tmpObj = tmpObj[key]
+    }
+  }
+
+  return result
+}
+
+function isDef(value) {
+  return value !== undefined && value !== null
+}
+
+export const getObjectValue = function(obj, propPath) {
+  const keys = propPath.split('.')
+  let result = obj
+
+  keys.forEach(key => {
+    result = isDef(result) && isDef(result[key]) ? result[key] : null
+  })
+
+  return result
+}
+
+export const setObjectValue = function(obj, objectName, value) {
+  const objectChains = objectName.split('.')
+  let objectModel = obj
+
+  objectChains.forEach((key, idx) => {
+    if (!key) return
+
+    if (idx === objectChains.length - 1) {
+      objectModel[key] = value
+      return
+    }
+
+    if (objectModel[key] === undefined) {
+      objectModel[key] = {}
+    }
+    objectModel = objectModel[key]
+  })
+}
+
 export const addWindowResizeHandler = function (handler) {
   let oldHandler = window.onresize
   if (typeof window.onresize != 'function') {
@@ -371,6 +436,22 @@ export function getFieldWidgetByName(widgetList, fieldName, staticWidgetsInclude
   let foundWidget = null
   let handlerFn = (widget) => {
     if (widget.options.name === fieldName) {
+      foundWidget = widget
+    }
+  }
+
+  traverseFieldWidgets(widgetList, handlerFn, null, staticWidgetsIncluded)
+  return foundWidget
+}
+
+export function getFieldWidgetById(widgetList, fieldId, staticWidgetsIncluded) {
+  if (!widgetList) {
+    return null
+  }
+
+  let foundWidget = null
+  let handlerFn = (widget) => {
+    if (widget.id === fieldId) {
       foundWidget = widget
     }
   }

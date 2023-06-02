@@ -57,7 +57,12 @@
     overwriteObj,
     getContainerWidgetByName,
     traverseFieldWidgetsOfContainer,
-    cloneFormConfigWithoutEventHandler, getDefaultFormConfig
+    cloneFormConfigWithoutEventHandler,
+    getDefaultFormConfig,
+    getFieldWidgetById,
+    hasPropertyOfObject,
+    getObjectValue,
+    setObjectValue
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
@@ -129,6 +134,8 @@
         getReadMode: () => this.readModeFlag,
         getSubFormFieldFlag: () => false,
         getSubFormName: () => '',
+        getObjectFieldFlag: () => false,  //是否对象容器字段
+        getObjectName: () => '',  //返回对象容器的名称
         getDSResultCache: () => this.dsResultCache,
       }
     },
@@ -334,6 +341,25 @@
                 this.buildDataFromWidget(childItem)
               })
             }
+          } else if (wItem.type === 'object-group') { // 处理对象容器内部字段！！
+            let objectFields = []
+            traverseFieldWidgetsOfContainer(wItem, (fld) => {
+              if (!!fld.formItemFlag) {
+                objectFields.push(fld.options.name)
+              }
+            })
+
+            let objectName = wItem.options.objectName
+            objectFields.forEach(fieldName => {
+              let objPath = objectName + '.' + fieldName
+              if (!hasPropertyOfObject(this.formData, objPath)) {
+                let fieldSchema = getFieldWidgetByName(wItem.widgetList, fieldName, false)
+                setObjectValue(this.formDataModel, objPath, fieldSchema.options.defaultValue)
+              } else {
+                let initialValue = getObjectValue(this.formData, objPath)
+                setObjectValue(this.formDataModel, objPath, initialValue)
+              }
+            })
           } else {  //自定义容器组件
             if (!!wItem.widgetList && (wItem.widgetList.length > 0)) {
               wItem.widgetList.forEach((childItem) => {
@@ -467,6 +493,10 @@
         }
 
         return result
+      },
+
+      findFieldWidgetById(fieldId, staticWidgetsIncluded) {
+        return getFieldWidgetById(this.formJsonObj.widgetList, fieldId, staticWidgetsIncluded)
       },
 
       initDataSetRequest() {

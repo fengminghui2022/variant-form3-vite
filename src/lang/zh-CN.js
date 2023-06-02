@@ -33,8 +33,9 @@ export default {
       'table-cell':     '单元格',
       'tab-pane':       '选项卡页',
       'data-table':     '数据表格',
-      'button-group':   '按钮组',
       tree:             '树形',
+      'button-group':   '按钮组',
+      'object-group':   '对象容器',
       'vf-dialog':      '弹出窗口',
       'vf-drawer':      '侧滑抽屉',
 
@@ -136,6 +137,7 @@ export default {
       lastPaneCannotBeDeleted: '仅剩一个选项卡页不可删除.',
       duplicateName: '组件名称已存在: ',
       nameRequired: '组件名称不可为空',
+      objectNameRequired: '对象名称不可为空',
 
       numberValidator: '数字',
       letterValidator: '字母',
@@ -179,6 +181,8 @@ export default {
       eventSetting: '事件属性',
       uniqueName: '唯一名称',
       editNameHelp: '修改名称后需按回车确认',
+      objectName: '对象名称',
+      objectNameHelp: '对象名称格式：aa、aa.bb或aa.bb.cc',
       label: '标签',
       displayType: '显示类型',
       defaultValue: '默认值',

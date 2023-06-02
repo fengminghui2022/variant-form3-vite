@@ -100,7 +100,7 @@
 
       rules: Array,
     },
-    inject: ['getFormConfig', 'getSubFormFieldFlag', 'getSubFormName'],
+    inject: ['getFormConfig', 'getSubFormFieldFlag', 'getSubFormName', 'getObjectFieldFlag', 'getObjectName'],
     computed: {
       formConfig() {
         return this.getFormConfig()
@@ -221,6 +221,8 @@
       getPropName() {
         if (this.subFormItemFlag && !this.designState) {
           return this.subFormName + "." + this.subFormRowIndex + "." + this.field.options.name + ""
+        } else if (this.getObjectFieldFlag() && !this.designState) {
+          return this.getObjectName() + '.' + this.field.options.name
         } else {
           return this.field.options.name
         }

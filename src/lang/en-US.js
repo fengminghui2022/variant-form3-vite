@@ -35,6 +35,7 @@ export default {
       'data-table':     'DataTable',
       tree:             'Tree',
       'button-group':   'ButtonGroup',
+      'object-group':   'ObjectGroup',
       'vf-dialog':      'Dialog',
       'vf-drawer':      'Drawer',
 
@@ -136,6 +137,7 @@ export default {
       lastPaneCannotBeDeleted: 'The last pane cannot be deleted.',
       duplicateName: 'Duplicate name: ',
       nameRequired: 'Name required.',
+      objectNameRequired: 'Object name required.',
 
       numberValidator: 'Number',
       letterValidator: 'Letter',
@@ -179,6 +181,8 @@ export default {
       eventSetting: 'Event Setting',
       uniqueName: 'Unique Name',
       editNameHelp: 'Press enter to confirm the modification',
+      objectName: 'Object Name',
+      objectNameHelp: 'For example：foo, foo.bar, foo.bar.one',
       label: 'Label',
       displayType: 'Type',
       defaultValue: 'Default Value',

@@ -448,6 +448,21 @@ export const containers = [
   },
 
   {
+    type: 'object-group',
+    category: 'container',
+    icon: 'object-group',
+    widgetList: [],
+    options: {
+      name: '',
+      objectName: 'testObj',
+      hidden: false,
+      customClass: '',
+      onCreated: '',
+      onMounted: '',
+    }
+  },
+
+  {
     type: 'vf-dialog',
     category: 'container',
     icon: 'vf-dialog',

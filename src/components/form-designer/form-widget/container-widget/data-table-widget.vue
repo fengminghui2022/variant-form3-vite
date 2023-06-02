@@ -157,21 +157,6 @@
 				this.designer.setSelected(widget)
 			},
 
-			renderHeader(h, { column, $index }) {//debugger
-				//console.log('column=====', column)
-
-				let colCount = 0;
-				if(this.widget.options.showIndex){
-					colCount++;
-				}
-				if(this.widget.options.showCheckBox){
-					colCount++;
-				}
-
-				column.formatS = this.widget.options.tableColumns[$index-colCount].formatS
-			  return column.label;
-			},
-
 			formatter(row, column, cellValue) {
 			  return cellValue;
 			},

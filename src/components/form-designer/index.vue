@@ -87,7 +87,7 @@
   import {createDesigner} from "@/components/form-designer/designer"
   import {
     deepClone, getQueryParam, getAllContainerWidgets,
-    getAllFieldWidgets, traverseAllWidgets, traverseFieldWidgetsOfContainer
+    getAllFieldWidgets, traverseAllWidgets, traverseFieldWidgetsOfContainer, setObjectValue
   } from "@/utils/util"
   import {MOCK_CASE_URL, VARIANT_FORM_VERSION} from "@/utils/config"
   import i18n, { changeLocale } from "@/utils/i18n"
@@ -315,9 +315,11 @@
         axios.get(this.fieldListApi.URL, {'headers': headers}).then(res => {
           let labelKey = this.fieldListApi.labelKey || 'label'
           let nameKey = this.fieldListApi.nameKey || 'name'
+          let resDataName = this.fieldListApi.resultDataName || ''
+          let resData = !!resDataName ? res.data[resDataName] : res.data
 
           this.fieldList.splice(0, this.fieldList.length)  //清空已有
-          res.data.forEach(fieldItem => {
+          resData.forEach(fieldItem => {
             this.fieldList.push({
               label: fieldItem[labelKey],
               name: fieldItem[nameKey]
@@ -498,13 +500,16 @@
       buildFormDataSchema() {
         let dataSchema = {}
         let allCws = getAllContainerWidgets(this.designer.widgetList)
-        let subFormCws = []
+        let subFormCws = [], objectCws = []
         allCws.forEach(ctn => {
           if (ctn.type === 'sub-form' || ctn.type === 'grid-sub-form') {
             subFormCws.push(ctn.container)
+          } else if (ctn.type === 'object-group') {
+            objectCws.push(ctn.container)
           }
         })
 
+        /* 处理子表单容器 */
         let allSFFields = []
         subFormCws.forEach(sf => {
           let sfDataSchema = {}
@@ -517,9 +522,23 @@
           dataSchema[sf.options.name] = sfDataSchema
         })
 
+        /* 处理对象容器 */
+        let allObjectFields = []
+        objectCws.forEach(oc => {
+          let ocDataSchema = {}
+          traverseFieldWidgetsOfContainer(oc, (w) => {
+            if (!!w.formItemFlag) {
+              ocDataSchema[w.options.name] = w.type  //
+              allObjectFields.push(w.options.name)
+            }
+          })
+          let objectName = oc.options.objectName
+          setObjectValue(dataSchema, objectName, ocDataSchema)
+        })
+
         let allFields = getAllFieldWidgets(this.designer.widgetList)
         allFields.forEach(fld => {
-          if (allSFFields.indexOf(fld.name) === -1) {
+          if ((allSFFields.indexOf(fld.name) === -1) && (allObjectFields.indexOf(fld.name) === -1)) {
             dataSchema[fld.name] = fld.type  //
           }
         })

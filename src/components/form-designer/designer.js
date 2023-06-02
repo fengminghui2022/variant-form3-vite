@@ -166,6 +166,13 @@ export function createDesigner(vueInstance) {
           if ((evt.to.className !== 'form-widget-canvas') && (wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
             return false
           }
+
+          /* 对象容器不允许拖入子表单、弹窗和抽屉，对象容器也不允许嵌套 */
+          if ((evt.to.className === 'object-group') && (wgType === 'sub-form' || wgType === 'grid-sub-form'
+              || wgType === 'vf-dialog' || wgType === 'vf-drawer' || wgType === 'object-group')) {
+            return false
+          }
+
         }
       }
 
