@@ -27,7 +27,7 @@
 												 :width="selectionWidth"  fixed="left"></el-table-column>
 
 				<template v-for="(item, index) in widget.options.tableColumns">
-					<table-high-level-column :column-schema="item" :data-table-ref="getDataTableRef" :column-index="index">
+					<table-high-level-column :column-schema="item" :data-table-ref="getDataTableRef" :column-index="index" :table-options="widget.options">
 					</table-high-level-column>
 				</template>
 

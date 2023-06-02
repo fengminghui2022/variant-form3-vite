@@ -158,6 +158,7 @@ export const containers = [
       showSummary: false, // 是否合计
       border: true, // 是否带有纵向边框（拖拽）
       tableSize: 'default', // 表格大小，large大、default中、small小
+      autoColumnWidthDisabled: false,
       tableColumns: [ //表格列信息
         {columnId: 1, prop:'name', label:'姓名', width:'100', show:true, align:'left', fixed:'left', sortable:true},
         {columnId: 2, prop:'date', label:'日期1', width:'160', show:true, align:'left', formatS:'d1'},

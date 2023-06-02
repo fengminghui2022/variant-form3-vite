@@ -41,6 +41,9 @@
 				</el-option>
 			</el-select>
 		</el-form-item>
+		<el-form-item :label="i18nt('designer.setting.autoColumnWidthDisabled')" :title="i18nt('designer.setting.autoColumnWidthDisabled')">
+			<el-switch v-model="optionModel.autoColumnWidthDisabled"></el-switch>
+		</el-form-item>
 		<el-form-item :label="i18nt('designer.setting.tableColEdit')">
 			<el-button type="primary" plain round @click="openSetting">{{i18nt('designer.setting.editAction')}}</el-button>
 		</el-form-item>

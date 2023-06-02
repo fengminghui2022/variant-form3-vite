@@ -19,7 +19,7 @@
 												 :width="selectionWidth" fixed="left"></el-table-column>
 
 				<template v-for="(item, index) in widget.options.tableColumns">
-					<table-multi-level-column :column-schema="item"></table-multi-level-column>
+					<table-multi-level-column :column-schema="item" :table-options="widget.options"></table-multi-level-column>
 				</template>
 
 				<template v-if="!!widget.options.showButtonsColumn">

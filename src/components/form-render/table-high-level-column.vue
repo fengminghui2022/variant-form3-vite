@@ -16,7 +16,8 @@
                    :formatter="formatterValue"
                    :format="columnSchema.format"
                    :show-overflow-tooltip="true"
-                   :min-width="columnSchema.width">
+                   :min-width="colMinWidth"
+                   :width="colWidth">
     <template #default="scope">
       <template v-if="columnSchema.formatS === 'render' && !!columnSchema.render">
         <table-column-custom-render :row="scope.row" :column="columnSchema" :data-table-ref="dataTableRef"
@@ -56,10 +57,23 @@
       },
       columnIndex: {
         type: Number
+      },
+      tableOptions: {
+        type: Object
       }
     },
     components: {
       TableColumnCustomRender,
+    },
+    computed: {
+      colMinWidth() {
+        return (this.tableOptions.autoColumnWidthDisabled === true) ? undefined : this.columnSchema.width
+      },
+
+      colWidth() {
+        return (this.tableOptions.autoColumnWidthDisabled === true) ? this.columnSchema.width : undefined
+      },
+
     },
     methods: {
       getSortable(column) {

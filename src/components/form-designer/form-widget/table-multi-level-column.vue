@@ -15,7 +15,8 @@
                    :formatter="formatterValue"
                    :format="columnSchema.format"
                    :show-overflow-tooltip="true"
-                   :width="columnSchema.width">
+                   :min-width="colMinWidth"
+                   :width="colWidth">
   </el-table-column>
 </template>
 
@@ -35,7 +36,20 @@
     props: {
       columnSchema: {
         type: Object
+      },
+      tableOptions: {
+        type: Object
       }
+    },
+    computed: {
+      colMinWidth() {
+        return (this.tableOptions.autoColumnWidthDisabled === true) ? undefined : this.columnSchema.width
+      },
+
+      colWidth() {
+        return (this.tableOptions.autoColumnWidthDisabled === true) ? this.columnSchema.width : undefined
+      },
+
     },
     methods: {
       formatterValue(row, column, cellValue) {
