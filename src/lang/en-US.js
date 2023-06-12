@@ -367,6 +367,7 @@ export default {
       showCheckBox: 'Show CheckBox',
       showIndex: 'Show Row Number',
       showPagination: 'Show Pagination',
+      paginationAlign: 'Align Of Pagination',
       smallPagination: 'Small Pagination',
       autoColumnWidthDisabled: 'Disable Auto Adjust Width Of Col',
       tableColEdit: 'Edit Cols',

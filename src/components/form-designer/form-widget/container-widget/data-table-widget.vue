@@ -40,16 +40,17 @@
 				</template>
 
 			</el-table>
+
 			<el-pagination v-if="widget.options.showPagination"
-									 	 :small="widget.options.smallPagination"
+										 :class="paginationAlign"
+										 :small="widget.options.smallPagination"
 										 :current-page="widget.options.pagination.currentPage"
 										 :page-sizes="widget.options.pagination.pageSizes"
 										 :page-size="widget.options.pagination.pageSize"
 										 :layout="paginationLayout"
 										 :total="widget.options.pagination.total"
 										 @size-change="handlePageSizeChange"
-										 @current-change="handleCurrentPageChange"
-			>
+										 @current-change="handleCurrentPageChange">
 			</el-pagination>
 
 		</div>
@@ -149,6 +150,11 @@
 
 			tableRowKey() {
 				return !this.widget.options.treeDataEnabled ? null : this.widget.options.rowKey
+			},
+
+			paginationAlign() {
+				let alignType = !this.widget.options.paginationAlign ? 'left' : this.widget.options.paginationAlign
+				return 'align-' + alignType
 			},
 
 		},
@@ -308,5 +314,19 @@
 	:deep(.el-table__body-wrapper .el-scrollbar__view) {
 		display: inline !important;  /* 解决设计状态下固定显示列在滚动后错位的问题！！ */
 	}
+
+	:deep(.el-pagination.align-left) {
+		justify-content: left;
+	}
+
+	:deep(.el-pagination.align-center) {
+		justify-content: center;
+	}
+
+	:deep(.el-pagination.align-right) {
+		justify-content: right;
+	}
+
 </style>
+
 

@@ -154,6 +154,7 @@ export const containers = [
       showIndex: false, // 是否显示行号列
       showCheckBox: true, // 是否显示复选框列
       showPagination: true, // 是否分页
+      paginationAlign: 'left',
       smallPagination: false, //是否显示小型分页
       showSummary: false, // 是否合计
       border: true, // 是否带有纵向边框（拖拽）

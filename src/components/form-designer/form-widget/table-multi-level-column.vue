@@ -2,7 +2,7 @@
   <el-table-column v-if="!!columnSchema.headerFlag && (!!columnSchema.children && columnSchema.children.length > 0)"
                    :label="columnSchema.label" :align="columnSchema.align ? columnSchema.align : 'center'">
     <template v-for="child in columnSchema.children">
-      <table-multi-level-column :column-schema="child"></table-multi-level-column>
+      <table-multi-level-column :column-schema="child" :table-options="tableOptions"></table-multi-level-column>
     </template>
   </el-table-column>
   <el-table-column v-if="!columnSchema.headerFlag && (columnSchema.show !== false) && !columnSchema.children"

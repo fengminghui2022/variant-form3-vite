@@ -21,6 +21,16 @@
 		<el-form-item :label="i18nt('designer.setting.showPagination')">
 			<el-switch v-model="optionModel.showPagination"></el-switch>
 		</el-form-item>
+		<el-form-item :label="i18nt('designer.setting.paginationAlign')" v-if="!!optionModel.showPagination">
+			<el-radio-group v-model="optionModel.paginationAlign" class="radio-group-custom">
+				<el-radio-button label="left">
+					{{i18nt('designer.setting.leftAlign')}}</el-radio-button>
+				<el-radio-button label="center">
+					{{i18nt('designer.setting.centerAlign')}}</el-radio-button>
+				<el-radio-button label="right">
+					{{i18nt('designer.setting.rightAlign')}}</el-radio-button>
+			</el-radio-group>
+		</el-form-item>
 		<el-form-item :label="i18nt('designer.setting.smallPagination')" v-if="!!optionModel.showPagination">
 			<el-switch v-model="optionModel.smallPagination"></el-switch>
 		</el-form-item>
@@ -916,6 +926,13 @@
 	.drag-sort-col {
 		padding-top: 8px;
 		cursor: move;
+	}
+
+	.radio-group-custom {
+		:deep(.el-radio-button__inner) {
+			padding-left: 12px;
+			padding-right: 12px;
+		}
 	}
 
 </style>

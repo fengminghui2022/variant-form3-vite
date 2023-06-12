@@ -50,7 +50,9 @@
 				</template>
 
 			</el-table>
+
 			<el-pagination v-if="widget.options.showPagination"
+										 :class="paginationAlign"
 										 :small="widget.options.smallPagination"
 										 :current-page="currentPage"
 										 :page-sizes="pageSizes"
@@ -168,6 +170,11 @@
 
 			tableRowKey() {
 				return !this.widget.options.rowKey ? null : this.widget.options.rowKey
+			},
+
+			paginationAlign() {
+				let alignType = !this.widget.options.paginationAlign ? 'left' : this.widget.options.paginationAlign
+				return 'align-' + alignType
 			},
 
 		},
@@ -652,4 +659,17 @@
 	:deep(.el-collapsed__header) {
 	  padding: 10px 12px;
 	}
+
+	:deep(.el-pagination.align-left) {
+		justify-content: left;
+	}
+
+	:deep(.el-pagination.align-center) {
+		justify-content: center;
+	}
+
+	:deep(.el-pagination.align-right) {
+		justify-content: right;
+	}
+
 </style>

@@ -368,6 +368,7 @@ export default {
       showIndex: '是否显示行号',
       showPagination: '是否显示分页',
       smallPagination: '小型分页',
+      paginationAlign: '分页水平对齐',
       autoColumnWidthDisabled: '禁用列宽自动充满',
       tableColEdit: '表格列编辑',
       tableDataEdit: '表格数据编辑',

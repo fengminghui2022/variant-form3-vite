@@ -2,7 +2,7 @@
   <el-table-column v-if="!!columnSchema.headerFlag && (!!columnSchema.children && columnSchema.children.length > 0)"
                    :label="columnSchema.label" :align="columnSchema.align ? columnSchema.align : 'center'">
     <template v-for="(child, idx) in columnSchema.children">
-      <table-high-level-column :column-schema="child" :data-table-ref="dataTableRef" :column-index="idx">
+      <table-high-level-column :column-schema="child" :data-table-ref="dataTableRef" :column-index="idx" :table-options="tableOptions">
       </table-high-level-column>
     </template>
   </el-table-column>
