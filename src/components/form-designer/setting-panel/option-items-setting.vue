@@ -1,5 +1,12 @@
 <template>
   <div class="option-items-pane">
+    <el-form-item :label="i18nt('designer.setting.optionValueType')" v-if="(selectedWidget.type !== 'cascader')">
+      <el-select v-model="optionModel.optionValueType">
+        <el-option :label="i18nt('designer.setting.dsRequestValueStringType')" value="String"></el-option>
+        <el-option :label="i18nt('designer.setting.dsRequestValueNumberType')" value="Number"></el-option>
+        <el-option :label="i18nt('designer.setting.dsRequestValueBooleanType')" value="Boolean"></el-option>
+      </el-select>
+    </el-form-item>
     <el-radio-group v-if="(selectedWidget.type === 'radio') || ((selectedWidget.type === 'select') && !selectedWidget.options.multiple)"
                     v-model="optionModel.defaultValue" @change="emitDefaultValueChange">
       <draggable tag="ul" :list="optionModel.optionItems" item-key="id"

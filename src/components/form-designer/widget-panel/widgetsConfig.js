@@ -680,6 +680,7 @@ export const basicFields = [
       dataSetName: '',  //数据集名称
       labelKey: 'label',
       valueKey: 'value',
+      optionValueType: '',
       optionItems: [
         {label: 'radio 1', value: 1},
         {label: 'radio 2', value: 2},
@@ -726,6 +727,7 @@ export const basicFields = [
       dataSetName: '',  //数据集名称
       labelKey: 'label',
       valueKey: 'value',
+      optionValueType: '',
       optionItems: [
         {label: 'check 1', value: 1},
         {label: 'check 2', value: 2},
@@ -777,6 +779,7 @@ export const basicFields = [
       dataSetName: '',  //数据集名称
       labelKey: 'label',
       valueKey: 'value',
+      optionValueType: '',
       optionItems: [
         {label: 'select 1', value: 1},
         {label: 'select 2', value: 2},

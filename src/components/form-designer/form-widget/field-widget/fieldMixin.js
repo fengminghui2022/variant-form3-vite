@@ -270,7 +270,7 @@ export default {
             this.loadOptionItemsFromDataSet(curDSName)
           }
 
-          return;
+          return
         }
 
         /* 异步更新option-data之后globalOptionData不能获取到最新值，改用provide的getOptionData()方法 */
@@ -281,8 +281,35 @@ export default {
           } else {
             this.loadOptions(newOptionItems[this.field.options.name])
           }
+
+          return
+        }
+
+        //对静态选项的值类型进行转换处理
+        if (this.field.type !== 'cascader') {
+          this.translateOptionItemsValue()
         }
       }
+    },
+
+    translateOptionItemsValue() {
+      let valueType = this.field.options.optionValueType
+      this.field.options.optionItems.forEach((opt, idx) => {
+        let optValue = opt.value + ''
+        if (valueType === 'String') {
+          opt.value = optValue
+        } else if (valueType === 'Number') {
+          opt.value = Number(optValue)
+        } else if (valueType === 'Boolean') {
+          if ((optValue.toLowerCase() === 'false') || (optValue === '0')) {
+            opt.value = false
+          } else if ((optValue.toLowerCase() === 'true') || (optValue === '1')) {
+            opt.value = true
+          } else {
+            opt.value = null
+          }
+        }
+      })
     },
 
     loadOptionItemsFromDataSet(dsName) {

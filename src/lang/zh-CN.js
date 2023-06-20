@@ -235,6 +235,7 @@ export default {
       circle: '圆形按钮',
       icon: '图标',
       optionsSetting: '选项设置',
+      optionValueType: '选项值类型',
       addOption: '增加选项',
       importOptions: '导入选项',
       resetDefault: '重设选中项',

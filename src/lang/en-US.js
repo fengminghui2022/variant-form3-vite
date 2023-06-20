@@ -235,6 +235,7 @@ export default {
       circle: 'Circle',
       icon: 'Icon',
       optionsSetting: 'Options Setting',
+      optionValueType: 'Value Type',
       addOption: 'Add Option',
       importOptions: 'Import Options',
       resetDefault: 'Reset Default',
