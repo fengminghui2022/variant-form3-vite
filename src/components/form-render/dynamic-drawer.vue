@@ -7,6 +7,10 @@
     <VFormRender ref="dFormRef" :form-json="formJson"
                  :option-data="optionData" :global-dsv="globalDsv" :parent-form="parentFormRef"
                  :disabled-mode="options.disabledMode" :dynamic-creation="true">
+      <!-- 递归传递插槽！！！ -->
+      <template v-for="(slot, name) in $slots" v-slot:[name]>
+        <slot :name="name"></slot>
+      </template>
     </VFormRender>
     <template #footer>
       <div style="float: right">
@@ -72,6 +76,9 @@
         return this.options.okButtonLabel || this.i18nt('designer.hint.confirm')
       }
 
+    },
+    created() {
+      //
     },
     mounted() {
       //

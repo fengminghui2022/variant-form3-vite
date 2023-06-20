@@ -190,7 +190,7 @@
       },
 
       cloneField(field) {
-        this.designer.cloneFieldWidget(field, this.parentWidget)
+        this.designer.cloneFieldWidget(field, this.parentList)
         this.designer.emitHistoryChange()
       },
 

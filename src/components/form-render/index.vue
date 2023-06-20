@@ -28,7 +28,7 @@
                       :index-of-parent-list="index" :parent-widget="null">
           <!-- 递归传递插槽！！！ -->
           <template v-for="slot in Object.keys($slots)" v-slot:[slot]="scope">
-            <slot :name="slot" v-bind="scope"/>
+            <slot :name="slot" v-bind="scope" />
           </template>
         </component>
       </template>
@@ -982,7 +982,7 @@
           parentFormRef: this,
           extraData: extraData,
           wrapperId: wrapperDivId,
-        })
+        }, this.$slots)
         dialogInstance.appContext = this.$root.$.appContext  //非常重要， 覆盖应用上下文！！
 
         let wrapperDiv = document.createElement("div")
@@ -1015,7 +1015,7 @@
           parentFormRef: this,
           extraData: extraData,
           wrapperId: wrapperDivId,
-        })
+        }, this.$slots)
         drawerInstance.appContext = this.$root.$.appContext  //非常重要， 覆盖应用上下文！！
 
         let wrapperDiv = document.createElement("div")

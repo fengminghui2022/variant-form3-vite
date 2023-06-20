@@ -690,7 +690,7 @@ export function createDesigner(vueInstance) {
 
     cloneGridCol(widget, parentWidget) {
       let newGridCol = deepClone(this.getContainerByType('grid-col'))
-      newGridCol.options.span = widget.options.span
+      newGridCol.options = deepClone(widget.options)
       let tmpId = generateId()
       newGridCol.id = 'grid-col-' + tmpId
       newGridCol.options.name = 'gridCol' + tmpId
@@ -757,14 +757,14 @@ export function createDesigner(vueInstance) {
       }
     },
 
-    cloneFieldWidget(fieldWidget, parentWidget) {
+    cloneFieldWidget(fieldWidget, parentList) {
       let newField = deepClone(fieldWidget)
       const tempId = generateId()
       newField.id = newField.type.replace(/-/g, '') + tempId
       newField.options.name = newField.id
 
-      if (!!parentWidget) {
-        parentWidget.widgetList.push(newField)
+      if (!!parentList) {
+        parentList.push(newField)
       } else {
         this.widgetList.push(newField)
       }

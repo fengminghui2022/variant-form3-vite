@@ -57,6 +57,21 @@
                          @dataTableSelectionChange="testDTSC" @operationButtonClick="testOBC"
                          @myEmitTest="onMyEmitTest"
                          @formChange="handleFormChange">
+              <template #slot1>
+                <div>test1</div>
+              </template>
+              <template #slot2>
+                <div>test2</div>
+              </template>
+              <template #slot3>
+                <div>test3</div>
+              </template>
+              <template #slot4>
+                <div>test4</div>
+              </template>
+              <template #slot5>
+                <div>test5</div>
+              </template>
             </VFormRender>
           </div>
         </div>
