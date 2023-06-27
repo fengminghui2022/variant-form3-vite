@@ -1,7 +1,7 @@
 <template>
   <container-item-wrapper :widget="widget">
 
-    <div class="sub-form-container"
+    <div :class="['sub-form-container', disabledClass, readModeClass]"
          v-show="!widget.options.hidden">
       <el-row class="header-row">
         <div class="action-header-column">
@@ -102,6 +102,14 @@
 
       widgetDisabled() {
         return !!this.widget.options.disabled
+      },
+
+      disabledClass() {
+        return !!this.widget.options.disabled ? 'sub-form-disabled' : ''
+      },
+
+      readModeClass() {
+        return !!this.getReadMode() ? 'sub-form-read-mode' : ''
       },
 
     },
