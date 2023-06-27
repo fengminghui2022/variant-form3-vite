@@ -1,7 +1,7 @@
 <template>
   <container-item-wrapper :widget="widget">
 
-    <div class="sub-form-container"
+    <div :class="['sub-form-container', disabledClass, readModeClass]"
          v-show="!widget.options.hidden">
       <el-row class="header-row">
         <div v-if="leftActionColumn" class="action-header-column">
@@ -62,7 +62,7 @@
           <span v-if="widget.options.showRowNumber" class="row-number-span">#{{sfrIdx+1}}</span>
         </div>
         <template v-for="(subWidget, swIdx) in widget.widgetList" :key="fieldSchemaData[sfrIdx][swIdx].id">
-          <div v-if="!subWidget.options.hidden" class="sub-form-table-column hide-label" :style="{width: subWidget.options.columnWidth}">
+          <div v-show="!subWidget.options.hidden" class="sub-form-table-column hide-label" :style="{width: subWidget.options.columnWidth}">
             <component :is="subWidget.type + '-widget'" :field="fieldSchemaData[sfrIdx][swIdx]"
                           :parent-list="widget.widgetList"
                           :index-of-parent-list="swIdx" :parent-widget="widget"
@@ -137,6 +137,14 @@
 
       widgetDisabled() {
         return !!this.widget.options.disabled
+      },
+
+      disabledClass() {
+        return !!this.widget.options.disabled ? 'sub-form-disabled' : ''
+      },
+
+      readModeClass() {
+        return !!this.getReadMode() ? 'sub-form-read-mode' : ''
       },
 
     },

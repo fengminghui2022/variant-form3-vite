@@ -670,5 +670,9 @@ export function getDSByName(formConfig, dsName) {
     })
   }
 
+  if (!resultDS) {
+    console.error('DS not found: ' + dsName)
+  }
+
   return resultDS
 }

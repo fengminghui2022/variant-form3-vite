@@ -211,6 +211,8 @@ export default {
     },
 
     disableSubForm() {
+      this.widget.options.disabled = true
+
       this.widget.widgetList.forEach(subWidget => {
         subWidget.options.disabled = true
       })
@@ -226,6 +228,8 @@ export default {
     },
 
     enableSubForm() {
+      this.widget.options.disabled = false
+
       this.widget.widgetList.forEach(subWidget => {
         subWidget.options.disabled = false
       })
