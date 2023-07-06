@@ -277,6 +277,7 @@ export default {
       maxValue: 'Max Value',
       precision: 'Precision',
       step: 'Step',
+      showControls: 'Show Controls',
       controlsPosition: 'Controls Position',
       minLength: 'Min Length',
       maxLength: 'Max Length',

@@ -4,6 +4,7 @@
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <el-input-number ref="fieldEditor" v-model="fieldModel" v-show="!isReadMode" class="full-width-input"
                      :disabled="field.options.disabled"
+                     :controls="showControls"
                      :controls-position="field.options.controlsPosition"
                      :placeholder="field.options.placeholder"
                      :min="field.options.min" :max="field.options.max"
@@ -64,6 +65,9 @@
       }
     },
     computed: {
+      showControls() {
+        return this.field.options.controls === undefined ? true : this.field.options.controls
+      },
 
     },
     beforeCreate() {

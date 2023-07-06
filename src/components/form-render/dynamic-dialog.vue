@@ -176,6 +176,19 @@
         return this.parentFormRef
       },
 
+      getTopFormRef() {
+        if (!this.parentFormRef.parentForm) {
+          return this.parentFormRef
+        }
+
+        let topFormRef = this.parentFormRef
+        while (topFormRef.parentForm) {
+          topFormRef = topFormRef.parentForm
+        }
+
+        return topFormRef
+      },
+
       getFormRef() {
         return this.$refs['dFormRef']
       },

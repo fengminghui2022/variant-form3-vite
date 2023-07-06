@@ -277,6 +277,7 @@ export default {
       maxValue: '最大值',
       precision: '精度',
       step: '增减步长',
+      showControls: '显示控制按钮',
       controlsPosition: '控制按钮位置',
       minLength: '最小长度',
       maxLength: '最大长度',

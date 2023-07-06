@@ -627,6 +627,7 @@ export const basicFields = [
       placeholder: '',
       columnWidth: '200px',
       size: '',
+      controls: true,  //是否显示控制按钮
       labelWidth: null,
       labelHidden: false,
       labelWrap: false,  //标签超长换行
