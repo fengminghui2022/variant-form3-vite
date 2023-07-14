@@ -529,6 +529,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       type: 'text',
@@ -579,6 +581,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       rows: 3,
@@ -621,6 +625,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: 0,
@@ -663,6 +669,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: null,
@@ -710,6 +718,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: [],
@@ -757,6 +767,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: '',
@@ -812,6 +824,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: null,
@@ -853,6 +867,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: null,
@@ -895,6 +911,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       type: 'date',
@@ -938,6 +956,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       type: 'daterange',
@@ -982,6 +1002,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: null,
@@ -1015,6 +1037,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: null,
@@ -1053,6 +1077,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: null,
@@ -1086,6 +1112,8 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       columnWidth: '200px',
@@ -1212,6 +1240,8 @@ export const advancedFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       labelWidth: null,
@@ -1257,6 +1287,8 @@ export const advancedFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       labelWidth: null,
@@ -1301,6 +1333,8 @@ export const advancedFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       placeholder: '',
@@ -1335,6 +1369,8 @@ export const advancedFields = [
     formItemFlag: true,
     options: {
       name: '',
+      keyNameEnabled: false,
+      keyName: '',  //数据键值名称
       label: '',
       labelAlign: '',
       defaultValue: '',

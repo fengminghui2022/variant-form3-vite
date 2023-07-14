@@ -34,8 +34,8 @@ export const overwriteObj = function(obj1, obj2) {  /* 浅拷贝对象属性，o
 
 /* 用Function对象实现eval函数功能 */
 export const evalFn = function (fn, DSV = null, VFR = null) {
-  let f = new Function('DSV', 'VFR', 'return ' + fn);
-  return f(DSV, VFR);
+  let f = new Function('DSV', 'VFR', 'LS', 'return ' + fn);
+  return f(DSV, VFR, localStorage);
 };
 
 export const trimEx = function (str, char, type) {

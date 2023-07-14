@@ -51,6 +51,11 @@ export default {
       }
     },
 
+    fieldKeyName() {
+      let fieldKeyName = this.field.options.name
+      return this.field.options.keyNameEnabled ? (this.field.options.keyName || fieldKeyName) : fieldKeyName
+    }
+
   },
 
   methods: {
@@ -72,11 +77,11 @@ export default {
     //--------------------- 组件内部方法 begin ------------------//
     getPropName() {
       if (this.subFormItemFlag && !this.designState) {
-        return this.subFormName + "." + this.subFormRowIndex + "." + this.field.options.name + ""
+        return this.subFormName + "." + this.subFormRowIndex + "." + this.fieldKeyName
       } else if (this.getObjectFieldFlag() && !this.designState) {
-        return this.getObjectName() + '.' + this.field.options.name
+        return this.getObjectName() + '.' + this.fieldKeyName
       } else {
-        return this.field.options.name
+        return this.fieldKeyName
       }
     },
 
@@ -97,10 +102,10 @@ export default {
           objectModel = objectModel[key]
         })
 
-        if (objectModel[this.field.options.name] === undefined) {
+        if (objectModel[this.fieldKeyName] === undefined) {
           this.fieldModel = null
         } else {
-          this.fieldModel = objectModel[this.field.options.name]
+          this.fieldModel = objectModel[this.fieldKeyName]
         }
 
         this.oldFieldValue = deepClone(this.fieldModel)
@@ -112,15 +117,15 @@ export default {
       if (!!this.subFormItemFlag && !this.designState) {  //SubForm子表单组件需要特殊处理！！
         let subFormData = this.formModel[this.subFormName]
         if (((subFormData === undefined) || (subFormData[this.subFormRowIndex] === undefined) ||
-            (subFormData[this.subFormRowIndex][this.field.options.name] === undefined)) &&
+            (subFormData[this.subFormRowIndex][this.fieldKeyName] === undefined)) &&
             (this.field.options.defaultValue !== undefined)) {
           this.fieldModel = this.field.options.defaultValue
-          subFormData[this.subFormRowIndex][this.field.options.name] = this.field.options.defaultValue
-        } else if (subFormData[this.subFormRowIndex][this.field.options.name] === undefined) {
+          subFormData[this.subFormRowIndex][this.fieldKeyName] = this.field.options.defaultValue
+        } else if (subFormData[this.subFormRowIndex][this.fieldKeyName] === undefined) {
           this.fieldModel = null
-          subFormData[this.subFormRowIndex][this.field.options.name] = null
+          subFormData[this.subFormRowIndex][this.fieldKeyName] = null
         } else {
-          this.fieldModel = subFormData[this.subFormRowIndex][this.field.options.name]
+          this.fieldModel = subFormData[this.subFormRowIndex][this.fieldKeyName]
         }
 
         /* 主动触发子表单内field-widget的onChange事件！！ */
@@ -134,13 +139,13 @@ export default {
         return
       }
 
-      if ((this.formModel[this.field.options.name] === undefined) &&
+      if ((this.formModel[this.fieldKeyName] === undefined) &&
           (this.field.options.defaultValue !== undefined)) {
         this.fieldModel = this.field.options.defaultValue
-      } else if (this.formModel[this.field.options.name] === undefined) {  //如果formModel为空对象，则初始化字段值为null!!
-        this.formModel[this.field.options.name] = null
+      } else if (this.formModel[this.fieldKeyName] === undefined) {  //如果formModel为空对象，则初始化字段值为null!!
+        this.formModel[this.fieldKeyName] = null
       } else {
-        this.fieldModel = this.formModel[this.field.options.name]
+        this.fieldModel = this.formModel[this.fieldKeyName]
       }
       this.oldFieldValue = deepClone(this.fieldModel)
       this.initFileList()  //处理图片上传、文件上传字段
@@ -164,7 +169,7 @@ export default {
       this.on$('setFormData', (newFormData) => {
         //console.log('formModel of globalModel----------', this.globalModel.formModel)
         if (!this.subFormItemFlag) {
-          this.setValue(newFormData[this.field.options.name])
+          this.setValue(newFormData[this.fieldKeyName])
         }
       })
 
@@ -259,6 +264,7 @@ export default {
             let localDsv = new Object({})
             overwriteObj(localDsv, gDsv)
             localDsv['widgetName'] = this.field.options.name
+            localDsv['widgetKeyName'] = this.fieldKeyName
             let dsResult = null
             try {
               dsResult = await runDataSourceRequest(curDS, localDsv, this.getFormRef(), false, this.$message)
@@ -275,11 +281,11 @@ export default {
 
         /* 异步更新option-data之后globalOptionData不能获取到最新值，改用provide的getOptionData()方法 */
         const newOptionItems = this.getOptionData()
-        if (!!newOptionItems && newOptionItems.hasOwnProperty(this.field.options.name)) {
+        if (!!newOptionItems && newOptionItems.hasOwnProperty(this.fieldKeyName)) {
           if (!!keepSelected) {
-            this.reloadOptions(newOptionItems[this.field.options.name])
+            this.reloadOptions(newOptionItems[this.fieldKeyName])
           } else {
-            this.loadOptions(newOptionItems[this.field.options.name])
+            this.loadOptions(newOptionItems[this.fieldKeyName])
           }
 
           return
@@ -470,7 +476,7 @@ export default {
         let subFormData = this.formModel[this.subFormName] || [{}]
         let subFormDataRow = subFormData[this.subFormRowIndex]
         if (!!subFormDataRow) { // 重置表单后subFormDataRow为undefined，应跳过！！
-          subFormDataRow[this.field.options.name] = value
+          subFormDataRow[this.fieldKeyName] = value
         }
       } else if (!!this.getObjectFieldFlag()) { // 如果是对象容器内部字段
         let objectChains = this.getObjectName().split('.')
@@ -483,9 +489,9 @@ export default {
           }
           objectModel = objectModel[key]
         })
-        objectModel[this.field.options.name] = value
+        objectModel[this.fieldKeyName] = value
       } else {
-        this.formModel[this.field.options.name] = value
+        this.formModel[this.fieldKeyName] = value
       }
     },
 

@@ -6,6 +6,8 @@
 const COMMON_PROPERTIES = {
   //字段
   'name'              :            'name-editor',
+  'keyNameEnabled'    :            'keyNameEnabled-editor',
+  'keyName'           :            'keyName-editor',
   'objectName'        :            'objectName-editor',
   'label'             :            'label-editor',
   'labelAlign'        :            'labelAlign-editor',

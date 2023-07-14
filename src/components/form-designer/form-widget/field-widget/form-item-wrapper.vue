@@ -219,12 +219,15 @@
       },
 
       getPropName() {
+        let fieldKeyName = this.field.options.name
+        fieldKeyName = this.field.options.keyNameEnabled ? (this.field.options.keyName || fieldKeyName) : fieldKeyName
+
         if (this.subFormItemFlag && !this.designState) {
-          return this.subFormName + "." + this.subFormRowIndex + "." + this.field.options.name + ""
+          return this.subFormName + "." + this.subFormRowIndex + "." + fieldKeyName
         } else if (this.getObjectFieldFlag() && !this.designState) {
-          return this.getObjectName() + '.' + this.field.options.name
+          return this.getObjectName() + '.' + fieldKeyName
         } else {
-          return this.field.options.name
+          return fieldKeyName
         }
       },
 

@@ -264,6 +264,11 @@
         }
       },
 
+      getFieldKeyName(field) {
+        let fieldKeyName = field.options.name
+        return field.options.keyNameEnabled ? (field.options.keyName || fieldKeyName) : fieldKeyName
+      },
+
       buildDataFromWidget(wItem) {
         if (wItem.category === 'container') {
           if (wItem.type === 'vf-dialog' || wItem.type === 'vf-drawer') {
@@ -301,7 +306,8 @@
               if (wItem.options.showBlankRow) {
                 wItem.widgetList.forEach(subFormItem => {
                   if (!!subFormItem.formItemFlag) {
-                    subFormDataRow[subFormItem.options.name] = subFormItem.options.defaultValue
+                    let sfiKeyName = this.getFieldKeyName(subFormItem)
+                    subFormDataRow[sfiKeyName] = subFormItem.options.defaultValue
                   }
                 })
 
@@ -325,7 +331,8 @@
               let gridSubFormDataRow = {}
               if (wItem.options.showBlankRow) {
                 gsfFWList.forEach(gridSubFormItem => {
-                  gridSubFormDataRow[gridSubFormItem.options.name] = gridSubFormItem.options.defaultValue
+                  let sfiKeyName = this.getFieldKeyName(gridSubFormItem)
+                  gridSubFormDataRow[sfiKeyName] = gridSubFormItem.options.defaultValue
                 })
                 this.formDataModel[gridSubFormName] = [gridSubFormDataRow]
               } else {
@@ -345,7 +352,7 @@
             let objectFields = []
             traverseFieldWidgetsOfContainer(wItem, (fld) => {
               if (!!fld.formItemFlag) {
-                objectFields.push(fld.options.name)
+                objectFields.push( this.getFieldKeyName(fld) )
               }
             })
 
@@ -368,11 +375,12 @@
             }
           }
         } else if (!!wItem.formItemFlag) {
-          if (!this.formData.hasOwnProperty(wItem.options.name)) {
-            this.formDataModel[wItem.options.name] = wItem.options.defaultValue
+          let fKeyName = this.getFieldKeyName(wItem)
+          if (!this.formData.hasOwnProperty(fKeyName)) {
+            this.formDataModel[fKeyName] = wItem.options.defaultValue
           } else {
-            let initialValue = this.formData[wItem.options.name]
-            this.formDataModel[wItem.options.name] = deepClone(initialValue)
+            let initialValue = this.formData[fKeyName]
+            this.formDataModel[fKeyName] = deepClone(initialValue)
           }
         }
       },
@@ -445,7 +453,7 @@
 
       findWidgetAndSetHidden(widgetName, hiddenFlag) {
         let foundW = this.getWidgetRef(widgetName)
-        if (!!foundW && !!foundW.setDisabled) {
+        if (!!foundW && !!foundW.setHidden) {
           foundW.setHidden(hiddenFlag)
         } else { //没找到，可能是子表单中的组件
           this.findWidgetOfSubFormAndSetHidden(widgetName, hiddenFlag)
@@ -460,7 +468,7 @@
 
         this.findWidgetNameInSubForm(widgetName).forEach(wn => {
           let sw = this.getWidgetRef(wn)
-          if (!!sw && !!sw.setDisabled) {
+          if (!!sw && !!sw.setHidden) {
             sw.setHidden(hiddenFlag)
           }
         })
