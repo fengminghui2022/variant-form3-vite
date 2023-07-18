@@ -1,5 +1,4 @@
 <template>
-  <el-config-provider :locale="elLocale">
   <div id="app">
     <VFormDesigner :designer-config="designerConfig" :global-dsv="globalDsv" ref="vfdRef">
       <!--
@@ -9,14 +8,10 @@
       -->
     </VFormDesigner>
   </div>
-  </el-config-provider>
 </template>
 
 <script>
 import VFormDesigner from './components/form-designer/index.vue'
-
-import zhCNLang from 'element-plus/lib/locale/lang/zh-cn'
-import enUSLang from 'element-plus/lib/locale/lang/en'
 
 export default {
   name: 'App',
@@ -38,18 +33,10 @@ export default {
         testApiHost: 'http://www.test.com/api'
       },
 
-      elLocaleMap: {
-        'zh-CN': zhCNLang,
-        'en-US': enUSLang,
-      },
     }
   },
   computed: {
-    elLocale() {
-      let curLocale = localStorage.getItem('v_form_locale') || 'zh-CN'
-      return this.elLocaleMap[curLocale]
-    },
-
+    //
   },
   methods: {
     doTest() {
