@@ -1,5 +1,5 @@
 <template>
-  <el-drawer ref="drawerRef" :title="options.title" v-model="drawerVisible" class="dynamic-drawer" append-to-body destroy-on-close
+  <el-drawer ref="drawerRef" :title="newTitle" v-model="drawerVisible" class="dynamic-drawer" append-to-body destroy-on-close
              :size="options.size" :modal="options.showModal" :direction="options.direction"
              :show-close="options.showClose" :close-on-click-modal="options.closeOnClickModal"
              :close-on-press-escape="options.closeOnPressEscape"
@@ -60,7 +60,11 @@
       wrapperId: {
         type: String,
         default: null
-      }
+      },
+      title: {
+        type: String,
+        default: null
+      },
     },
     data() {
       return {
@@ -74,7 +78,11 @@
 
       okBtnLabel() {
         return this.options.okButtonLabel || this.i18nt('designer.hint.confirm')
-      }
+      },
+
+      newTitle() {
+        return this.title || this.options.title
+      },
 
     },
     created() {

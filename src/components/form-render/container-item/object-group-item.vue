@@ -6,7 +6,7 @@
       <template v-for="(subWidget, swIdx) in widget.widgetList">
         <template v-if="'container' === subWidget.category">
           <component :is="getComponentByContainer(subWidget)" :widget="subWidget" :key="swIdx" :parent-list="widget.widgetList"
-                     :index-of-parent-list="swIdx" :parent-widget="widget"
+                     :index-of-parent-list="swIdx" :parent-widget="widget" :parent-object-name="widget.options.objectName"
                      :sub-form-row-id="subFormRowId" :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex">
             <!-- 递归传递插槽！！！ -->
             <template v-for="slot in Object.keys($scopedSlots)" v-slot:[slot]="scope">
@@ -60,6 +60,10 @@
         type: String,
         default: ''
       },
+      parentObjectName: { /* 父级对象容器名称 */
+        type: String,
+        default: ''
+      }
     },
     provide() {
       return {

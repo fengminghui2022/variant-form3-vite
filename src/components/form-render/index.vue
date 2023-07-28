@@ -967,8 +967,9 @@
        * @param dialogName
        * @param formData
        * @param extraData
+       * @param title
        */
-      showDialog(dialogName, formData = {}, extraData = {}) {
+      showDialog(dialogName, formData = {}, extraData = {}, title = '') {
         let topFormRef = this.getTopFormRef()
         let dialogCon = getContainerWidgetByName(topFormRef.widgetList, dialogName)
         if (!dialogName || (dialogCon.type !== 'vf-dialog')) {
@@ -990,6 +991,7 @@
           parentFormRef: this,
           extraData: extraData,
           wrapperId: wrapperDivId,
+          title: title,
         }, this.$slots)
         dialogInstance.appContext = this.$root.$.appContext  //非常重要， 覆盖应用上下文！！
 
@@ -1001,7 +1003,7 @@
         dialogInstance.component.ctx.show()
       },
 
-      showDrawer(drawerName, formData = {}, extraData = {}) {
+      showDrawer(drawerName, formData = {}, extraData = {}, title = '') {
         let topFormRef = this.getTopFormRef()
         let drawerCon = getContainerWidgetByName(topFormRef.widgetList, drawerName)
         if (!drawerCon || (drawerCon.type !== 'vf-drawer')) {
@@ -1023,6 +1025,7 @@
           parentFormRef: this,
           extraData: extraData,
           wrapperId: wrapperDivId,
+          title: title,
         }, this.$slots)
         drawerInstance.appContext = this.$root.$.appContext  //非常重要， 覆盖应用上下文！！
 

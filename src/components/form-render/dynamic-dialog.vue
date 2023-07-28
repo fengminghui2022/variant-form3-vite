@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :title="options.title" v-model="dialogVisible" append-to-body destroy-on-close draggable
+  <el-dialog :title="newTitle" v-model="dialogVisible" append-to-body destroy-on-close draggable
              :width="options.width" :fullscreen="options.fullscreen" :modal="options.showModal"
              :show-close="options.showClose" :close-on-click-modal="options.closeOnClickModal"
              :close-on-press-escape="options.closeOnPressEscape" :center="options.center"
@@ -61,6 +61,10 @@
         type: String,
         default: null
       },
+      title: {
+        type: String,
+        default: null
+      },
     },
     data() {
       return {
@@ -74,7 +78,11 @@
 
       okBtnLabel() {
         return this.options.okButtonLabel || this.i18nt('designer.hint.confirm')
-      }
+      },
+
+      newTitle() {
+        return this.title || this.options.title
+      },
 
     },
     created() {

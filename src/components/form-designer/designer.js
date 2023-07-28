@@ -167,9 +167,9 @@ export function createDesigner(vueInstance) {
             return false
           }
 
-          /* 对象容器不允许拖入子表单、弹窗和抽屉，对象容器也不允许嵌套 */
-          if ((evt.to.className === 'object-group') && (wgType === 'sub-form' || wgType === 'grid-sub-form'
-              || wgType === 'vf-dialog' || wgType === 'vf-drawer' || wgType === 'object-group')) {
+          /* 对象容器不允许拖入子表单、弹窗和抽屉，对象容器自身也不允许嵌套 */
+          if ((evt.to.className === 'object-group') && (wgType === 'object-group' || wgType === 'sub-form' || wgType === 'grid-sub-form'
+              || wgType === 'table-sub-form' || wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
             return false
           }
 

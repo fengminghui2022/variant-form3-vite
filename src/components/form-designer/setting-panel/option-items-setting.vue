@@ -1,7 +1,7 @@
 <template>
   <div class="option-items-pane">
     <el-form-item :label="i18nt('designer.setting.optionValueType')" v-if="(selectedWidget.type !== 'cascader')">
-      <el-select v-model="optionModel.optionValueType">
+      <el-select v-model="optionModel.optionValueType" @change="handelValueTypeChange">
         <el-option :label="i18nt('designer.setting.dsRequestValueStringType')" value="String"></el-option>
         <el-option :label="i18nt('designer.setting.dsRequestValueNumberType')" value="Number"></el-option>
         <el-option :label="i18nt('designer.setting.dsRequestValueBooleanType')" value="Boolean"></el-option>
@@ -132,6 +132,33 @@
       },
     },
     methods: {
+      handelValueTypeChange(valueType) {
+        // 先清空默认值!!!
+        if ((this.selectedWidget.type === 'checkbox') ||
+            ((this.selectedWidget.type === 'select') && this.selectedWidget.options.multiple)) {
+          this.optionModel.defaultValue = []
+        } else {
+          this.optionModel.defaultValue = ''
+        }
+
+        this.selectedWidget.options.optionItems.forEach((opt, idx) => {
+          let optValue = opt.value + ''
+          if (valueType === 'String') {
+            opt.value = optValue
+          } else if (valueType === 'Number') {
+            opt.value = Number(optValue)
+          } else if (valueType === 'Boolean') {
+            if ((optValue.toLowerCase() === 'false') || (optValue === '0')) {
+              opt.value = false
+            } else if ((optValue.toLowerCase() === 'true') || (optValue === '1')) {
+              opt.value = true
+            } else {
+              opt.value = null
+            }
+          }
+        })
+      },
+
       emitDefaultValueChange() {
         if (!!this.designer && !!this.designer.formWidget) {
           let fieldWidget = this.designer.formWidget.getWidgetRef(this.selectedWidget.options.name)
