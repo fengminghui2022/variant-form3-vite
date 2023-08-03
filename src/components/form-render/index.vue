@@ -352,15 +352,15 @@
             let objectFields = []
             traverseFieldWidgetsOfContainer(wItem, (fld) => {
               if (!!fld.formItemFlag) {
-                objectFields.push( this.getFieldKeyName(fld) )
+                objectFields.push(fld.options.name)
               }
             })
 
             let objectName = wItem.options.objectName
             objectFields.forEach(fieldName => {
-              let objPath = objectName + '.' + fieldName
+              let fieldSchema = getFieldWidgetByName(wItem.widgetList, fieldName, false)
+              let objPath = objectName + '.' + this.getFieldKeyName(fieldSchema)
               if (!hasPropertyOfObject(this.formData, objPath)) {
-                let fieldSchema = getFieldWidgetByName(wItem.widgetList, fieldName, false)
                 setObjectValue(this.formDataModel, objPath, fieldSchema.options.defaultValue)
               } else {
                 let initialValue = getObjectValue(this.formData, objPath)
