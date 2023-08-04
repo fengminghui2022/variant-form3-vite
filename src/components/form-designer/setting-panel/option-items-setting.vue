@@ -4,7 +4,6 @@
       <el-select v-model="optionModel.optionValueType" @change="handelValueTypeChange">
         <el-option :label="i18nt('designer.setting.dsRequestValueStringType')" value="String"></el-option>
         <el-option :label="i18nt('designer.setting.dsRequestValueNumberType')" value="Number"></el-option>
-        <el-option :label="i18nt('designer.setting.dsRequestValueBooleanType')" value="Boolean"></el-option>
       </el-select>
     </el-form-item>
     <el-radio-group v-if="(selectedWidget.type === 'radio') || ((selectedWidget.type === 'select') && !selectedWidget.options.multiple)"
@@ -146,14 +145,16 @@
           if (valueType === 'String') {
             opt.value = optValue
           } else if (valueType === 'Number') {
-            opt.value = Number(optValue)
+            if (!isNaN(optValue * 1)) {
+              opt.value = Number(optValue)
+            } else {
+              opt.value = idx + 1
+            }
           } else if (valueType === 'Boolean') {
-            if ((optValue.toLowerCase() === 'false') || (optValue === '0')) {
-              opt.value = false
-            } else if ((optValue.toLowerCase() === 'true') || (optValue === '1')) {
+            if ((optValue.toLowerCase() === 'true') || (optValue === '1')) {
               opt.value = true
             } else {
-              opt.value = null
+              opt.value = false
             }
           }
         })

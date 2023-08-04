@@ -1,5 +1,5 @@
 <template>
-  <el-form-item :label="i18nt('designer.setting.rows')">
+  <el-form-item v-if="!optionModel.autosize" :label="i18nt('designer.setting.rows')">
     <el-input-number v-model="optionModel.rows" style="width: 100%"></el-input-number>
   </el-form-item>
 </template>

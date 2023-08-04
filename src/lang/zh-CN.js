@@ -205,6 +205,7 @@ export default {
       border: '带有边框',
       labelWidth: '标签宽度',
       rows: '行数',
+      autosize: '自动适应高度',
       labelHidden: '隐藏字段标签',
       labelWrap: '标签超长换行',
       required: '必填字段',

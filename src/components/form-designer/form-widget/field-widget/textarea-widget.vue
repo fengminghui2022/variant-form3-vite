@@ -5,6 +5,7 @@
     <el-input type="textarea" ref="fieldEditor" v-model="fieldModel" v-show="!isReadMode"
               :disabled="field.options.disabled" :readonly="field.options.readonly"
               :placeholder="field.options.placeholder" :rows="field.options.rows"
+              :key="textareaKey" :autosize="field.options.autosize"
               :minlength="field.options.minLength" :maxlength="field.options.maxLength"
               :show-word-limit="field.options.showWordLimit"
               @focus="handleFocusCustomEvent" @blur="handleBlurCustomEvent" @input="handleInputCustomEvent"
@@ -18,6 +19,7 @@
 
 <script>
   import FormItemWrapper from './form-item-wrapper'
+  import {generateId} from "@/utils/util"
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
@@ -60,9 +62,13 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        widgetKey: '',
       }
     },
     computed: {
+      textareaKey() {
+        return this.widgetKey || this.field.id
+      },
 
     },
     beforeCreate() {
@@ -89,6 +95,9 @@
     },
 
     methods: {
+      refreshWidgetKey() {  //强制刷新组件！！
+        this.widgetKey = 'textarea-key-' + generateId()
+      },
 
     }
   }

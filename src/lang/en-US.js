@@ -205,6 +205,7 @@ export default {
       border: 'Show Border',
       labelWidth: 'Width Of Label',
       rows: 'Rows',
+      autosize: 'Autosize',
       labelHidden: 'Hide Label',
       labelWrap: 'Label Wrap',
       required: 'Required',

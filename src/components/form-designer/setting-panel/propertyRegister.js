@@ -29,6 +29,7 @@ const COMMON_PROPERTIES = {
   'labelHidden'       :            'labelHidden-editor',
   'labelWrap'         :            'labelWrap-editor',
   'rows'              :            'rows-editor',
+  'autosize'          :            'autosize-editor',
   'required'          :            'required-editor',
   'requiredHint'      :            'requiredHint-editor',
   'validation'        :            'validation-editor',

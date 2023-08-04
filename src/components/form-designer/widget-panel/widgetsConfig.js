@@ -586,6 +586,7 @@ export const basicFields = [
       label: '',
       labelAlign: '',
       rows: 3,
+      autosize: false,  //自适应内容高度
       defaultValue: '',
       placeholder: '',
       columnWidth: '200px',
