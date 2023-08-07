@@ -3,7 +3,8 @@
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <el-rate ref="fieldEditor" v-model="fieldModel"
-             :disabled="field.options.disabled"
+             class="no-margin-top"
+             :disabled="field.options.disabled || isReadMode"
              :max="field.options.max"
              :low-threshold="field.options.lowThreshold" :high-threshold="field.options.highThreshold"
              :allow-half="field.options.allowHalf"
@@ -98,4 +99,13 @@
     width: 100% !important;
   }
 
+</style>
+<style lang="scss">
+  .el-rate.no-margin-top {
+    margin-top: 0 !important;
+  }
+
+  .readonly-mode-form .el-form-item__content .el-rate__item {
+    color: #ccd0d6 !important;  /* 凸显选项星星颜色 */
+  }
 </style>
