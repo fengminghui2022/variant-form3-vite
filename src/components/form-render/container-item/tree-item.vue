@@ -257,7 +257,9 @@
 
 			setTreeData(data) {
 				this.widget.options.treeData = data;
-				this.currentKey = data[0].id;
+				if (data && (data.length > 0)) {
+					this.currentKey = data[0].id;
+				}
 			},
 
 			getTreeData() {
