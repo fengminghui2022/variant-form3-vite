@@ -134,6 +134,8 @@
   }
 
   .readonly-mode-rich-editor {
+    width: 100%;  //解决垂直滚动条不居右显示的问题！！
+
     :deep(.ql-toolbar) {
       display: none;
     }
