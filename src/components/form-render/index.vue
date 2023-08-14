@@ -62,7 +62,7 @@
     getFieldWidgetById,
     hasPropertyOfObject,
     getObjectValue,
-    setObjectValue
+    setObjectValue, deleteCustomStyleAndScriptNode
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
@@ -208,6 +208,9 @@
       this.initLocale()
       this.initDataSetRequest()
       this.handleOnMounted()
+    },
+    beforeUnmount() {
+      deleteCustomStyleAndScriptNode(this.previewState, this.formId)
     },
     methods: {
       initFormObject(insertHtmlCodeFlag = true) {
@@ -771,8 +774,8 @@
        * @param callback 回调函数
        */
       validateForm(callback) {
-        this.$refs['renderForm'].validate((valid) => {
-          callback(valid)
+        this.$refs['renderForm'].validate((valid, obj) => {
+          callback(valid, obj)
         })
       },
 

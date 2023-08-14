@@ -124,7 +124,7 @@ const createStyleSheet = function() {
 }
 
 export const insertCustomCssToHead = function (cssCode, formId = '') {
-  let head = document.getElementsByTagName('head')[0]
+  const head = document.getElementsByTagName('head')[0]
   let oldStyle = document.getElementById('vform-custom-css')
   if (!!oldStyle) {
     head.removeChild(oldStyle)  //先清除后插入！！
@@ -148,7 +148,7 @@ export const insertCustomCssToHead = function (cssCode, formId = '') {
 }
 
 export const insertGlobalFunctionsToHtml = function (functionsCode, formId = '') {
-  let bodyEle = document.getElementsByTagName('body')[0]
+  const bodyEle = document.getElementsByTagName('body')[0]
   let oldScriptEle = document.getElementById('v_form_global_functions')
   !!oldScriptEle && bodyEle.removeChild(oldScriptEle)  //先清除后插入！！
   if (!!formId) {
@@ -161,6 +161,26 @@ export const insertGlobalFunctionsToHtml = function (functionsCode, formId = '')
   newScriptEle.type = 'text/javascript'
   newScriptEle.innerHTML = functionsCode
   bodyEle.appendChild(newScriptEle)
+}
+
+export const deleteCustomStyleAndScriptNode = function(previewState, formId) {
+  const head = document.getElementsByTagName('head')[0]
+  let oldStyle = document.getElementById('vform-custom-css' + '-' + formId)
+  if (previewState) {
+    oldStyle = document.getElementById('vform-custom-css')
+  }
+  if (!!oldStyle) {
+    head.removeChild(oldStyle)
+  }
+
+  const bodyEle = document.getElementsByTagName('body')[0]
+  let oldScriptEle = document.getElementById('v_form_global_functions' + '-' + formId)
+  if (previewState) {
+    oldScriptEle = document.getElementById('v_form_global_functions')
+  }
+  if (!!oldScriptEle) {
+    bodyEle.removeChild(oldScriptEle)
+  }
 }
 
 export const optionExists = function(optionsObj, optionName) {
