@@ -3,6 +3,14 @@
     <div class="panel-container">
 
     <el-tabs v-model="firstTab" class="no-bottom-margin indent-left-margin">
+      <el-tab-pane name="chartLib">
+        <template #label>
+          <span><svg-icon icon-class="el-chart" /> {{i18nt('designer.chartLib')}}</span>
+        </template>
+        <el-collapse-item name="1" :title="i18nt('designer.containerTitle')">
+        </el-collapse-item>
+      </el-tab-pane>
+
       <el-tab-pane name="componentLib">
         <template #label>
           <span><svg-icon icon-class="el-set-up" /> {{i18nt('designer.componentLib')}}</span>
@@ -300,6 +308,10 @@
   .side-scroll-bar {
     :deep(.el-scrollbar__wrap) {
       overflow-x: hidden;
+    }
+
+    :deep(.el-tabs__item) {
+      padding: 0 10px;
     }
   }
 

@@ -1,6 +1,6 @@
 import {
   Edit, Minus, Plus, InfoFilled, Search, CirclePlus, Delete,
-  ArrowDown, ArrowUp, Bottom, Top, Back, Right, BottomLeft, TopRight,
+  ArrowDown, ArrowUp, Bottom, Top, Back, Right, BottomLeft, TopRight
 } from '@element-plus/icons-vue'
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'

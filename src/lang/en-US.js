@@ -11,6 +11,7 @@ export default {
   },
 
   designer: {
+    chartLib: 'Charts',
     componentLib: 'Components',
     formLib: 'Templates',
     containerTitle: 'Container',
