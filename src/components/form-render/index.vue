@@ -641,7 +641,14 @@
 
         this.$refs['renderForm'].validate((valid) => {
           if (valid) {
-            callback(this.formDataModel)
+            //执行表单自定义校验
+            //执行表单自定义校验
+            let customValid = this.doCustomValidation()
+            if (customValid) {
+              callback(this.formDataModel)
+            } else {
+              callback(this.formDataModel, this.i18nt('render.hint.validationFailed'))
+            }
           } else {
             callback(this.formDataModel, this.i18nt('render.hint.validationFailed'))
           }
@@ -775,8 +782,27 @@
        */
       validateForm(callback) {
         this.$refs['renderForm'].validate((valid, obj) => {
-          callback(valid, obj)
+          if (valid) {
+            //执行表单自定义校验
+            let customValid = this.doCustomValidation();
+            callback(customValid, obj)
+          } else {
+            callback(valid, obj)
+          }
         })
+      },
+
+      /**
+       * 执行表单自定义校验代码
+       */
+      doCustomValidation() {
+        if (!this.formConfig.onFormValidate) {
+          return true
+        }
+
+        let customFn = new Function('formModel', this.formConfig.onFormValidate)
+        let result = customFn.call(this, this.formDataModel)
+        return result === undefined ? true : result
       },
 
       validateFields() {

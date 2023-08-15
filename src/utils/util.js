@@ -562,6 +562,7 @@ export function getDefaultFormConfig() {
     onFormCreated: '',
     onFormMounted: '',
     onFormDataChange: '',
+    onFormValidate: '',
   }
 }
 
