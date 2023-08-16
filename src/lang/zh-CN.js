@@ -27,7 +27,6 @@ export default {
       grid:             '栅格',
       table:            '表格',
       tab:              '标签页',
-      section:          '区块',
       'sub-form':       '单行子表单',
       'grid-sub-form':  '多行子表单',
       'grid-col':       '栅格列',

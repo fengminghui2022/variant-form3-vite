@@ -27,7 +27,6 @@ export default {
       grid:             'Grid',
       table:            'Table',
       tab:              'Tab',
-      section:          'Section',
       'sub-form':       'SubForm',
       'grid-sub-form':  'GridSubForm',
       'grid-col':       'GridCol',

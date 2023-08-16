@@ -7,7 +7,8 @@
  */
 
 import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils/util"
-import {containers, advancedFields, basicFields, customFields} from "@/components/form-designer/widget-panel/widgetsConfig.js"
+import {containers, advancedFields, basicFields, customFields, chartContainers, chartWidgets}
+    from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
 
@@ -623,7 +624,7 @@ export function createDesigner(vueInstance) {
     },
 
     getContainerByType(typeName) {
-      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields]
+      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields, ...chartContainers, chartWidgets]
       let foundCon = null
       allWidgets.forEach(con => {
         if (!!con.category && !!con.type && (con.type === typeName)) {
@@ -635,7 +636,7 @@ export function createDesigner(vueInstance) {
     },
 
     getFieldWidgetByType(typeName) {
-      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields]
+      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields, chartContainers, chartWidgets]
       let foundWidget = null
       allWidgets.forEach(widget => {
         if (!!!widget.category && !!widget.type && (widget.type === typeName)) {

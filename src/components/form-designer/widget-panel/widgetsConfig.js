@@ -1434,7 +1434,23 @@ export const customFields = [
 
 ]
 
+export const chartContainers = [
+
+]
+
+export const chartWidgets = [
+
+]
+
 export function addContainerWidgetSchema(containerSchema) {
+  containers.push(containerSchema)
+}
+
+/**
+ * addContainerWidgetSchema方法的简写
+ * @param containerSchema
+ */
+export function addContainerSchema(containerSchema) {
   containers.push(containerSchema)
 }
 
@@ -1448,4 +1464,12 @@ export function addAdvancedFieldSchema(fieldSchema) {
 
 export function addCustomWidgetSchema(widgetSchema) {
   customFields.push(widgetSchema)
+}
+
+export function addChartContainerSchema(chartContainerSchema) {
+  chartContainers.push(chartContainerSchema)
+}
+
+export function addChartSchema(chartSchema) {
+  chartWidgets.push(chartSchema)
 }

@@ -17,8 +17,11 @@ import {alertSchema} from "@/extension/samples/extension-schema"
 import AlertWidget from '@/extension/samples/alert/alert-widget'
 import {registerFWGenerator} from '@/utils/sfc-generator'
 import {alertTemplateGenerator} from '@/extension/samples/extension-sfc-generator'
+import {loadChartsExtension} from "@/extension/charts/charts-loader";
 
 export const loadExtension = function (app) {
+  /* 加载图标组件 */
+  loadChartsExtension(app)
 
   /**
    * 加载容器组件步骤：

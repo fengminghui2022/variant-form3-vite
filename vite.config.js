@@ -51,6 +51,10 @@ export default defineConfig({
     }
   },
 
+  server: {
+    port: 3001,
+  },
+
   build: {
     //minify: false,
     commonjsOptions: {

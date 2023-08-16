@@ -20,6 +20,7 @@
     "mitt": "^3.0.0",
     "sortablejs": "1.14.0",
     "vue": "^3.2.26",
+    "vue-draggable-resizable-gorkys": "^2.4.8",
     "vue3-quill": "^0.2.6"
   },
   "devDependencies": {
