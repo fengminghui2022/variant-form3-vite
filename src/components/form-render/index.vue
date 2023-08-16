@@ -62,7 +62,7 @@
     getFieldWidgetById,
     hasPropertyOfObject,
     getObjectValue,
-    setObjectValue
+    setObjectValue, deleteCustomStyleAndScriptNode
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
@@ -208,6 +208,9 @@
       this.initLocale()
       this.initDataSetRequest()
       this.handleOnMounted()
+    },
+    beforeUnmount() {
+      deleteCustomStyleAndScriptNode(this.previewState, this.formId)
     },
     methods: {
       initFormObject(insertHtmlCodeFlag = true) {
@@ -638,7 +641,14 @@
 
         this.$refs['renderForm'].validate((valid) => {
           if (valid) {
-            callback(this.formDataModel)
+            //执行表单自定义校验
+            //执行表单自定义校验
+            let customValid = this.doCustomValidation()
+            if (customValid) {
+              callback(this.formDataModel)
+            } else {
+              callback(this.formDataModel, this.i18nt('render.hint.validationFailed'))
+            }
           } else {
             callback(this.formDataModel, this.i18nt('render.hint.validationFailed'))
           }
@@ -771,9 +781,28 @@
        * @param callback 回调函数
        */
       validateForm(callback) {
-        this.$refs['renderForm'].validate((valid) => {
-          callback(valid)
+        this.$refs['renderForm'].validate((valid, obj) => {
+          if (valid) {
+            //执行表单自定义校验
+            let customValid = this.doCustomValidation();
+            callback(customValid, obj)
+          } else {
+            callback(valid, obj)
+          }
         })
+      },
+
+      /**
+       * 执行表单自定义校验代码
+       */
+      doCustomValidation() {
+        if (!this.formConfig.onFormValidate) {
+          return true
+        }
+
+        let customFn = new Function('formModel', this.formConfig.onFormValidate)
+        let result = customFn.call(this, this.formDataModel)
+        return result === undefined ? true : result
       },
 
       validateFields() {
