@@ -3,6 +3,7 @@ import {addChartContainerSchema, addChartSchema} from "@/components/form-designe
 import {ext_chart_containers as EC_CONS, ext_charts_widgets as EC_WS} from "./charts-schema";
 import SectionWidget from "@/extension/charts/section/section-widget";
 import SectionItem from "@/extension/charts/section/section-item";
+import {registerChartWidgets} from "@/extension/charts/chart-widget";
 
 export const loadChartsExtension = function (app) {
   EC_CONS.forEach(con => {
@@ -14,5 +15,6 @@ export const loadChartsExtension = function (app) {
   EC_WS.forEach(wgt => {
     addChartSchema(wgt)
   })
+  registerChartWidgets(app)
 
 }

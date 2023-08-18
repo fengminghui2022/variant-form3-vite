@@ -26,6 +26,8 @@ export default {
 
       designerConfig: {
         //logoHeader: false,
+        productName: '美乐低代码',
+        productTitle: '仪表盘设计',
       },
 
       //全局数据源变量

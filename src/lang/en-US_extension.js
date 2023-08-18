@@ -4,6 +4,7 @@ export default {
       card: 'Card',
       alert: 'Alert',
       section: 'Section',
+      statistic: 'Statistic',
     },
 
     setting: {

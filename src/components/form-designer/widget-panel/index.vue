@@ -20,7 +20,20 @@
               </template>
             </draggable>
           </el-collapse-item>
+
+          <el-collapse-item name="2" :title="i18nt('designer.chartTitle')">
+            <draggable tag="ul" :list="chartWidgets" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :move="checkFieldMove"
+                       :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+              <template #item="{ element: chart }">
+                <li class="field-widget-item" :title="chart.displayName" @dblclick="addFieldByDbClick(chart)">
+                  <span><svg-icon :icon-class="chart.icon" class-name="color-svg-icon" />{{getWidgetLabel(chart)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
         </el-collapse>
+
       </el-tab-pane>
 
       <el-tab-pane name="componentLib">

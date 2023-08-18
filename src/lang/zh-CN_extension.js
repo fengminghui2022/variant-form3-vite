@@ -4,6 +4,7 @@ export default {
       card: '卡片',
       alert: '提示',
       section: '区块',
+      statistic: '统计数值',
     },
 
     setting: {

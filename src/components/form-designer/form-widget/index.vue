@@ -9,12 +9,15 @@
       </template>
 
       <div class="form-widget-canvas">
-        <draggable :list="designer.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 300}"
-                   tag="transition-group" :component-data="{name: 'fade'}"
+        <draggable :list="designer.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
+                   tag="div" :component-data="{name: 'fade'}"
                    handle=".drag-handler" @end="onDragEnd" @add="onDragAdd" @update="onDragUpdate" :move="checkMove">
           <template #item="{ element: widget, index }">
-            <div class="transition-group-el">
-              <template v-if="'container' === widget.category">
+              <template v-if="'section' === widget.type">
+                <component :is="getWidgetName(widget)" :widget="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
+                           :index-of-parent-list="index" :parent-widget="null" @refLineParams="getRefLineParams"></component>
+              </template>
+              <template v-else-if="'container' === widget.category">
                 <component :is="getWidgetName(widget)" :widget="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
                                   :index-of-parent-list="index" :parent-widget="null"></component>
               </template>
@@ -22,9 +25,67 @@
                 <component :is="getWidgetName(widget)" :field="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
                               :index-of-parent-list="index" :parent-widget="null" :design-state="true"></component>
               </template>
-            </div>
           </template>
         </draggable>
+
+        <!--
+        <vue-draggable-resizable
+                :w="200"
+                :h="200"
+                :parent="false"
+                :debug="false"
+                :min-width="200"
+                :min-height="200"
+                :isConflictCheck="true"
+                :snap="true"
+                :snapTolerance="1"
+                @refLineParams="getRefLineParams"
+                class="test1">
+        </vue-draggable-resizable>
+        <vue-draggable-resizable
+                :w="200"
+                :h="200"
+                :parent="false"
+                :x="210"
+                :debug="false"
+                :min-width="200"
+                :min-height="200"
+                :isConflictCheck="true"
+                :snap="true"
+                :snapTolerance="1"
+                @refLineParams="getRefLineParams"
+                class="test2">
+        </vue-draggable-resizable>
+        <vue-draggable-resizable
+                :w="200"
+                :h="200"
+                :parent="false"
+                :x="420"
+                :debug="false"
+                :min-width="200"
+                :min-height="200"
+                :isConflictCheck="true"
+                :snap="true"
+                :snapTolerance="1"
+                @refLineParams="getRefLineParams"
+                class="test3">
+        </vue-draggable-resizable>
+        -->
+
+        <!--辅助线-->
+        <span class="ref-line v-line"
+              v-for="item in vLine"
+              :key="item.id"
+              v-show="item.display"
+              :style="{ left: item.position, top: item.origin, height: item.lineLength}"
+        />
+        <span class="ref-line h-line"
+              v-for="item in hLine"
+              :key="item.id"
+              v-show="item.display"
+              :style="{ top: item.position, left: item.origin, width: item.lineLength}"
+        />
+        <!--辅助线END-->
       </div>
 
     </el-form>
@@ -36,12 +97,15 @@
   import '@/components/form-designer/form-widget/container-widget/index'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import i18n from "@/utils/i18n"
+  import VueDraggableResizable from "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.vue"
+  import "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.css"
 
   export default {
     name: "VFormWidget",
     componentName: "VFormWidget",
     mixins: [i18n],
     components: {
+      VueDraggableResizable,
       ...FieldComponents,
     },
     props: {
@@ -80,6 +144,9 @@
         formModel: {},
         widgetRefList: {},
         dsResultCache: {},
+
+        vLine: [],
+        hLine: [],
       }
     },
     computed: {
@@ -168,6 +235,22 @@
         return this.designer.checkWidgetMove(evt)
       },
 
+      // 辅助线回调事件
+      getRefLineParams (params) {
+        //console.error('aaaaa')
+
+        const { vLine, hLine } = params
+        let id = 0
+        this.vLine = vLine.map(item => {
+          item['id'] = ++id
+          return item
+        })
+        this.hLine = hLine.map(item => {
+          item['id'] = ++id
+          return item
+        })
+      },
+
       getFormData() {
         return this.formModel
       },
@@ -243,6 +326,12 @@
       .form-widget-canvas {
         //min-height: calc(100vh - 56px - 68px + 48px);
         padding: 3px;
+        position: relative;
+
+        div[name='fade'] {
+          height: 100%;
+          //background-color: #F1F2F3;
+        }
       }
     }
 

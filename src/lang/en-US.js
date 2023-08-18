@@ -20,6 +20,7 @@ export default {
     basicFieldTitle: 'Basic Field',
     advancedFieldTitle: 'Advanced Field',
     customFieldTitle: 'Customized Field',
+    chartTitle: 'Chart Widget',
 
     noWidgetHint: 'Please select a widget from the left list, drag and drop to this container.',
 
