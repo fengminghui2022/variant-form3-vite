@@ -334,6 +334,7 @@
         let curNode = {
           id: widget.id,
           label: widget.options.label || widget.type,
+          type: widget.type,
           //selectable: true,
         }
         treeNode.push(curNode)
@@ -348,6 +349,7 @@
             let colNode = {
               id: col.id,
               label: col.options.name || widget.type,
+              type: widget.type,
               children: []
             }
             curNode.children.push(colNode)
@@ -361,6 +363,7 @@
             let rowNode = {
               id: row.id,
               label: 'table-row',
+              type: widget.type,
               selectable: false,
               children: [],
             }
@@ -375,6 +378,7 @@
               let cellNode = {
                 id: cell.id,
                 label: 'table-cell',
+                type: cell.type,
                 children: []
               }
               rowChildren.push(cellNode)
@@ -389,6 +393,7 @@
             let tabNode = {
               id: tab.id,
               label: tab.options.name || widget.type,
+              type: widget.type,
               selectable: false,
               children: []
             }

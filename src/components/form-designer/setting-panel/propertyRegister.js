@@ -77,6 +77,8 @@ const COMMON_PROPERTIES = {
   'draggable':            					'show-draggable-editor',
 	'lazy':            								'tree-lazy-editor',
 	'treeDataEdit':            				'treeData-editor',
+  'enableFormula':                  'enableFormula-editor',
+  'formula':                        'formula-editor',
 
   //容器
   'showBlankRow'       :            'showBlankRow-editor',
