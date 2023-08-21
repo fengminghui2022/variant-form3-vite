@@ -1,6 +1,6 @@
-import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems,TODAY,NOW,EYEAR,EMONTH,EDAY} from "@/utils/util"
+import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
-import * as formulajs from 'formulajs' 
+
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData',
     'getGlobalDsv', 'getReadMode', 'getSubFormFieldFlag', 'getSubFormName', 'getDSResultCache',
@@ -9,7 +9,6 @@ export default {
     return {
       fieldReadonlyFlag: false,
       dataSetLoadedFlag: false,
-      FUNAPI: formulajs, //计算公式
     }
   },
   computed: {
@@ -581,41 +580,6 @@ export default {
         return
       }
 
-        if (this.parentWidget.type === "sub-form") {
-            let subFormFieldsArr = this.getWidgetRef(this.subFormName).fieldSchemaData[0];
-            for (let i = 0; i < subFormFieldsArr.length; i++) {
-                let formula = subFormFieldsArr[i].options.formula
-                let formulaTags = subFormFieldsArr[i].options.formulaTags
-                if (!!formula && formulaTags.length > 0) {
-                    localStorage.setItem("currentSubFormRowId", this.subFormRowId)
-                    localStorage.setItem("currentFormulaWidgetType", "sub") // 计算公式赋值对象，sub子表单字段，main主表单字段
-                    // 将公式中的字段替换为对应字段值
-                    formula = this.getFormRef().getFormula(formula)
-                    // 判断公式中的函数，决定某些类用本地函数，某些类用formulajs API函数
-                    let arr = formula.match(/[A-Za-z]*/g)
-                    for (let i = 0; i < arr.length; i++) {
-                        // 判断函数不为空，且在预置函数穷举列表中
-                        if (!!arr[i] && this.getFormRef().findCalFunStartIndex(arr[i]) != -1) {
-                            let funName = arr[i].toUpperCase()
-                            if (funName === "TODAY" || funName === "NOW" || funName === "EMONTH" || funName === "EDAY") {
-                                formula = formula.replace(arr[i], "this." + funName);
-                            } else {
-                                formula = formula.replace(arr[i], "this.FUNAPI." + funName);
-                            }
-                        }
-                    }
-                    try {
-                        // 将计算结果赋值到公式所在的字段组件
-                       
-                        this.getWidgetRef(subFormFieldsArr[i].options.name + "@row" + this.subFormRowId)?.setValue(evalFn(
-                            formula), true)
-                    } catch (e) {
-                       // console.log("formula", formula)
-                        console.log("错误",e);
-                    }
-                }
-            }
-        }
       if (!!this.field.options.onChange) {
         let changeFn = new Function('value', 'oldValue', 'subFormData', 'rowId', this.field.options.onChange)
         changeFn.call(this, val, oldVal, subFormData, rowId)

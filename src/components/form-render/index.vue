@@ -62,14 +62,12 @@
     getFieldWidgetById,
     hasPropertyOfObject,
     getObjectValue,
-    setObjectValue, deleteCustomStyleAndScriptNode,
-    handlerFormulaCal
+    setObjectValue, deleteCustomStyleAndScriptNode
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
   import DynamicDrawer from './dynamic-drawer'
 
-  import * as formulajs from 'formulajs' 
   export default {
     name: "VFormRender",
     componentName: 'VFormRender',
@@ -143,8 +141,6 @@
     },
     data() {
       return {
-        FUNAPI: formulajs,
-				formula: "", // 全局计算公式
         formJsonObj: this.formJson,
 
         formDataModel: {
@@ -202,12 +198,7 @@
 
     },
     watch: {
-			formDataModel: {
-				handler: function(val, oldVal) {
-					handlerFormulaCal(this,this.globalDsv,val)
-				},
-				deep: true
-			},
+      //
     },
     created() {
       this.buildFormModel(!this.formJsonObj ? null : this.formJsonObj.widgetList)
