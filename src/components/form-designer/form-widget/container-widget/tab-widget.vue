@@ -18,7 +18,7 @@
 
         <el-tab-pane v-for="(tab, index) in widget.tabs" :key="index" :label="tab.options.label" :name="tab.options.name"
                      @click.stop="selectWidget(widget)">
-          <draggable :list="tab.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+          <draggable :list="tab.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
                      handle=".drag-handler" tag="transition-group" :component-data="{name: 'fade'}"
                      @add="(evt) => onContainerDragAdd(evt, tab.widgetList)"
                      @update="onContainerDragUpdate" :move="checkContainerMove">

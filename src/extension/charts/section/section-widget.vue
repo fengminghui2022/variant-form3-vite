@@ -1,14 +1,18 @@
 <template>
   <vue-draggable-resizable
-          :w="200"
-          :h="200"
+          :w="widget.options.w"
+          :h="widget.options.h"
+          :x="widget.options.x"
+          :y="widget.options.y"
           :parent="false"
-          :debug="false"
+          :debug="true"
           :min-width="100"
           :min-height="20"
           :isConflictCheck="true"
           :snap="true"
           :snapTolerance="1"
+          @dragstop="onDragCallback"
+          @resizestop="onResizeCallback"
           @refLineParams="emitRefLineParams"
           class="section">
 
@@ -35,8 +39,10 @@
 </template>
 
 <script>
-  import VueDraggableResizable from "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.vue"
-  import "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.css"
+  //import VueDraggableResizable from "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.vue"
+  //import "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.css"
+  import VueDraggableResizable from "@/components/vdr/components/vue-draggable-resizable.vue"
+  import "@/components/vdr/components/vue-draggable-resizable.css"
 
   export default {
     name: "section-widget",
@@ -72,6 +78,7 @@
       },
 
       onDragAdd(evt, subList) { //重复代码，可合并
+        debugger
         const newIndex = evt.newIndex
         if (!!subList[newIndex]) {
           this.designer.setSelected( subList[newIndex] )
@@ -84,6 +91,22 @@
       onDragUpdate() {
         this.designer.emitHistoryChange()
       },
+
+      onDragCallback(x, y) {
+        this.widget.options.x = x
+        this.widget.options.y = y
+        console.error('x, y', x + ', ' + y)
+        this.designer.emitHistoryChange()
+      },
+
+      onResizeCallback(x, y, width, height) {
+        this.widget.options.x = x
+        this.widget.options.y = y
+        this.widget.options.w = width
+        this.widget.options.h = height
+        console.error('w, h', width + ', ' + height)
+        this.designer.emitHistoryChange()
+      }
 
     }
   }

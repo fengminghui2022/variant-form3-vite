@@ -28,50 +28,6 @@
           </template>
         </draggable>
 
-        <!--
-        <vue-draggable-resizable
-                :w="200"
-                :h="200"
-                :parent="false"
-                :debug="false"
-                :min-width="200"
-                :min-height="200"
-                :isConflictCheck="true"
-                :snap="true"
-                :snapTolerance="1"
-                @refLineParams="getRefLineParams"
-                class="test1">
-        </vue-draggable-resizable>
-        <vue-draggable-resizable
-                :w="200"
-                :h="200"
-                :parent="false"
-                :x="210"
-                :debug="false"
-                :min-width="200"
-                :min-height="200"
-                :isConflictCheck="true"
-                :snap="true"
-                :snapTolerance="1"
-                @refLineParams="getRefLineParams"
-                class="test2">
-        </vue-draggable-resizable>
-        <vue-draggable-resizable
-                :w="200"
-                :h="200"
-                :parent="false"
-                :x="420"
-                :debug="false"
-                :min-width="200"
-                :min-height="200"
-                :isConflictCheck="true"
-                :snap="true"
-                :snapTolerance="1"
-                @refLineParams="getRefLineParams"
-                class="test3">
-        </vue-draggable-resizable>
-        -->
-
         <!--辅助线-->
         <span class="ref-line v-line"
               v-for="item in vLine"
@@ -97,15 +53,15 @@
   import '@/components/form-designer/form-widget/container-widget/index'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import i18n from "@/utils/i18n"
-  import VueDraggableResizable from "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.vue"
-  import "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.css"
+  //import VueDraggableResizable from "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.vue"
+  //import "vue-draggable-resizable-gorkys/src/components/vue-draggable-resizable.css"
 
   export default {
     name: "VFormWidget",
     componentName: "VFormWidget",
     mixins: [i18n],
     components: {
-      VueDraggableResizable,
+      //VueDraggableResizable,
       ...FieldComponents,
     },
     props: {

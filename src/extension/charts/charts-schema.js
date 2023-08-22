@@ -5,7 +5,10 @@ export const ext_chart_containers = [
     icon: 'section',
     widgetList: [],
     options: {
-
+      x: 10,
+      y: 10,
+      w: 200,
+      h: 200,
     },
   },
 

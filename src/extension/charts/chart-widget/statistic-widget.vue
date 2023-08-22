@@ -8,8 +8,7 @@
           :index-of-parent-list="indexOfParentList"
           :sub-form-row-index="subFormRowIndex"
           :sub-form-col-index="subFormColIndex"
-          :sub-form-row-id="subFormRowId"
-  >
+          :sub-form-row-id="subFormRowId">
     <div class="card-panel" :style="{'justify-content':field.options.showIcon?'space-between':'center'}">
       <div class="card-panel-icon-wrapper icon-color" v-if="field.options.showIcon" :style="{'color':field.options.iconColor,'--hover-color': field.options.iconColor }">
         <svg-icon :icon-class="field.options.icon" class-name="card-panel-icon" />
@@ -19,7 +18,7 @@
           {{field.options.label}}
         </div>
         <div>
-          <count-up :startVal="0" :endVal="field.options.option.value" :duration="200" class="card-panel-num">
+          <count-up :startVal="0" :endVal="field.options.option.value" class="card-panel-num">
           </count-up>
         </div>
       </div>
@@ -162,6 +161,7 @@
 <style lang="scss" scoped>
   .chart {
     height: 300px;
+    //height: 100%;
   }
   .card-panel {
     cursor: pointer;

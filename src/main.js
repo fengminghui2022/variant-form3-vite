@@ -8,7 +8,7 @@ import '@/iconfont/iconfont.css'
 import Draggable from '@/../lib/vuedraggable/dist/vuedraggable.umd.js'
 import {registerIcon} from '@/utils/el-icons'
 import 'virtual:svg-icons-register'
-import 'vue-draggable-resizable-gorkys/dist/VueDraggableResizable.css'
+//import 'vue-draggable-resizable-gorkys/dist/VueDraggableResizable.css'
 
 import ContainerWidgets from '@/components/form-designer/form-widget/container-widget/index'
 import ContainerItems from '@/components/form-render/container-item/index'

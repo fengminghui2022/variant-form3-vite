@@ -4,7 +4,7 @@
 
     <div class="dialog-container" :class="[selected ? 'selected' : '', customClass]"
          @click.stop="selectWidget(widget)">
-      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
                  handle=".drag-handler" @end="(evt) => onDialogDragEnd(evt, widget.widgetList)"
                  @add="(evt) => onDialogDragAdd(evt, widget.widgetList)"
                  @update="onDialogDragUpdate" :move="checkContainerMove">

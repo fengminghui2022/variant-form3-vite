@@ -16,7 +16,7 @@
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
       <el-form label-position="top">
         <div class="sub-form-table">
-          <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+          <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
                      tag="transition-group" :component-data="{name: 'fade'}"
                      handle=".drag-handler"
                      @add="(evt) => onSubFormDragAdd(evt, widget.widgetList)"

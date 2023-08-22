@@ -4,7 +4,7 @@
     <div class="object-group-container" @click.stop="selectWidget(widget)"
              :class="[selected ? 'selected' : '', customClass]">
       <div class="object-group">
-      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
                  tag="transition-group" :component-data="{name: 'fade'}"
                  handle=".drag-handler"
                  @add="(evt) => onContainerDragAdd(evt, widget.widgetList)"
