@@ -5,6 +5,8 @@ import {
   CAL_FUNCTION_ENUM
 } from '@/utils/config'
 import * as formulajs from 'formulajs' 
+import {EditorView} from "codemirror"
+import {MatchDecorator,Decoration,ViewPlugin,WidgetType} from "@codemirror/view"
 //引入计算公式函数相关 end
 
 export function isNull(value) {
@@ -1011,6 +1013,90 @@ export function getDSByName(formConfig, dsName) {
 				//TODO handle the exception
 			}
 		}
+
+    export class PlaceholderWidget extends WidgetType {
+      text; type;  
+      constructor(text) {
+        super();
+        if (text) {
+          //type 仅用于区分颜色
+          if(text.indexOf("}") > -1){
+            //函数
+            this.type="func";
+          }
+          this.text=text.substring(1,text.length-1);
+        } 
+      }
+      eq(other) {
+        return this.text == other.text;
+      }
+      // 此处是我们的渲染方法    
+      toDOM() {
+        let elt = document.createElement('span'); 
+         if (!this.text) return elt;
+          elt.className = this.type == "func"?"cm-mywidget":"cm-mywidget2";
+          elt.textContent = this.text;
+          return elt;
+      }
+      ignoreEvent() {
+        return true;
+      }
+    }
+    
+    
+    export const placeholderMatcher = new MatchDecorator({    
+      regexp:  /(\[\w+\]|\{\w+\(?\})/g,   
+     // regexp:/\[\[(\w+\.\w+\(?)\]\]/g, //如何匹配计算符号？
+      decoration: (match) =>      
+          Decoration.replace({        
+              widget: new PlaceholderWidget(match[1])      
+          })  
+    });
+    
+    
+    export const placeholders = ViewPlugin.fromClass(class {
+      placeholders
+      constructor(view) {
+          this.placeholders = placeholderMatcher.createDeco(view)
+      }
+      update(update) {
+        this.placeholders = placeholderMatcher.updateDeco(update, this.placeholders)
+      }
+      }, {
+        decorations: instance => instance.placeholders,
+        provide: plugin => EditorView.atomicRanges.of(view => {
+          return view.plugin(plugin)?.placeholders || Decoration.none
+        })
+    })
+    
+      // 背景样式  
+      export const baseTheme = EditorView.baseTheme({
+        ".cm-mywidget": {
+            paddingLeft: "6px",
+            paddingRight: "6px",
+            paddingTop: "3px",
+            paddingBottom: "3px",
+            marginLeft: "3px",
+            marginRight: "3px",
+            backgroundColor: "#ffcdcc",
+            borderRadius: "4px",
+        },
+        ".cm-mywidget2":{
+          paddingLeft: "6px",
+          paddingRight: "6px",
+          paddingTop: "3px",
+          paddingBottom: "3px",
+          marginLeft: "3px",
+          marginRight: "3px",
+          backgroundColor: "#f8e7a0",
+          borderRadius: "4px",
+        }
+       
+    });
+
+
+
+
 			// 获取当前日期 yyyy-MM-dd
 		// 	export function TODAY() {
 		// 		return this.dateFormat(new Date(), "yyyy-MM-dd")

@@ -131,7 +131,7 @@
                                     </div>
                                 </el-col>
                             </el-row>
-                            <codemirror
+                            <!-- <codemirror
                                 ref="mirCode"
                                 v-model="formula"
                                 placeholder="Code gose here..."
@@ -140,7 +140,8 @@
                                 :readOnlyFlg="false"
                                 :lineWrapping="true"
                                 :indent-with-tab="true"
-                                :tabSize="2"></codemirror>
+                                :tabSize="2"></codemirror> -->
+                             <div ref="coderef"  style="height:85px;width:100%"></div>
                         </div>
                         <div class="body-right">
                             <el-button
@@ -310,16 +311,19 @@
 </template>
 
 <script>
-    import { Codemirror } from "vue-codemirror";
+    import {basicSetup,EditorView} from "codemirror"
+    import {javascript} from "@codemirror/lang-javascript"
+    import { EditorState} from "@codemirror/state";
+  //  import { Codemirror } from "vue-codemirror";
     import i18n from "@/utils/i18n";
   //  import CodeEditor from "@/components/code-editor/index";
-    import { deepClone } from "@/utils/util";
+     import { deepClone,placeholders,baseTheme } from "@/utils/util";
     export default {
         name: "formula-editor",
         mixins: [i18n],
         components: {
           //  CodeEditor,
-            Codemirror,
+          // Codemirror,
         },
         props: {
             designer: Object,
@@ -333,6 +337,7 @@
         },
         data() {
             return {
+                codeMirror:null,
                 isFormulaEdit: this.formulaMode != "view",
                 formulaMode: "view", // 公式模式：查看/编辑
                 formulaSize: "default", // 公式大小
@@ -734,8 +739,9 @@
                 }
             },
             clearTags() {
-                this.formula = ""; //CodeMirror 模式
                 this.tags = []; //el-tag模式
+                //CodeMirror 模式
+                this.codeMirror.dispatch({ changes: { from: 0, to: this.codeMirror.state.doc.length, insert: "" } })
             },
             handleClickTag(tag) {
                 tag.closable = !tag.closable;
@@ -791,8 +797,9 @@
                             obj.id +
                             "]";
                     } else {
-                        fieldTitle = "[" + obj.label + "]";
-                        fieldName = "{" + obj.id + "}";
+                        //fieldTitle = "[" + obj.label + "]";
+                        //fieldName = "{" + obj.id + "}";
+                        fieldName=obj.id;
                     }
                     this.tags.push({
                         name: fieldTitle,
@@ -804,30 +811,33 @@
                     });
 
                     //CodeMirror 模式
-                    this.formula += fieldName;
+                    //this.formula += fieldName;
+                    this.updateCodeMirror(fieldName,"field");
                 }
             },
             // 插入数字
             insertNumFun(insertNum) {
-                this.tags.push({
-                    name: insertNum,
-                    value: insertNum,
-                    closable: this.isFormulaEdit,
-                    size: this.formulaSize,
-                    paraType: "Num",
-                    type: "",
-                });
+                //可不用
+                // this.tags.push({
+                //     name: insertNum,
+                //     value: insertNum,
+                //     closable: this.isFormulaEdit,
+                //     size: this.formulaSize,
+                //     paraType: "Num",
+                //     type: "",
+                // });
             },
             // 插入字符
             insertStrFun(insertStr) {
-                this.tags.push({
-                    name: insertStr,
-                    value: insertStr,
-                    closable: this.isFormulaEdit,
-                    size: this.formulaSize,
-                    paraType: "Str",
-                    type: "",
-                });
+                //可不用
+                // this.tags.push({
+                //     name: insertStr,
+                //     value: insertStr,
+                //     closable: this.isFormulaEdit,
+                //     size: this.formulaSize,
+                //     paraType: "Str",
+                //     type: "",
+                // });
             },
             // 插入符号
             insertSymbol(opt) {
@@ -847,8 +857,8 @@
                 });
 
                 //CodeMirror 模式
-                this.formula += opt;
-               console.log(this.$refs.mirCode)
+               // this.formula += opt;
+              this.updateCodeMirror(opt);
             },
             // 插入函数
             insertFunction(opt) {
@@ -862,7 +872,30 @@
                 });
 
                 //CodeMirror 模式
-                this.formula += opt;
+                //this.formula += opt;
+                this.updateCodeMirror(opt,"func");
+            },
+            //更新编辑器数据
+             updateCodeMirror(opt,type=null){
+               var code="";  
+                if(type == "func"){
+                    code = `{${opt}}`;
+                }
+                else if(type == "field"){
+                    code = `[${opt}]`;
+                }
+                else{
+                    code = `${opt}`;
+                }
+                if(code){
+                     this.codeMirror.dispatch({
+                        changes: {
+                            from: this.codeMirror.state.selection.main.head, to: this.codeMirror.state.selection.main.head, insert: code
+                        },
+                        selection: { anchor: this.codeMirror.state.selection.main.head + code.length},
+                    });
+                }
+
             },
             // 在字符串中查找[开始]结尾的字符串，并删除
             removeStr(str) {
@@ -898,15 +931,33 @@
                 this.formulaMode = "view";
                 this.isFormulaEdit = false;
                 this.formulaModeChange("view");
+
+                 //==== codeMirror 挂载视图 ====
+                 this.$nextTick(()=>{
+                    this.codeMirror = new EditorView({      
+                        state: EditorState.create({     
+                            doc: this.formula,       
+                            extensions: [basicSetup,javascript(),             
+                                [baseTheme, [], placeholders]],        
+                        }),
+                        parent: this.$refs.coderef
+                    });
+                    console.log("编辑器实例==>",this.codeMirror);
+                })
             },
             // 保存计算公式-展示和计算公式-计算
             saveFormula() {
                 this.optionModel.formula = "";
                 this.optionModel.formulaShow = "";
 
+                this.optionModel.formula =  this.codeMirror.state.doc.text.join("\r\n");
+                this.optionModel.formulaShow =  this.optionModel.formula;
+                //此处需要把函数的大括号去掉？
+                console.log("表达式===>",this.optionModel.formula);
+
                 //CodeMirror 模式
-                this.optionModel.formulaShow = this.formula;
-                this.optionModel.formula = this.formula;
+                // this.optionModel.formulaShow = this.formula;
+                // this.optionModel.formula = this.formula;
                 ////CodeMirror 模式 end
                 //===el-tag模式====
                 // for (let i = 0; i < this.tags.length; i++) {
@@ -916,10 +967,10 @@
                 //         this.optionModel.formula + this.tags[i].value;
                 // }
                 //===el-tag模式 end====
-                if (!this.isValid(this.optionModel.formula)) {
-                    this.$message.error("函数缺失右括号)");
-                    return false;
-                }
+                // if (!this.isValid(this.optionModel.formula)) {
+                //     this.$message.error("函数缺失右括号)");
+                //     return false;
+                // }
                 // this.optionModel.formulaTags = this.tags;
                 this.dialogFormVisible = false;
             },
@@ -1173,7 +1224,11 @@
     };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+    :deep(.cm-editor){
+        height:100%;
+    }
+
     li {
         list-style: none;
     }

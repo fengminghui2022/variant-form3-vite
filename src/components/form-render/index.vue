@@ -62,7 +62,7 @@
     getFieldWidgetById,
     hasPropertyOfObject,
     getObjectValue,
-    setObjectValue, deleteCustomStyleAndScriptNode,
+    setObjectValue,
     handlerFormulaCal
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
