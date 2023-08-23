@@ -3,6 +3,7 @@
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <el-select ref="fieldEditor" v-model="fieldModel" v-show="!isReadMode" class="full-width-input"
+               :key="selectKey"
                :disabled="field.options.disabled"
                :clearable="field.options.clearable"
                :filterable="field.options.filterable"
@@ -30,6 +31,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {generateId} from "@/utils/util";
 
   export default {
     name: "select-widget",
@@ -69,6 +71,7 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        widgetKey: '',
       }
     },
     computed: {
@@ -82,6 +85,10 @@
         } else {
           return undefined
         }
+      },
+
+      selectKey() {
+        return this.widgetKey || this.field.id
       },
 
     },
@@ -116,6 +123,10 @@
        */
       getSelectedLabel() {
         return this.$refs.fieldEditor.selectedLabel
+      },
+
+      refreshWidgetKey() {  //强制刷新组件！！
+        this.widgetKey = 'select-key-' + generateId()
       },
 
     }
