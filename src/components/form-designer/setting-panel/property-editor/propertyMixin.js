@@ -46,8 +46,13 @@ export default {
           this.optionModel.defaultValue = ''
         }
       }
-    },
 
+      //重新生成select组件
+      const selectWidget = this.designer.formWidget.getSelectedWidgetRef()
+      if (selectWidget && selectWidget.refreshWidgetKey) {
+        selectWidget.refreshWidgetKey()
+      }
+    },
 
   }
 }
