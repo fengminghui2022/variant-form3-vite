@@ -85,29 +85,27 @@ export default {
       }
     },
 
+    getObjectModel() {
+      let objectChains = this.getObjectName().split('.')
+      let objectModel = this.formModel
+      objectChains.forEach(key => {
+        if (!key) return
+
+        if (objectModel[key] === undefined) {
+          objectModel[key] = {}
+        }
+        objectModel = objectModel[key]
+      })
+    },
+
     initFieldModel() {
       if (!this.field.formItemFlag) {
         return
       }
 
       if (!!this.getObjectFieldFlag() && !this.designState) { //处理对象容器内部组件
-        let objectChains = this.getObjectName().split('.')
-        let objectModel = this.formModel
-        objectChains.forEach(key => {
-          if (!key) return
-
-          if (objectModel[key] === undefined) {
-            objectModel[key] = {}
-          }
-          objectModel = objectModel[key]
-        })
-
-        if (objectModel[this.fieldKeyName] === undefined) {
-          this.fieldModel = null
-        } else {
-          this.fieldModel = objectModel[this.fieldKeyName]
-        }
-
+        const objectModel = this.getObjectModel()
+        this.fieldModel = objectModel === undefined ? null : objectModel[this.fieldKeyName]
         this.oldFieldValue = deepClone(this.fieldModel)
         this.initFileList()  //处理图片上传、文件上传字段
 
@@ -169,7 +167,12 @@ export default {
       this.on$('setFormData', (newFormData) => {
         //console.log('formModel of globalModel----------', this.globalModel.formModel)
         if (!this.subFormItemFlag) {
-          this.setValue(newFormData[this.fieldKeyName])
+          if (!!this.getObjectFieldFlag() && !this.designState) { //处理对象容器内部组件
+            const objectModel = this.getObjectModel()
+            this.setValue(objectModel === undefined ? null : objectModel[this.fieldKeyName])
+          } else {
+            this.setValue(newFormData[this.fieldKeyName])
+          }
         }
       })
 
@@ -479,16 +482,7 @@ export default {
           subFormDataRow[this.fieldKeyName] = value
         }
       } else if (!!this.getObjectFieldFlag()) { // 如果是对象容器内部字段
-        let objectChains = this.getObjectName().split('.')
-        let objectModel = this.formModel
-        objectChains.forEach(key => {
-          if (!key) return
-
-          if (objectModel[key] === undefined) {
-            objectModel[key] = {}
-          }
-          objectModel = objectModel[key]
-        })
+        const objectModel = this.getObjectModel()
         objectModel[this.fieldKeyName] = value
       } else {
         this.formModel[this.fieldKeyName] = value
