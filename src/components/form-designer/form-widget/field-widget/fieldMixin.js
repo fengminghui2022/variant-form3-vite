@@ -96,6 +96,8 @@ export default {
         }
         objectModel = objectModel[key]
       })
+
+      return objectModel
     },
 
     initFieldModel() {
