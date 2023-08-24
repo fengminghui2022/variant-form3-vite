@@ -131,16 +131,6 @@
                                     </div>
                                 </el-col>
                             </el-row>
-                            <!-- <codemirror
-                                ref="mirCode"
-                                v-model="formula"
-                                placeholder="Code gose here..."
-                                :style="{ height: '85px', width: '100%' }"
-                                :autofocus="true"
-                                :readOnlyFlg="false"
-                                :lineWrapping="true"
-                                :indent-with-tab="true"
-                                :tabSize="2"></codemirror> -->
                              <div ref="coderef"  style="height:85px;width:100%"></div>
                         </div>
                         <div class="body-right">
@@ -243,7 +233,7 @@
                                         <el-collapse-item
                                             v-for="(item, index) in formulas"
                                             :key="index"
-                                            :title="item.fClass"
+                                            :title="i18nt(item.fClass)"
                                             :name="index">
                                             <div
                                                 v-for="(info, i) in item.flist"
@@ -256,16 +246,16 @@
                                                 "
                                                 v-on:mouseenter="
                                                     showIntro(
-                                                        info.fName,
-                                                        item.fClass,
-                                                        info.fIntro
+                                                        i18nt(info.fName),
+                                                        i18nt(item.fClass),
+                                                        i18nt(info.fIntro)
                                                     )
                                                 "
                                                 v-on:mouseleave="resetIntro">
                                                 <span>{{ info.fName }}</span>
                                                 <el-tag
                                                     :type="getClass(info.fType)"
-                                                    >{{ info.fType }}</el-tag
+                                                    >{{ i18nt(info.fType) }}</el-tag
                                                 >
                                             </div>
                                         </el-collapse-item>
@@ -314,16 +304,12 @@
     import {basicSetup,EditorView} from "codemirror"
     import {javascript} from "@codemirror/lang-javascript"
     import { EditorState} from "@codemirror/state";
-  //  import { Codemirror } from "vue-codemirror";
     import i18n from "@/utils/i18n";
-  //  import CodeEditor from "@/components/code-editor/index";
-     import { deepClone,placeholders,baseTheme } from "@/utils/util";
+    import { deepClone,placeholders,baseTheme,formulas } from "@/utils/util";
     export default {
         name: "formula-editor",
         mixins: [i18n],
         components: {
-          //  CodeEditor,
-          // Codemirror,
         },
         props: {
             designer: Object,
@@ -451,273 +437,275 @@
                         this.i18nt("designer.hint.formulaPara") +
                         '2</span><span class="cg">)</span>',
                 },
-                formulas: [
-                    {
-                        fClass: this.i18nt(
-                            "designer.hint.formulaFunctionMaths"
-                        ),
-                        flist: [
-                            {
-                                fName: "INT",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaINT"),
-                            },
-                            {
-                                fName: "SUM",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaSUM"),
-                            },
-                            {
-                                fName: "AVERAGE",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaAVERAGE"
-                                ),
-                            },
-                            {
-                                fName: "MAX",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaMAX"),
-                            },
-                            {
-                                fName: "MIN",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaMIN"),
-                            },
-                            {
-                                fName: "ABS",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaABS"),
-                            },
-                            {
-                                fName: "ROUND",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaROUND"
-                                ),
-                            },
-                            {
-                                fName: "CEILING",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaCEILING"
-                                ),
-                            },
-                            {
-                                fName: "LOG",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaLOG"),
-                            },
-                            {
-                                fName: "MOD",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaMOD"),
-                            },
-                            {
-                                fName: "POWER",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaNumber"
-                                ),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaPOWER"
-                                ),
-                            },
-                        ],
-                    },
-                    {
-                        fClass: this.i18nt(
-                            "designer.hint.formulaFunctionLogic"
-                        ),
-                        flist: [
-                            {
-                                fName: "AND",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaAND"),
-                            },
-                            {
-                                fName: "IF",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaIF"),
-                            },
-                            {
-                                fName: "IFS",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaIFS"),
-                            },
-                            {
-                                fName: "IFERROR",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaIFERROR"
-                                ),
-                            },
-                            {
-                                fName: "IFNA",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaIFNA"),
-                            },
-                            {
-                                fName: "NOT",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaNOT"),
-                            },
-                            {
-                                fName: "OR",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaOR"),
-                            },
-                            {
-                                fName: "SWITCH",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaSWITCH"
-                                ),
-                            },
-                            {
-                                fName: "XOR",
-                                fType: this.i18nt(
-                                    "designer.hint.formulaObject"
-                                ),
-                                fIntro: this.i18nt("designer.hint.formulaXOR"),
-                            },
-                        ],
-                    },
-                    {
-                        fClass: this.i18nt("designer.hint.formulaFunctionTime"),
-                        flist: [
-                            {
-                                fName: "YEAR",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt("designer.hint.formulaYEAR"),
-                            },
-                            {
-                                fName: "MONTH",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaMONTH"
-                                ),
-                            },
-                            {
-                                fName: "DAY",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt("designer.hint.formulaDAY"),
-                            },
-                            {
-                                fName: "TODAY",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaTODAY"
-                                ),
-                            },
-                            {
-                                fName: "NOW",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt("designer.hint.formulaNOW"),
-                            },
-                            {
-                                fName: "EMONTH",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaEMONTH"
-                                ),
-                            },
-                            {
-                                fName: "EDAY",
-                                fType: this.i18nt("designer.hint.formulaDate"),
-                                fIntro: this.i18nt("designer.hint.formulaEDAY"),
-                            },
-                        ],
-                    },
-                    {
-                        fClass: this.i18nt(
-                            "designer.hint.formulaFunctionString"
-                        ),
-                        flist: [
-                            {
-                                fName: "FIND",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt("designer.hint.formulaFIND"),
-                            },
-                            {
-                                fName: "LEFT",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt("designer.hint.formulaLEFT"),
-                            },
-                            {
-                                fName: "RIGHT",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaRIGHT"
-                                ),
-                            },
-                            {
-                                fName: "LEN",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt("designer.hint.formulaLEN"),
-                            },
-                            {
-                                fName: "LOWER",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaLOWER"
-                                ),
-                            },
-                            {
-                                fName: "UPPER",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt(
-                                    "designer.hint.formulaUPPER"
-                                ),
-                            },
-                            {
-                                fName: "MID",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt("designer.hint.formulaMID"),
-                            },
-                            {
-                                fName: "TRIM",
-                                fType: this.i18nt("designer.hint.formulaChar"),
-                                fIntro: this.i18nt("designer.hint.formulaTRIM"),
-                            },
-                        ],
-                    },
-                ],
+                formulas:formulas
+                //移到 util.js 计算时需要判断 函数类型
+                // formulas: [
+                //     {
+                //         fClass: this.i18nt(
+                //             "designer.hint.formulaFunctionMaths"
+                //         ),
+                //         flist: [
+                //             {
+                //                 fName: "INT",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaINT"),
+                //             },
+                //             {
+                //                 fName: "SUM",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaSUM"),
+                //             },
+                //             {
+                //                 fName: "AVERAGE",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaAVERAGE"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "MAX",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaMAX"),
+                //             },
+                //             {
+                //                 fName: "MIN",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaMIN"),
+                //             },
+                //             {
+                //                 fName: "ABS",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaABS"),
+                //             },
+                //             {
+                //                 fName: "ROUND",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaROUND"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "CEILING",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaCEILING"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "LOG",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaLOG"),
+                //             },
+                //             {
+                //                 fName: "MOD",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaMOD"),
+                //             },
+                //             {
+                //                 fName: "POWER",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaNumber"
+                //                 ),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaPOWER"
+                //                 ),
+                //             },
+                //         ],
+                //     },
+                //     {
+                //         fClass: this.i18nt(
+                //             "designer.hint.formulaFunctionLogic"
+                //         ),
+                //         flist: [
+                //             {
+                //                 fName: "AND",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaAND"),
+                //             },
+                //             {
+                //                 fName: "IF",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaIF"),
+                //             },
+                //             {
+                //                 fName: "IFS",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaIFS"),
+                //             },
+                //             {
+                //                 fName: "IFERROR",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaIFERROR"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "IFNA",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaIFNA"),
+                //             },
+                //             {
+                //                 fName: "NOT",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaNOT"),
+                //             },
+                //             {
+                //                 fName: "OR",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaOR"),
+                //             },
+                //             {
+                //                 fName: "SWITCH",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaSWITCH"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "XOR",
+                //                 fType: this.i18nt(
+                //                     "designer.hint.formulaObject"
+                //                 ),
+                //                 fIntro: this.i18nt("designer.hint.formulaXOR"),
+                //             },
+                //         ],
+                //     },
+                //     {
+                //         fClass: this.i18nt("designer.hint.formulaFunctionTime"),
+                //         flist: [
+                //             {
+                //                 fName: "YEAR",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt("designer.hint.formulaYEAR"),
+                //             },
+                //             {
+                //                 fName: "MONTH",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaMONTH"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "DAY",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt("designer.hint.formulaDAY"),
+                //             },
+                //             {
+                //                 fName: "TODAY",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaTODAY"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "NOW",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt("designer.hint.formulaNOW"),
+                //             },
+                //             {
+                //                 fName: "EMONTH",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaEMONTH"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "EDAY",
+                //                 fType: this.i18nt("designer.hint.formulaDate"),
+                //                 fIntro: this.i18nt("designer.hint.formulaEDAY"),
+                //             },
+                //         ],
+                //     },
+                //     {
+                //         fClass: this.i18nt(
+                //             "designer.hint.formulaFunctionString"
+                //         ),
+                //         flist: [
+                //             {
+                //                 fName: "FIND",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt("designer.hint.formulaFIND"),
+                //             },
+                //             {
+                //                 fName: "LEFT",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt("designer.hint.formulaLEFT"),
+                //             },
+                //             {
+                //                 fName: "RIGHT",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaRIGHT"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "LEN",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt("designer.hint.formulaLEN"),
+                //             },
+                //             {
+                //                 fName: "LOWER",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaLOWER"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "UPPER",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt(
+                //                     "designer.hint.formulaUPPER"
+                //                 ),
+                //             },
+                //             {
+                //                 fName: "MID",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt("designer.hint.formulaMID"),
+                //             },
+                //             {
+                //                 fName: "TRIM",
+                //                 fType: this.i18nt("designer.hint.formulaChar"),
+                //                 fIntro: this.i18nt("designer.hint.formulaTRIM"),
+                //             },
+                //         ],
+                //     },
+                // ],
             };
         },
         mounted() {},
@@ -739,8 +727,8 @@
                 }
             },
             clearTags() {
+                this.formula = ""; //CodeMirror 模式
                 this.tags = []; //el-tag模式
-                //CodeMirror 模式
                 this.codeMirror.dispatch({ changes: { from: 0, to: this.codeMirror.state.doc.length, insert: "" } })
             },
             handleClickTag(tag) {
@@ -797,9 +785,10 @@
                             obj.id +
                             "]";
                     } else {
-                        //fieldTitle = "[" + obj.label + "]";
-                        //fieldName = "{" + obj.id + "}";
+                        //fieldTitle = '[' + obj.label + ']'
+						//fieldName = '{' + obj.id + '}'
                         fieldName=obj.id;
+                        fieldTitle=obj.label;
                     }
                     this.tags.push({
                         name: fieldTitle,
@@ -812,7 +801,7 @@
 
                     //CodeMirror 模式
                     //this.formula += fieldName;
-                    this.updateCodeMirror(fieldName,"field");
+                    this.updateCodeMirror(fieldName,fieldTitle,"field");
                 }
             },
             // 插入数字
@@ -857,8 +846,9 @@
                 });
 
                 //CodeMirror 模式
-               // this.formula += opt;
-              this.updateCodeMirror(opt);
+                //this.formula += opt;
+              // console.log(this.$refs.mirCode)
+              this.updateCodeMirror(opt,opt,null);
             },
             // 插入函数
             insertFunction(opt) {
@@ -873,29 +863,44 @@
 
                 //CodeMirror 模式
                 //this.formula += opt;
-                this.updateCodeMirror(opt,"func");
+                const val=opt.substring(0,opt.length-1);
+                this.updateCodeMirror(val,val,"func");
             },
-            //更新编辑器数据
-             updateCodeMirror(opt,type=null){
-               var code="";  
-                if(type == "func"){
-                    code = `{${opt}}`;
-                }
-                else if(type == "field"){
-                    code = `[${opt}]`;
-                }
-                else{
-                    code = `${opt}`;
-                }
-                if(code){
-                     this.codeMirror.dispatch({
-                        changes: {
-                            from: this.codeMirror.state.selection.main.head, to: this.codeMirror.state.selection.main.head, insert: code
-                        },
-                        selection: { anchor: this.codeMirror.state.selection.main.head + code.length},
-                    });
-                }
+            updateCodeMirror(field,text,type=null){
+                if (type) {
+                    var obj = {
+                        field: field,
+                        text: text,
+                        type: type
+                    }
+                    let selectionLet = obj.field.length + obj.text.length + obj.type.length;//光标位置；
+                    var code = `{{${obj.field}.${obj.text}.${obj.type}}}`;
+                    if (type == "func") {
+                        code += "()";
+                        selectionLet = selectionLet + 7
+                    }
+                    else {
+                        selectionLet = selectionLet + 6;
+                    }
 
+                    if (code) {
+                        this.codeMirror.dispatch({
+                            changes: {
+                                from: this.codeMirror.state.selection.main.head, to: this.codeMirror.state.selection.main.head, insert: code
+                            },
+                            selection: { anchor: this.codeMirror.state.selection.main.head + selectionLet },
+                        });
+                    }
+                }
+                else {
+                    this.codeMirror.dispatch({
+                        changes: {
+                            from: this.codeMirror.state.selection.main.head, to: this.codeMirror.state.selection.main.head, insert: text
+                        },
+                        selection: { anchor: this.codeMirror.state.selection.main.head + text.length }
+                    });
+
+                }
             },
             // 在字符串中查找[开始]结尾的字符串，并删除
             removeStr(str) {
@@ -926,17 +931,20 @@
 
                 // 加载当前字段计算公式tags
                 this.tags = deepClone(this.optionModel.formulaTags);
-                this.formula = deepClone(this.optionModel.formula);
+               // this.formula = deepClone(this.optionModel.formula);
+                const code = this.optionModel.formulaShow;
+
                 this.dialogFormVisible = true;
                 this.formulaMode = "view";
                 this.isFormulaEdit = false;
                 this.formulaModeChange("view");
 
+
                  //==== codeMirror 挂载视图 ====
                  this.$nextTick(()=>{
                     this.codeMirror = new EditorView({      
                         state: EditorState.create({     
-                            doc: this.formula,       
+                            doc: code,       
                             extensions: [basicSetup,javascript(),             
                                 [baseTheme, [], placeholders]],        
                         }),
@@ -952,11 +960,24 @@
 
                 this.optionModel.formula =  this.codeMirror.state.doc.text.join("\r\n");
                 this.optionModel.formulaShow =  this.optionModel.formula;
-                //此处需要把函数的大括号去掉？
+                var re = /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)\}\}/g;
+                var array = [];
+                var temp;
+                //提取大括号内数据
+                while (temp = re.exec(this.optionModel.formula)) {
+                    array.push(temp[0].match(/{{([^}]*)}}/)[1]);
+                }
+                 array.forEach(item=>{
+                     const strs=item.split(".");
+                     //字段需要加大括号 否则计算时会报错
+                     const val = strs[2] == "field"?`{${strs[0]}}`:strs[0];
+                     this.optionModel.formula = this.optionModel.formula.replace("{{"+item+"}}",val);
+                 })
+
                 console.log("表达式===>",this.optionModel.formula);
 
                 //CodeMirror 模式
-                // this.optionModel.formulaShow = this.formula;
+              //  this.optionModel.formulaShow = this.formula;
                 // this.optionModel.formula = this.formula;
                 ////CodeMirror 模式 end
                 //===el-tag模式====
@@ -967,10 +988,12 @@
                 //         this.optionModel.formula + this.tags[i].value;
                 // }
                 //===el-tag模式 end====
-                // if (!this.isValid(this.optionModel.formula)) {
-                //     this.$message.error("函数缺失右括号)");
+                
+
+              //  if (!this.isValid(this.optionModel.formula)) {
+               //    this.$message.error("函数缺失右括号)");
                 //     return false;
-                // }
+              //  }
                 // this.optionModel.formulaTags = this.tags;
                 this.dialogFormVisible = false;
             },
@@ -1387,11 +1410,11 @@
         padding-left: 30px;
     }
 
-    >>> .cg {
+    .cg {
         color: #0a5d7c;
     }
 
-    >>> .fname {
+    .fname {
         display: inline-block;
         border-radius: 2px;
         padding: 0 5px;
@@ -1403,7 +1426,7 @@
         background: #fff;
     }
 
-    >>> .cs {
+    .cs {
         display: inline-block;
         border-radius: 2px;
         padding: 0 5px;

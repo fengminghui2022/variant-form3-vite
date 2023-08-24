@@ -7,6 +7,7 @@ import {
 import * as formulajs from 'formulajs' 
 import {EditorView} from "codemirror"
 import {MatchDecorator,Decoration,ViewPlugin,WidgetType} from "@codemirror/view"
+import {translate} from "@/utils/i18n";
 //引入计算公式函数相关 end
 
 export function isNull(value) {
@@ -785,14 +786,10 @@ export function getDSByName(formConfig, dsName) {
 						// 获取字段组件名去大括号
 						let widgetID = fieldHandle.split("{")[1].split("}")[0]
 						// 获取组件值
-						value = VFR.getWidgetRef(widgetID).getValue();
+            //value = VFR.getWidgetRef(widgetID).getValue();
 
-            // if (typeof value === "string") {
-            //   value = "\""+ value +"\"";
-            // }
-            // if (typeof value === "number") {
-            //   value = Number(value)
-            // }
+						//此处需判断函数类型，否则使用字符串函数时会报错。
+            value = getWidgetValue(VFR,formula,widgetID);
 					}
 					// 字表字段取值
 					if (subFieldStart != -1) {
@@ -849,6 +846,29 @@ export function getDSByName(formConfig, dsName) {
 				// 继续替换下一处字段组件
 				return getFormula(VFR,formula);
 			}
+
+      /**
+       * 获取字段值
+       * @param {*} func 
+       */
+      function getWidgetValue(VFR,formula,widgetID){
+        const sIndex= formula.indexOf("(");
+        const func = formula.substring(0,sIndex);
+
+        const funcType= formulas.find(item=>{
+          if(item.flist.some(fItem=>{
+            return fItem.fName == func
+          })){
+            return item;
+          }
+        });
+        if(translate(funcType.fClass) == "数学类型"){
+           return  Number(VFR.getWidgetRef(widgetID).getValue());
+        }
+        else{
+          return "\""+ VFR.getWidgetRef(widgetID).getValue() +"\"";
+        }
+      }
 
 			/** 
 			 * 公式套用函数计算得出计算结果
@@ -1015,16 +1035,17 @@ export function getDSByName(formConfig, dsName) {
 		}
 
     export class PlaceholderWidget extends WidgetType {
-      text; type;  
+     field;text; type;  
       constructor(text) {
         super();
         if (text) {
           //type 仅用于区分颜色
-          if(text.indexOf("}") > -1){
-            //函数
-            this.type="func";
-          }
-          this.text=text.substring(1,text.length-1);
+          const [field,mText,type] = text.split(".");
+
+          this.text=mText;
+          this.type=type;
+          this.field=field;
+
         } 
       }
       eq(other) {
@@ -1045,8 +1066,7 @@ export function getDSByName(formConfig, dsName) {
     
     
     export const placeholderMatcher = new MatchDecorator({    
-      regexp:  /(\[\w+\]|\{\w+\(?\})/g,   
-     // regexp:/\[\[(\w+\.\w+\(?)\]\]/g, //如何匹配计算符号？
+      regexp:/\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)\}\}/g,
       decoration: (match) =>      
           Decoration.replace({        
               widget: new PlaceholderWidget(match[1])      
@@ -1095,61 +1115,201 @@ export function getDSByName(formConfig, dsName) {
     });
 
 
-
-
-			// 获取当前日期 yyyy-MM-dd
-		// 	export function TODAY() {
-		// 		return this.dateFormat(new Date(), "yyyy-MM-dd")
-		// 	}
-		// 	// 获取当前时间 yyyy-MM-dd hh:mm:ss
-		// 	NOW() {
-		// 		return this.dateFormat(new Date(), "yyyy-MM-dd hh:mm:ss")
-		// 	},
-		// 	/** 加减日期年
-		// 	 * @param {Object} date 日期
-		// 	 * @param {Object} month 加减的年
-		// 	 */
-		//  export	EYEAR(date, year) {
-		// 		try {
-		// 			let myDate = new Date(date)
-		// 			let newDate = myDate.setYear(myDate.getFullYear() + year)
-		// 			return this.dateFormat(new Date(newDate), "yyyy-MM-dd")
-		// 		} catch (e) {
-		// 			//TODO handle the exception
-		// 			console.log(this.i18nt('designer.hint.formulaDateError'), date)
-		// 			console.error(this.i18nt('designer.hint.formulaDateErrorMsg'), e);
-		// 		}
-		// 	},
-		// 	/** 加减日期月份
-		// 	 * @param {Object} date 日期
-		// 	 * @param {Object} month 加减的月份
-		// 	 */
-		// 	EMONTH(date, month) {
-		// 		try {
-		// 			let myDate = new Date(date)
-		// 			let newDate = myDate.setMonth(myDate.getMonth() + month)
-		// 			return this.dateFormat(new Date(newDate), "yyyy-MM-dd")
-		// 		} catch (e) {
-		// 			//TODO handle the exception
-		// 			console.log(this.i18nt('designer.hint.formulaDateError'), date)
-		// 			console.error(this.i18nt('designer.hint.formulaDateErrorMsg'), e);
-		// 		}
-		// 	},
-		// 	/** 加减日期天数 
-		// 	 * @param {Object} date
-		// 	 * @param {Object} day 加减天数
-		// 	 */
-		// 	EDAY(date, day) {
-		// 		try {
-		// 			let myDate = new Date(date)
-		// 			let newDate = myDate.setDate(myDate.getDate() + day)
-		// 			return this.dateFormat(new Date(newDate), "yyyy-MM-dd")
-		// 		} catch (e) {
-		// 			//TODO handle the exception
-		// 			console.log(this.i18nt('designer.hint.formulaDateError'), date)
-		// 			console.error(this.i18nt('designer.hint.formulaDateErrorMsg'), e);
-		// 		}
-		// 	},
-
-			//--------------------- 以上为公式计算的API方法 end ------------------//
+  export const formulas = [
+      {
+          fClass: "designer.hint.formulaFunctionMaths",
+          flist: [
+              {
+                  fName: "INT",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaINT",
+              },
+              {
+                  fName: "SUM",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaSUM",
+              },
+              {
+                  fName: "AVERAGE",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaAVERAGE",
+              },
+              {
+                  fName: "MAX",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaMAX",
+              },
+              {
+                  fName: "MIN",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaMIN",
+              },
+              {
+                  fName: "ABS",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaABS",
+              },
+              {
+                  fName: "ROUND",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaROUND",
+              },
+              {
+                  fName: "CEILING",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaCEILING",
+              },
+              {
+                  fName: "LOG",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaLOG",
+              },
+              {
+                  fName: "MOD",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaMOD",
+              },
+              {
+                  fName: "POWER",
+                  fType: "designer.hint.formulaNumber",
+                  fIntro: "designer.hint.formulaPOWER",
+              },
+          ],
+      },
+      {
+          fClass: "designer.hint.formulaFunctionLogic",
+          flist: [
+              {
+                  fName: "AND",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaAND",
+              },
+              {
+                  fName: "IF",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaIF",
+              },
+              {
+                  fName: "IFS",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaIFS",
+              },
+              {
+                  fName: "IFERROR",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaIFERROR",
+              },
+              {
+                  fName: "IFNA",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaIFNA",
+              },
+              {
+                  fName: "NOT",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaNOT",
+              },
+              {
+                  fName: "OR",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaOR",
+              },
+              {
+                  fName: "SWITCH",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaSWITCH",
+              },
+              {
+                  fName: "XOR",
+                  fType: "designer.hint.formulaObject",
+                  fIntro: "designer.hint.formulaXOR",
+              },
+          ],
+      },
+      {
+          fClass: "designer.hint.formulaFunctionTime",
+          flist: [
+              {
+                  fName: "YEAR",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaYEAR",
+              },
+              {
+                  fName: "MONTH",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaMONTH",
+              },
+              {
+                  fName: "DAY",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaDAY",
+              },
+              {
+                  fName: "TODAY",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaTODAY",
+              },
+              {
+                  fName: "NOW",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaNOW",
+              },
+              {
+                  fName: "EMONTH",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaEMONTH",
+              },
+              {
+                  fName: "EDAY",
+                  fType: "designer.hint.formulaDate",
+                  fIntro: "designer.hint.formulaEDAY",
+              },
+          ],
+      },
+      {
+          fClass: "designer.hint.formulaFunctionString",
+          flist: [
+              {
+                  fName: "FIND",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaFIND",
+              },
+              {
+                  fName: "LEFT",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaLEFT",
+              },
+              {
+                  fName: "RIGHT",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaRIGHT",
+              },
+              {
+                  fName: "LEN",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaLEN",
+              },
+              {
+                  fName: "LOWER",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaLOWER",
+              },
+              {
+                  fName: "UPPER",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaUPPER",
+              },
+              {
+                  fName: "MID",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaMID",
+              },
+              {
+                  fName: "TRIM",
+                  fType: "designer.hint.formulaChar",
+                  fIntro: "designer.hint.formulaTRIM",
+              },
+          ],
+      },
+  ];
 //==============计算公式 end==============  
