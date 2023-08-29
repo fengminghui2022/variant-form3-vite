@@ -783,10 +783,10 @@ export function getFormula(VFR, formula) {
       // 获取字段组件名去大括号
       let widgetID = fieldHandle.split("{")[1].split("}")[0]
       // 获取组件值
-      //value = VFR.getWidgetRef(widgetID).getValue();
+      value = VFR.getWidgetRef(widgetID).getValue();
 
       //此处需判断函数类型，否则使用字符串函数时会报错。
-      value = getWidgetValue(VFR, formula, widgetID);
+      /*value = getWidgetValue(VFR, formula, widgetID);*/
     }
     // 字表字段取值
     if (subFieldStart !== -1) {
@@ -893,7 +893,7 @@ export function functionCal(VFR, formula) {
         if (paraList[i] === "FALSE") {
           paraList[i] = false;
         }
-        paraList[i] = eval(paraList[i])
+        paraList[i] = evalFn(paraList[i])
       } catch (e) {
         //TODO handle the exception
         console.log("函数[" + funStr + "]中的参数" + paraList[i] + "异常")
@@ -905,7 +905,8 @@ export function functionCal(VFR, formula) {
     let execFunCal = formulajs[funName](...paraList)
     VFR.formula = VFR.formula.replace(funStr, execFunCal)
   } else {
-    return eval("\"" + VFR.formula + "\"")
+    //return eval("\"" + VFR.formula + "\"")
+    return evalFn(VFR.formula, VFR)
   }
   return functionCal(VFR, formula)
 }
@@ -1062,7 +1063,7 @@ export class PlaceholderWidget extends WidgetType {
   toDOM() {
     let elt = document.createElement('span');
     if (!this.text) return elt;
-    elt.className = this.type == "func" ? "cm-mywidget" : "cm-mywidget2";
+    elt.className = this.type === "func" ? "cm-function" : "cm-field";
     elt.textContent = this.text;
     return elt;
   }
@@ -1101,7 +1102,7 @@ export const placeholders = ViewPlugin.fromClass(class {
 
 // 背景样式
 export const baseTheme = EditorView.baseTheme({
-  ".cm-mywidget": {
+  ".cm-function": {
     paddingLeft: "6px",
     paddingRight: "6px",
     paddingTop: "3px",
@@ -1111,7 +1112,7 @@ export const baseTheme = EditorView.baseTheme({
     backgroundColor: "#ffcdcc",
     borderRadius: "4px",
   },
-  ".cm-mywidget2": {
+  ".cm-field": {
     paddingLeft: "6px",
     paddingRight: "6px",
     paddingTop: "3px",
