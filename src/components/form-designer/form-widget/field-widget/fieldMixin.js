@@ -4,15 +4,12 @@ import {
   overwriteObj,
   runDataSourceRequest,
   translateOptionItems,
-  TODAY,
-  NOW,
-  EYEAR,
-  EMONTH,
-  EDAY,
   evalFn
 } from "@/utils/util"
 import FormValidators from '@/utils/validators'
-import * as formulajs from 'formulajs'
+import {TODAY, NOW, EYEAR, EMONTH, EDAY,} from '@/utils/formula-util'
+import * as formulajs from '@formulajs/formulajs'
+
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData',
     'getGlobalDsv', 'getReadMode', 'getSubFormFieldFlag', 'getSubFormName', 'getDSResultCache',

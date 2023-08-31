@@ -49,8 +49,9 @@
                   </el-button>
                 </el-col>
               </el-row>
-              <div ref="cmRef" style="height:120px;width:100%"></div>
+              <div ref="cmRef" style="height:150px;width:100%"></div>
             </div>
+            <!--
             <div class="editor-bottom">
               <el-button
                       v-on:click="insertSymbol(item)"
@@ -60,6 +61,7 @@
                 {{item}}
               </el-button>
             </div>
+            -->
           </div>
         </el-col>
       </el-row>
@@ -174,7 +176,8 @@ import {basicSetup, EditorView} from "codemirror"
 import {javascript} from "@codemirror/lang-javascript"
 import {EditorState} from "@codemirror/state";
 import i18n from "@/utils/i18n";
-import {deepClone, placeholders, baseTheme, formulas} from "@/utils/util";
+import {deepClone, getAllFieldWidgets} from "@/utils/util";
+import {placeholders, baseTheme, formulas} from "@/utils/formula-util";
 
 export default {
   name: "formula-editor",
@@ -274,6 +277,13 @@ export default {
     filterNode(value, data) {
       if (!value) return true;
       return data.label.indexOf(value) !== -1;
+    },
+
+    loadFieldListToTreeData() {
+      this.fieldTreeData.length = 0 //先清空
+
+      let allFields = getAllFieldWidgets(this.designer.widgetList);
+      //
     },
 
     // 插入字段
@@ -774,14 +784,14 @@ li {
 .editor {
   margin-left: 10px;
   margin-right: 10px;
-  height: 210px;
+  height: 190px;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
 
 .editor-top {
   //margin-left: 10px;
-  height: 150px;
+  height: 200px;
   width: 100%;
   padding: 8px;
   position: relative;

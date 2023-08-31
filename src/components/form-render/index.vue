@@ -38,7 +38,6 @@
 
 <script>
   import { createVNode, render } from 'vue'
-  //import ElForm from 'element-ui/packages/form/src/form.vue'  /* 用于源码调试Element UI */
   import emitter from '@/utils/emitter'
   import './container-item/index'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
@@ -49,7 +48,6 @@
     insertGlobalFunctionsToHtml,
     getAllContainerWidgets,
     getAllFieldWidgets,
-    traverseFieldWidgets,
     buildDefaultFormJson,
     getDSByName,
     runDataSourceRequest,
@@ -63,13 +61,14 @@
     hasPropertyOfObject,
     getObjectValue,
     setObjectValue,
-    handlerFormulaCal
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
   import DynamicDrawer from './dynamic-drawer'
 
-  import * as formulajs from 'formulajs' 
+  import * as formulajs from '@formulajs/formulajs'
+  import {handlerFormulaCal} from '@/utils/formula-util'
+
   export default {
     name: "VFormRender",
     componentName: 'VFormRender',
