@@ -11,14 +11,14 @@
         <el-input v-model="optionModel.formulaShow" readonly>
           <template #append>
             <el-button
-                    @click="setFormula"
+                    @click="editFormula"
                     icon="el-icon-edit"></el-button>
           </template>
         </el-input>
       </el-tooltip>
     </el-form-item>
     <el-dialog
-            v-model="dialogFormVisible"
+            v-model="formulaDialogVisible"
             :title="i18nt('designer.hint.formulaSetting')"
             class="small-padding-dialog"
             draggable
@@ -42,14 +42,11 @@
                 <el-col :span="2">
                   <el-button
                           size="small"
-                          @click="clearTags"
+                          @click="clearFormula"
                           type="danger"
-                          plain
-                  >{{
-                      i18nt("designer.hint.formulaClear")
-                    }}
-                  </el-button
-                  >
+                          plain>
+                    {{i18nt("designer.hint.formulaClear")}}
+                  </el-button>
                 </el-col>
               </el-row>
               <div ref="cmRef" style="height:120px;width:100%"></div>
@@ -60,7 +57,7 @@
                       size="default"
                       v-for="(item, idx) in operate"
                       :key="idx">
-                {{ item }}
+                {{item}}
               </el-button>
             </div>
           </div>
@@ -118,18 +115,8 @@
                               v-for="(info, i) in item.flist"
                               :key="i"
                               class="field-item"
-                              v-on:click="
-                                                    insertFunction(
-                                                        info.fName + '('
-                                                    )
-                                                "
-                              v-on:mouseenter="
-                                                    showIntro(
-                                                        i18nt(info.fName),
-                                                        i18nt(item.fClass),
-                                                        i18nt(info.fIntro)
-                                                    )
-                                                "
+                              @click="insertFunction(info.fName + '(')"
+                              @mouseenter="showIntro(i18nt(info.fName), i18nt(item.fClass), i18nt(info.fIntro))"
                               v-on:mouseleave="resetIntro">
                         <span>{{ info.fName }}</span>
                         <el-tag
@@ -171,7 +158,7 @@
               i18nt("designer.hint.confirm")
             }}
           </el-button>
-          <el-button size="default" @click="dialogFormVisible = false">{{
+          <el-button size="default" @click="formulaDialogVisible = false">{{
               i18nt("designer.hint.cancel")
             }}
           </el-button>
@@ -206,14 +193,11 @@ export default {
   data() {
     return {
       codeMirror: null,
-      isFormulaEdit: this.formulaMode !== "view",
-      formulaMode: "view", // 公式模式：查看/编辑
-      formulaSize: "default", // 公式大小
       formula: "",
       tags: [], // 公式页签集合
       fieldTreeData: [], // 设计器字段树
       filterText: "",
-      dialogFormVisible: false,
+      formulaDialogVisible: false,
       operate: [
         "+",
         "-",
@@ -268,32 +252,10 @@ export default {
   mounted() {
   },
   methods: {
-    formulaModeChange(value) {
-      for (let i = 0; i < this.tags.length; i++) {
-        if (value === "view") {
-          this.tags[i].closable = false;
-          this.isFormulaEdit = false;
-        } else {
-          this.tags[i].closable = true;
-          this.isFormulaEdit = true;
-        }
-      }
-    },
-
-    formulaSizeChange(value) {
-      for (let i = 0; i < this.tags.length; i++) {
-        this.tags[i].size = value;
-      }
-    },
-
-    clearTags(event) {
+    clearFormula(event) {
       this.formula = ""; //CodeMirror 模式
       this.tags = []; //el-tag模式
       this.codeMirror.dispatch({changes: {from: 0, to: this.codeMirror.state.doc.length, insert: ""}})
-    },
-
-    handleClickTag(tag) {
-      tag.closable = !tag.closable;
     },
 
     /** 删除字符串str中的第n个subStr
@@ -307,12 +269,6 @@ export default {
         num++;
         return num === n ? "" : item;
       });
-    },
-
-    // 关闭tag时，删除tags中的子项，并且删除公式数组中对应的公式因子
-    handleCloseTag(tag) {
-      let index = this.tags.indexOf(tag);
-      this.tags.splice(index, 1);
     },
 
     filterNode(value, data) {
@@ -358,8 +314,6 @@ export default {
         this.tags.push({
           name: fieldTitle,
           value: fieldName,
-          closable: this.isFormulaEdit,
-          size: this.formulaSize,
           paraType: "Field",
           type: "",
         });
@@ -368,32 +322,6 @@ export default {
         //this.formula += fieldName;
         this.updateCodeMirror(fieldName, fieldTitle, "field");
       }
-    },
-
-    // 插入数字
-    insertNumFun(insertNum) {
-      //可不用
-      // this.tags.push({
-      //     name: insertNum,
-      //     value: insertNum,
-      //     closable: this.isFormulaEdit,
-      //     size: this.formulaSize,
-      //     paraType: "Num",
-      //     type: "",
-      // });
-    },
-
-    // 插入字符
-    insertStrFun(insertStr) {
-      //可不用
-      // this.tags.push({
-      //     name: insertStr,
-      //     value: insertStr,
-      //     closable: this.isFormulaEdit,
-      //     size: this.formulaSize,
-      //     paraType: "Str",
-      //     type: "",
-      // });
     },
 
     // 插入符号
@@ -407,8 +335,6 @@ export default {
       this.tags.push({
         name: opt,
         value: opt,
-        closable: this.isFormulaEdit,
-        size: this.formulaSize,
         paraType: "Symbol",
         type: tagType,
       });
@@ -424,8 +350,6 @@ export default {
       this.tags.push({
         name: opt,
         value: opt,
-        closable: this.isFormulaEdit,
-        size: this.formulaSize,
         paraType: "Function",
         type: "warning",
       });
@@ -490,7 +414,7 @@ export default {
     },
 
     // 打开编辑公式弹窗
-    setFormula() {
+    editFormula() {
       this.fieldTreeData.length = 0;
       // 初始化字段树
       this.designer.widgetList.forEach((wItem) => {
@@ -505,12 +429,7 @@ export default {
       this.tags = deepClone(this.optionModel.formulaTags);
       // this.formula = deepClone(this.optionModel.formula);
       const code = this.optionModel.formulaShow;
-
-      this.dialogFormVisible = true;
-      this.formulaMode = "view";
-      this.isFormulaEdit = false;
-      this.formulaModeChange("view");
-
+      this.formulaDialogVisible = true;
 
       //==== codeMirror 挂载视图 ====
       this.$nextTick(() => {
@@ -533,9 +452,9 @@ export default {
 
       this.optionModel.formula = this.codeMirror.state.doc.text.join("\r\n");
       this.optionModel.formulaShow = this.optionModel.formula;
-      var re = /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)\}\}/g;
-      var array = [];
-      var temp;
+      let re = /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)}}/g;
+      let array = [];
+      let temp;
       //提取大括号内数据
       while (temp = re.exec(this.optionModel.formula)) {
         array.push(temp[0].match(/{{([^}]*)}}/)[1]);
@@ -543,7 +462,7 @@ export default {
       array.forEach(item => {
         const strs = item.split(".");
         //字段需要加大括号 否则计算时会报错
-        const val = strs[2] == "field" ? `{${strs[0]}}` : strs[0];
+        const val = strs[2] === "field" ? `{${strs[0]}}` : strs[0];
         this.optionModel.formula = this.optionModel.formula.replace("{{" + item + "}}", val);
       })
 
@@ -568,7 +487,7 @@ export default {
       //     return false;
       //  }
       // this.optionModel.formulaTags = this.tags;
-      this.dialogFormVisible = false;
+      this.formulaDialogVisible = false;
     },
 
     // 解析计算公式 STEP1：将公式中的字段转换为【英文表名.英文字段名】
@@ -641,13 +560,13 @@ export default {
       };
     },
 
-    showIntro(mname, title, content) {
+    showIntro(name, title, content) {
       content = '<span class="cg">' + content + "</span>";
       this.introduction = {
         title: title,
         content: content,
       };
-      this.introTitle = mname;
+      this.introTitle = name;
     },
 
     buildTreeNodeOfWidget(widget, treeNode) {
@@ -659,6 +578,7 @@ export default {
         formItemFlag: widget.formItemFlag || "",
         //selectable: true,
       };
+
       // 主要处理数字和字符串
       if (
           curNode.type === "input" ||
@@ -764,6 +684,11 @@ export default {
       }
     },
 
+    /**
+     * 校验计算公式是否正确
+     * @param s
+     * @returns {boolean}
+     */
     isValid(s) {
       let a = []; //存储左括号出现的地方
       let l = s.length;

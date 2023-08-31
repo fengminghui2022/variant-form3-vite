@@ -1,9 +1,5 @@
 import Clipboard from 'clipboard'
 import axios from 'axios'
-    //引入计算公式函数相关
-import {
-  CAL_FUNCTION_ENUM
-} from '@/utils/config'
 import * as formulajs from 'formulajs'
 import {EditorView} from "codemirror"
 import {MatchDecorator,Decoration,ViewPlugin,WidgetType} from "@codemirror/view"
@@ -871,7 +867,7 @@ function getWidgetValue(VFR, formula, widgetName) {
  * @param {Object} VFR
  * @param {Object} formula
  */
-export function functionCal(VFR, formula) {
+function functionCal(VFR, formula) {
   let startIndex = findCalFunStartIndex(formula)
   // 若找到函数，则解析函数，否则直接EVAL计算公式
   if (startIndex !== -1) {
@@ -913,8 +909,8 @@ export function functionCal(VFR, formula) {
 
 // 查找公式中的函数是否在枚举中
 export function hasFun(funName) {
-  for (let i = 0; i < CAL_FUNCTION_ENUM.length; i++) {
-    if (funName === CAL_FUNCTION_ENUM[i]) {
+  for (let i = 0; i < FORMULA_JS_FUNCTIONS.length; i++) {
+    if (funName === FORMULA_JS_FUNCTIONS[i]) {
       return true
     }
   }
@@ -923,9 +919,9 @@ export function hasFun(funName) {
 
 export function findCalFunStartIndex(formula) {
   let startIndex = -1
-  for (let i = 0; i < CAL_FUNCTION_ENUM.length; i++) {
-    let index = formula.indexOf(CAL_FUNCTION_ENUM[i])
-    if (index != -1) {
+  for (let i = 0; i < FORMULA_JS_FUNCTIONS.length; i++) {
+    let index = formula.indexOf(FORMULA_JS_FUNCTIONS[i])
+    if (index !== -1) {
       return index
     }
   }
@@ -1047,16 +1043,14 @@ export class PlaceholderWidget extends WidgetType {
     if (text) {
       //type 仅用于区分颜色
       const [field, mText, type] = text.split(".");
-
       this.text = mText;
       this.type = type;
       this.field = field;
-
     }
   }
 
   eq(other) {
-    return this.text == other.text;
+    return this.text === other.text;
   }
 
   // 此处是我们的渲染方法
@@ -1075,7 +1069,7 @@ export class PlaceholderWidget extends WidgetType {
 
 
 export const placeholderMatcher = new MatchDecorator({
-  regexp: /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)\}\}/g,
+  regexp: /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)}}/g,
   decoration: (match) =>
       Decoration.replace({
         widget: new PlaceholderWidget(match[1])
@@ -1125,6 +1119,43 @@ export const baseTheme = EditorView.baseTheme({
 
 });
 
+const FORMULA_JS_FUNCTIONS = [
+  "INT",
+  "SUM",
+  "AVERAGE",
+  "MAX",
+  "MIN",
+  "ABS",
+  "ROUND",
+  "CEILING",
+  "LOG",
+  "MOD",
+  "POWER",
+  "AND",
+  "IF",
+  "IFS",
+  "IFERROR",
+  "IFNA",
+  "NOT",
+  "OR",
+  "SWITCH",
+  "XOR",
+  "YEAR",
+  "MONTH",
+  "DAY",
+  "TODAY",
+  "NOW",
+  "EMONTH",
+  "EDAY",
+  "FIND",
+  "LEFT",
+  "RIGHT",
+  "LEN",
+  "LOWER",
+  "UPPER",
+  "MID",
+  "TRIM",
+];
 
 export const formulas = [
   {
