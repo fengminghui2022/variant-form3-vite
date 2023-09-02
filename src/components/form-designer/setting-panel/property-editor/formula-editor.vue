@@ -176,7 +176,7 @@ import {basicSetup, EditorView} from "codemirror"
 import {javascript} from "@codemirror/lang-javascript"
 import {EditorState} from "@codemirror/state";
 import i18n from "@/utils/i18n";
-import {deepClone, getAllFieldWidgets} from "@/utils/util";
+import {deepClone, getAllContainerWidgets, getAllFieldWidgets, traverseFieldWidgetsOfContainer} from "@/utils/util";
 import {placeholders, baseTheme, formulas} from "@/utils/formula-util";
 
 export default {
@@ -279,11 +279,70 @@ export default {
       return data.label.indexOf(value) !== -1;
     },
 
-    loadFieldListToTreeData() {
+    loadFieldListToTree() {
       this.fieldTreeData.length = 0 //先清空
 
-      let allFields = getAllFieldWidgets(this.designer.widgetList);
-      //
+      const allFields = getAllFieldWidgets(this.designer.widgetList);
+      const allContainers = getAllContainerWidgets(this.designer.widgetList)
+
+      const subFormArray = []
+      let sfFieldArray = []
+      const subFormFieldMap = {}
+
+      //获取子表单容器内部的字段
+      allContainers.forEach(con => {
+        if ((con.type === 'sub-form') || (con.type === 'grid-sub-form')) {
+          subFormArray.push(con.container)
+
+          const tmpFieldArray = []
+          const fwHandler = (fw) => {
+            if (!!fw.formItemFlag) {
+              tmpFieldArray.push(fw)
+            }
+          }
+          traverseFieldWidgetsOfContainer(con.container, fwHandler)
+          subFormFieldMap[con.container.options.name] = tmpFieldArray
+          sfFieldArray = sfFieldArray.concat(tmpFieldArray)
+        }
+      })
+
+      //加载到树形组件数据对象
+      allFields.forEach(fld => {
+        if (!sfFieldArray.find(item => item.id === fld.field.id)) {  //排除子表单字段
+          const fieldNode = {
+            id: fld.field.id,
+            name: fld.field.options.name,
+            label: fld.field.options.label,
+            type: fld.field.type,
+            formItemFlag: true
+          }
+          this.fieldTreeData.push(fieldNode)
+        }
+      })
+
+      subFormArray.forEach(sf => {
+        const subFormNode = {
+          id: sf.id,
+          name: sf.options.name,
+          label:sf.options.name || sf.type,
+          type: sf.type,
+          formItemFlag: false,
+          children: []
+        }
+
+        subFormFieldMap[sf.options.name].forEach(fld => {
+          const fieldNode = {
+            id: fld.id,
+            name: fld.options.name,
+            label: fld.options.label,
+            type: fld.type,
+            formItemFlag: true
+          }
+          subFormNode.children.push(fieldNode)
+        })
+
+        this.fieldTreeData.push(subFormNode)
+      })
     },
 
     // 插入字段
@@ -429,7 +488,8 @@ export default {
       // 初始化字段树
       this.designer.widgetList.forEach((wItem) => {
         if (this.optionModel.name !== wItem.id) {
-          this.buildTreeNodeOfWidget(wItem, this.fieldTreeData);
+          //this.buildTreeNodeOfWidget(wItem, this.fieldTreeData);
+          this.loadFieldListToTree()
         }
       });
 
