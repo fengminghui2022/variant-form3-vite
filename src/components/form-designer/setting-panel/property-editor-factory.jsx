@@ -120,23 +120,53 @@ export const createRadioButtonGroupEditor = function (propName, propLabelKey, co
   }
 }
 
+/**
+ JSX创建动态组件，会引起Vue显示以下警告信息，原因不明：
+ Extraneous non-emits event listeners (updateOptions) were passed to component but could not be automatically inherited because component renders fragment or text root nodes. If the listener is intended to be a component custom event listener only, declare it using the "emits" option.
+ */
+// export const createSelectEditor = function (propName, propLabelKey, configs) {
+//   return {
+//     props: {
+//       optionModel: Object,
+//     },
+//     render(h) {
+//       return (
+//         <el-form-item label={translate(propLabelKey)}>
+//           <el-select v-model={this.optionModel[propName]}>
+//             {
+//               configs.optionItems.map(item => {
+//                 return <el-option label={item.label} value={item.value} />
+//               })
+//             }
+//           </el-select>
+//         </el-form-item>
+//       )
+//     }
+//   }
+// }
+
+/* 换一种动态组件创建的实现方法，解决上述问题 */
 export const createSelectEditor = function (propName, propLabelKey, configs) {
   return {
+    template: `
+    <el-form-item :label="propLabel">
+      <el-select v-model="optionModel.${propName}">
+        <el-option v-for="item in optionItems" :key="item.value" :label="item.label"
+                   :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
+  `,
     props: {
+      designer: Object,
+      selectedWidget: Object,
       optionModel: Object,
     },
-    render(h) {
-      return (
-        <el-form-item label={translate(propLabelKey)}>
-          <el-select v-model={this.optionModel[propName]}>
-            {
-              configs.optionItems.map(item => {
-                return <el-option label={item.label} value={item.value} />
-              })
-            }
-          </el-select>
-        </el-form-item>
-      )
+    data() {
+      return {
+        optionItems: configs.optionItems,
+        propLabel: translate(propLabelKey)
+      }
     }
   }
 }
