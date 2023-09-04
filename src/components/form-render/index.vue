@@ -143,7 +143,6 @@
     data() {
       return {
         FUNAPI: formulajs,
-				formula: "", // 全局计算公式
         formJsonObj: this.formJson,
 
         formDataModel: {
@@ -203,7 +202,7 @@
     watch: {
 			formDataModel: {
 				handler: function(val, oldVal) {
-					handlerFormulaCal(this,this.globalDsv,val)
+					handlerFormulaCal(this,this.globalDsv, val)
 				},
 				deep: true
 			},

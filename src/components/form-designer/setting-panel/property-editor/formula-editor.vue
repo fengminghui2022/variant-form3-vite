@@ -8,7 +8,7 @@
       <el-tooltip
               :content="optionModel.formulaShow || '暂无'"
               placement="top">
-        <el-input v-model="optionModel.formulaShow" readonly>
+        <el-input v-model="formulaForView" readonly>
           <template #append>
             <el-button
                     @click="editFormula"
@@ -49,9 +49,9 @@
                   </el-button>
                 </el-col>
               </el-row>
-              <div ref="cmRef" style="height:150px;width:100%"></div>
+              <div ref="cmRef" style="height:110px;width:100%"></div>
             </div>
-            <!--
+            <!-- -->
             <div class="editor-bottom">
               <el-button
                       v-on:click="insertSymbol(item)"
@@ -61,7 +61,7 @@
                 {{item}}
               </el-button>
             </div>
-            -->
+            <!-- -->
           </div>
         </el-col>
       </el-row>
@@ -176,7 +176,13 @@ import {basicSetup, EditorView} from "codemirror"
 import {javascript} from "@codemirror/lang-javascript"
 import {EditorState} from "@codemirror/state";
 import i18n from "@/utils/i18n";
-import {deepClone, getAllContainerWidgets, getAllFieldWidgets, traverseFieldWidgetsOfContainer} from "@/utils/util";
+import {
+  deepClone,
+  getAllContainerWidgets,
+  getAllFieldWidgets,
+  getFieldWidgetById,
+  traverseFieldWidgetsOfContainer
+} from "@/utils/util";
 import {placeholders, baseTheme, formulas} from "@/utils/formula-util";
 
 export default {
@@ -187,6 +193,23 @@ export default {
     designer: Object,
     selectedWidget: Object,
     optionModel: Object,
+  },
+  computed: {
+    formulaForView() {
+      const regExp = /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g
+      const matchResult = this.optionModel.formula.match(regExp)
+      if (!matchResult) {
+        return this.optionModel.formula
+      }
+
+      let resultFormula = this.optionModel.formula
+      matchResult.forEach(mi => {
+        const secondPart = mi.split('.')[1]
+        resultFormula = resultFormula.replaceAll(mi, secondPart)
+      })
+
+      return resultFormula
+    },
   },
   watch: {
     filterText(val) {
@@ -345,51 +368,86 @@ export default {
       })
     },
 
+    // // 插入字段
+    // insertField(obj, node, self) {
+    //   if (!!obj.formItemFlag) {
+    //     let fieldTitle = "";
+    //     let fieldName = "";
+    //     let parentType = node.parent.data.type;
+    //     // 判断若为子表单字段用[]包裹，主表单字段用{}包裹
+    //     if (parentType === "sub-form") {
+    //       fieldTitle =
+    //           "[" +
+    //           node.parent.data.label +
+    //           "." +
+    //           obj.label +
+    //           "]";
+    //       fieldName =
+    //           "[" + node.parent.data.id + "." + obj.id + "]";
+    //     } else if (parentType === "grid") {
+    //       fieldTitle =
+    //           "[" +
+    //           node.parent.parent.parent.data.label +
+    //           "." +
+    //           obj.label +
+    //           "]";
+    //       fieldName =
+    //           "[" +
+    //           node.parent.parent.parent.data.id +
+    //           "." +
+    //           obj.id +
+    //           "]";
+    //     } else {
+    //       //fieldTitle = '[' + obj.label + ']'
+    //       //fieldName = '{' + obj.id + '}'
+    //       fieldName = obj.id;
+    //       fieldTitle = obj.label;
+    //     }
+    //     this.tags.push({
+    //       name: fieldTitle,
+    //       value: fieldName,
+    //       paraType: "Field",
+    //       type: "",
+    //     });
+    //
+    //     //CodeMirror 模式
+    //     //this.formula += fieldName;
+    //     this.updateCodeMirror(fieldName, fieldTitle, "field");
+    //   }
+    // },
+
     // 插入字段
     insertField(obj, node, self) {
       if (!!obj.formItemFlag) {
-        let fieldTitle = "";
-        let fieldName = "";
+        let fieldLabel = "";
+        let fieldId = "";
         let parentType = node.parent.data.type;
         // 判断若为子表单字段用[]包裹，主表单字段用{}包裹
         if (parentType === "sub-form") {
-          fieldTitle =
-              "[" +
-              node.parent.data.label +
-              "." +
-              obj.label +
-              "]";
-          fieldName =
-              "[" + node.parent.data.id + "." + obj.id + "]";
-        } else if (parentType === "grid") {
-          fieldTitle =
-              "[" +
-              node.parent.parent.parent.data.label +
-              "." +
-              obj.label +
-              "]";
-          fieldName =
-              "[" +
-              node.parent.parent.parent.data.id +
-              "." +
-              obj.id +
-              "]";
+          // fieldLabel = "[" + node.parent.data.label + "." + obj.label + "]";
+          // fieldId = "[" + node.parent.data.id + "." + obj.id + "]";
+
+          fieldId = obj.id
+          //fieldLabel = obj.label
+          fieldLabel = '[' + obj.label + ']'
         } else {
           //fieldTitle = '[' + obj.label + ']'
           //fieldName = '{' + obj.id + '}'
-          fieldName = obj.id;
-          fieldTitle = obj.label;
+
+          fieldId = obj.id
+          //fieldLabel = obj.label
+          fieldLabel = '[' + obj.label + ']'
         }
         this.tags.push({
-          name: fieldTitle,
-          value: fieldName,
+          name: fieldLabel,
+          value: fieldId,
           paraType: "Field",
           type: "",
         });
 
         //CodeMirror 模式
         //this.formula += fieldName;
-        this.updateCodeMirror(fieldName, fieldTitle, "field");
+        this.updateCodeMirror(fieldId, fieldLabel, "field");
       }
     },
 
@@ -482,24 +540,48 @@ export default {
       return this.removeStr(newStr);
     },
 
+    /**
+     * 字段label可能在公式保存后再次被修改，当编辑公式时需要再次刷新公式中的字段label（不刷新也不会影响公式计算结果）
+     */
+    refreshFormula() {
+      const regExp = /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g
+      const matchResult = this.optionModel.formula.match(regExp)
+      if (!matchResult) {
+        return this.optionModel.formula
+      }
+
+      matchResult.forEach(mi => {
+        const firstPart = mi.split('.')[0]
+        const thirdPart = mi.split('.')[2]
+        const fieldId = firstPart.substring(2, firstPart.length)
+        const fieldSchema = getFieldWidgetById(this.designer.widgetList, fieldId, false)
+        const newLabel = fieldSchema.options.label || fieldSchema.options.name
+        this.optionModel.formula = this.optionModel.formula.replaceAll(mi,
+            '{{' + firstPart + '.[' + newLabel + '].' + thirdPart + "}}")
+      })
+    },
+
     // 打开编辑公式弹窗
     editFormula() {
-      this.fieldTreeData.length = 0;
+      this.fieldTreeData.length = 0
       // 初始化字段树
       this.designer.widgetList.forEach((wItem) => {
         if (this.optionModel.name !== wItem.id) {
           //this.buildTreeNodeOfWidget(wItem, this.fieldTreeData);
           this.loadFieldListToTree()
         }
-      });
+      })
 
-      console.log("设计器字段===>", this.fieldTreeData);
+      console.log("设计器字段===>", this.fieldTreeData)
 
       // 加载当前字段计算公式tags
-      this.tags = deepClone(this.optionModel.formulaTags);
+      this.tags = deepClone(this.optionModel.formulaTags)
       // this.formula = deepClone(this.optionModel.formula);
-      const code = this.optionModel.formulaShow;
-      this.formulaDialogVisible = true;
+
+      //const code = this.optionModel.formulaShow;
+      this.refreshFormula()
+      const code = this.optionModel.formula
+      this.formulaDialogVisible = true
 
       //==== codeMirror 挂载视图 ====
       this.$nextTick(() => {
@@ -511,7 +593,7 @@ export default {
           }),
           parent: this.$refs.cmRef
         });
-        console.log("编辑器实例==>", this.codeMirror);
+        console.log("编辑器实例==>", this.codeMirror)
       })
     },
 
@@ -639,121 +721,6 @@ export default {
       this.introTitle = name;
     },
 
-    buildTreeNodeOfWidget(widget, treeNode) {
-      let curNode = {
-        id: widget.id,
-        name: widget.options.name,
-        label: widget.options.label || widget.type,
-        type: widget.type,
-        formItemFlag: widget.formItemFlag || "",
-        //selectable: true,
-      };
-
-      // 主要处理数字和字符串
-      if (
-          curNode.type === "input" ||
-          curNode.type === "textarea" ||
-          curNode.type === "number" ||
-          curNode.type === "date" ||
-          curNode.type === "sub-form" ||
-          curNode.type === "grid-sub-form" ||
-          curNode.type === "grid"
-      ) {
-        if (
-            curNode.type === "sub-form" ||
-            curNode.type === "grid-sub-form"
-        ) {
-          curNode.label = curNode.name;
-        }
-        treeNode.push(curNode);
-      }
-
-      if (widget.category === undefined) {
-        return;
-      }
-
-      curNode.children = [];
-      if (widget.type === "grid") {
-        widget.cols.map((col) => {
-          let colNode = {
-            id: col.id,
-            label: col.options.name || widget.type,
-            type: widget.type,
-            formItemFlag: widget.formItemFlag || "",
-            children: [],
-          };
-          curNode.children.push(colNode);
-          col.widgetList.map((wChild) => {
-            this.buildTreeNodeOfWidget(
-                wChild,
-                colNode.children
-            );
-          });
-        });
-      } else if (widget.type === "table") {
-        //TODO: 需要考虑合并单元格！！
-        widget.rows.map((row) => {
-          let rowNode = {
-            id: row.id,
-            label: "table-row",
-            type: widget.type,
-            formItemFlag: widget.formItemFlag || "",
-            selectable: false,
-            children: [],
-          };
-          curNode.children.push(rowNode);
-          row.cols.map((cell) => {
-            if (!!cell.merged) {
-              //跳过合并单元格！！
-              return;
-            }
-            let rowChildren = rowNode.children;
-            let cellNode = {
-              id: cell.id,
-              label: "table-cell",
-              type: cell.type,
-              formItemFlag: "",
-              children: [],
-            };
-            rowChildren.push(cellNode);
-            cell.widgetList.map((wChild) => {
-              this.buildTreeNodeOfWidget(
-                  wChild,
-                  cellNode.children
-              );
-            });
-          });
-        });
-      } else if (widget.type === "tab") {
-        widget.tabs.map((tab) => {
-          let tabNode = {
-            id: tab.id,
-            label: tab.options.name || widget.type,
-            type: widget.type,
-            formItemFlag: widget.formItemFlag || "",
-            selectable: false,
-            children: [],
-          };
-          curNode.children.push(tabNode);
-          tab.widgetList.map((wChild) => {
-            this.buildTreeNodeOfWidget(
-                wChild,
-                tabNode.children
-            );
-          });
-        });
-      } else if (widget.type === "sub-form") {
-        widget.widgetList.map((wChild) => {
-          this.buildTreeNodeOfWidget(wChild, curNode.children);
-        });
-      } else if (widget.category === "container") {
-        //自定义容器
-        widget.widgetList.map((wChild) => {
-          this.buildTreeNodeOfWidget(wChild, curNode.children);
-        });
-      }
-    },
-
     /**
      * 校验计算公式是否正确
      * @param s
@@ -844,14 +811,14 @@ li {
 .editor {
   margin-left: 10px;
   margin-right: 10px;
-  height: 190px;
+  height: 200px;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
 
 .editor-top {
   //margin-left: 10px;
-  height: 200px;
+  height: 130px;
   width: 100%;
   padding: 8px;
   position: relative;

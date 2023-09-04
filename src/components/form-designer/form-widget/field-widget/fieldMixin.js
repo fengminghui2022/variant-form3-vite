@@ -615,7 +615,6 @@ export default {
             }
             try {
               // 将计算结果赋值到公式所在的字段组件
-
               this.getWidgetRef(subFormFieldsArr[i].options.name + "@row" + this.subFormRowId)?.setValue(evalFn(
                   formula), true)
             } catch (e) {

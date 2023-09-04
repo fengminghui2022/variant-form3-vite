@@ -1,8 +1,93 @@
 // 计算公式相关工具方法
-import {evalFn} from "@/utils/util";
+import {evalFn, getFieldWidgetById} from "@/utils/util";
 import * as formulajs from '@formulajs/formulajs'
 import {EditorView} from "codemirror"
 import {MatchDecorator,Decoration,ViewPlugin,WidgetType} from "@codemirror/view"
+
+class PlaceholderWidget extends WidgetType {
+  field;
+  text;
+  type;
+
+  constructor(text) {
+    super();
+    if (text) {
+      //type 仅用于区分颜色
+      const [field, mText, type] = text.split(".");
+      this.text = mText;
+      this.type = type;
+      this.field = field;
+    }
+  }
+
+  eq(other) {
+    return this.text === other.text;
+  }
+
+  // 此处是我们的渲染方法
+  toDOM() {
+    let elt = document.createElement('span');
+    if (!this.text) return elt;
+    elt.className = this.type === "func" ? "cm-function" : "cm-field";
+    elt.textContent = this.text;
+    return elt;
+  }
+
+  ignoreEvent() {
+    return true;
+  }
+}
+
+const placeholderMatcher = new MatchDecorator({
+  regexp: /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g,
+  decoration: (match) =>
+      Decoration.replace({
+        widget: new PlaceholderWidget(match[1])
+      })
+});
+
+
+export const placeholders = ViewPlugin.fromClass(class {
+  placeholders
+
+  constructor(view) {
+    this.placeholders = placeholderMatcher.createDeco(view)
+  }
+
+  update(update) {
+    this.placeholders = placeholderMatcher.updateDeco(update, this.placeholders)
+  }
+}, {
+  decorations: instance => instance.placeholders,
+  provide: plugin => EditorView.atomicRanges.of(view => {
+    return view.plugin(plugin)?.placeholders || Decoration.none
+  })
+})
+
+// 背景样式
+export const baseTheme = EditorView.baseTheme({
+  ".cm-function": {
+    paddingLeft: "6px",
+    paddingRight: "6px",
+    paddingTop: "3px",
+    paddingBottom: "3px",
+    marginLeft: "3px",
+    marginRight: "3px",
+    backgroundColor: "#ffcdcc",
+    borderRadius: "4px",
+  },
+  ".cm-field": {
+    paddingLeft: "6px",
+    paddingRight: "6px",
+    paddingTop: "3px",
+    paddingBottom: "3px",
+    marginLeft: "3px",
+    marginRight: "3px",
+    backgroundColor: "#f8e7a0",
+    borderRadius: "4px",
+  }
+
+});
 
 // 计算公式全局字段组件汇总和计算
 export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
@@ -10,6 +95,7 @@ export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
   Object.keys(val).forEach(propName => {
     fieldList.push(propName)
   })
+
   for (let i = 0; i < fieldList.length; i++) {
     let fieldWidget = VFR.getWidgetRef(fieldList[i])
     if (!!fieldWidget && !!fieldWidget.field) {
@@ -18,11 +104,13 @@ export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
       if (!!formula && enableFormula) {
         localStorage.setItem("currentFormulaWidgetType", "main") // 计算公式赋值对象，sub子表单字段，main主表单字段
         // 获取字段组件值获取替换后的计算公式
-        VFR.formula = getFormula(VFR, formula)
+        //VFR.formula = getFormula(VFR, formula)
+        //debugger
+        VFR.formula = replaceFieldsOfFormula(VFR, formula)
+
         // 加入计算公式中的函数计算
         if (!!VFR.formula) {
           try {
-
             // 查找计算公式中的函数，统一转为大写，并改为this.FUNAPI.函数名
             let arr = VFR.formula.match(/[A-Za-z]*/g)
             for (let i = 0; i < arr.length; i++) {
@@ -38,8 +126,8 @@ export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
             }
             let regExpFlag = new RegExp(
                 "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}+-\\/【】‘；：”“'。，、？ ]")
-            // 判断结果是否最终值，且没有函数,没有运算符，若是则断定为字符串拼接值，直接复制到字段组件
 
+            // 判断结果是否最终值，且没有函数,没有运算符，若是则断定为字符串拼接值，直接复制到字段组件
             if (findCalFunStartIndex(VFR.formula) === -1 && !regExpFlag.test(VFR.formula)) {
               let value = VFR.formula
               if (value === "null" || !value) {
@@ -105,7 +193,8 @@ export function getFormula(VFR, formula) {
       //此处需判断函数类型，否则使用字符串函数时会报错。
       /*value = getWidgetValue(VFR, formula, widgetID);*/
     }
-    // 字表字段取值
+
+    // 子表单字段取值
     if (subFieldStart !== -1) {
       let subFieldEnd = formula.indexOf("]", subFieldStart) + 1;
       fieldHandle = formula.substring(subFieldStart, subFieldEnd);
@@ -159,6 +248,38 @@ export function getFormula(VFR, formula) {
   formula = formula.replace(fieldHandle, value)
   // 继续替换下一处字段组件
   return getFormula(VFR, formula);
+}
+
+/**
+ * 替换计算公式中的字段值
+ * @param VFR
+ * @param formula
+ * @returns {*}
+ */
+export function replaceFieldsOfFormula(VFR, formula) {
+  const regExp = /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g
+  const matchResult = formula.match(regExp)
+  if (!matchResult) {
+    return formula
+  }
+
+  let resultFormula = formula
+  matchResult.forEach(mi => {
+    const firstPart = mi.split('.')[0]
+    const fieldId = firstPart.substring(2, firstPart.length)
+    const fieldSchema = getFieldWidgetById(VFR.formJsonObj.widgetList, fieldId, false)
+    if (!!fieldSchema) {
+      const fieldRef = VFR.getWidgetRef(fieldSchema.options.name)
+      if (!!fieldRef) {
+        //是否要考虑字符串值的替换？？
+        resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
+      } else {  //getWidgetRef找不到，则可能是子表单字段
+
+      }
+    }
+  })
+
+  return resultFormula
 }
 
 /**
@@ -353,92 +474,6 @@ export function EDAY(date, day) {
     //TODO handle the exception
   }
 }
-
-export class PlaceholderWidget extends WidgetType {
-  field;
-  text;
-  type;
-
-  constructor(text) {
-    super();
-    if (text) {
-      //type 仅用于区分颜色
-      const [field, mText, type] = text.split(".");
-      this.text = mText;
-      this.type = type;
-      this.field = field;
-    }
-  }
-
-  eq(other) {
-    return this.text === other.text;
-  }
-
-  // 此处是我们的渲染方法
-  toDOM() {
-    let elt = document.createElement('span');
-    if (!this.text) return elt;
-    elt.className = this.type === "func" ? "cm-function" : "cm-field";
-    elt.textContent = this.text;
-    return elt;
-  }
-
-  ignoreEvent() {
-    return true;
-  }
-}
-
-
-export const placeholderMatcher = new MatchDecorator({
-  regexp: /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)}}/g,
-  decoration: (match) =>
-      Decoration.replace({
-        widget: new PlaceholderWidget(match[1])
-      })
-});
-
-
-export const placeholders = ViewPlugin.fromClass(class {
-  placeholders
-
-  constructor(view) {
-    this.placeholders = placeholderMatcher.createDeco(view)
-  }
-
-  update(update) {
-    this.placeholders = placeholderMatcher.updateDeco(update, this.placeholders)
-  }
-}, {
-  decorations: instance => instance.placeholders,
-  provide: plugin => EditorView.atomicRanges.of(view => {
-    return view.plugin(plugin)?.placeholders || Decoration.none
-  })
-})
-
-// 背景样式
-export const baseTheme = EditorView.baseTheme({
-  ".cm-function": {
-    paddingLeft: "6px",
-    paddingRight: "6px",
-    paddingTop: "3px",
-    paddingBottom: "3px",
-    marginLeft: "3px",
-    marginRight: "3px",
-    backgroundColor: "#ffcdcc",
-    borderRadius: "4px",
-  },
-  ".cm-field": {
-    paddingLeft: "6px",
-    paddingRight: "6px",
-    paddingTop: "3px",
-    paddingBottom: "3px",
-    marginLeft: "3px",
-    marginRight: "3px",
-    backgroundColor: "#f8e7a0",
-    borderRadius: "4px",
-  }
-
-});
 
 const FORMULA_JS_FUNCTIONS = [
   "INT",
