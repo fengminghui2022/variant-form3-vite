@@ -2,8 +2,8 @@
   <el-col v-if="widget.type === 'grid-col'" class="grid-cell" v-bind="layoutProps"
           :class="[selected ? 'selected' : '', customClass]" :style="colHeightStyle"
           @click.stop="selectWidget(widget)">
-    <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
-               tag="transition-group" :component-data="{name: 'fade'}"
+    <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
+               tag="div" :component-data="{name: 'fade', class: 'drag-drop-zone'}"
                handle=".drag-handler" @end="(evt) => onGridDragEnd(evt, widget.widgetList)"
                @add="(evt) => onGridDragAdd(evt, widget.widgetList)"
                @update="onGridDragUpdate" :move="checkContainerMove">
@@ -288,9 +288,9 @@
     outline: 1px dashed #336699;
     position: relative;
 
-    .form-widget-list {
+    .form-widget-list, .drag-drop-zone {
       min-height: 28px;
-      display: inline;
+      //display: inline;
     }
 
     .grid-col-action{

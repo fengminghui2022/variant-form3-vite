@@ -102,7 +102,7 @@
         display: table-cell;
       }
 
-      .form-widget-list {
+      .form-widget-list, .drag-drop-zone {
         border: 1px dashed #336699;
         min-height: 36px;
       }

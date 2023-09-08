@@ -37,12 +37,12 @@ export function createDesigner(vueInstance) {
       this.widgetList = []
       this.formConfig = deepClone(defaultFormConfig)
 
-      //输出版本信息和语雀链接
-      console.info(`%cVariantForm %cVer${VARIANT_FORM_VERSION} %chttps://www.yuque.com/visualdev/vform3`,
-          "color:#409EFF;font-size: 22px;font-weight:bolder",
-          "color:#999;font-size: 12px",
-          "color:#333"
-      )
+      // //输出版本信息和语雀链接
+      // console.info(`%cVariantForm %cVer${VARIANT_FORM_VERSION} %chttps://www.yuque.com/visualdev/vform3`,
+      //     "color:#409EFF;font-size: 22px;font-weight:bolder",
+      //     "color:#999;font-size: 12px",
+      //     "color:#333"
+      // )
 
       if (!resetFormJson) {
         this.initHistoryData()
@@ -163,7 +163,8 @@ export function createDesigner(vueInstance) {
           }
 
           /* 弹窗、抽屉只允许拖入设计器画布第一层！！ */
-          if ((evt.to.className !== 'form-widget-canvas') && (wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
+          if ((evt.to.className !== 'form-widget-canvas') && (evt.to.className !== 'canvas-drag-drop-zone')
+              && (wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
             return false
           }
 

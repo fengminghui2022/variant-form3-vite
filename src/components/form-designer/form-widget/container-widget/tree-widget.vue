@@ -208,7 +208,7 @@
 	  //padding: 5px;
 	  margin: 2px;
 
-	  .form-widget-list {
+	  .form-widget-list, .drag-drop-zone {
 	    min-height: 28px;
 	  }
 	}

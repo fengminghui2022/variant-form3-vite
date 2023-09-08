@@ -18,8 +18,8 @@
 
         <el-tab-pane v-for="(tab, index) in widget.tabs" :key="index" :label="tab.options.label" :name="tab.options.name"
                      @click.stop="selectWidget(widget)">
-          <draggable :list="tab.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
-                     handle=".drag-handler" tag="transition-group" :component-data="{name: 'fade'}"
+          <draggable :list="tab.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
+                     handle=".drag-handler" tag="div" :component-data="{name: 'fade', class: 'drag-drop-zone'}"
                      @add="(evt) => onContainerDragAdd(evt, tab.widgetList)"
                      @update="onContainerDragUpdate" :move="checkContainerMove">
             <template #item="{ element: subWidget, index: swIdx }">
@@ -108,7 +108,7 @@
     //padding: 5px;
     margin: 2px;
 
-    .form-widget-list {
+    .form-widget-list, .drag-drop-zone {
       min-height: 28px;
     }
   }

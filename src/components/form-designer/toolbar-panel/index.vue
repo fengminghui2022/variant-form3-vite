@@ -739,6 +739,10 @@
 </script>
 
 <style lang="scss" scoped>
+  .toolbar-container {
+    width: 100%;
+  }
+
   .toolbar-container:after {
     display: block;
     content: "";
