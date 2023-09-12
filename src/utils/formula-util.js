@@ -3,6 +3,7 @@ import {evalFn, getFieldWidgetById} from "@/utils/util";
 import * as formulajs from '@formulajs/formulajs'
 import {EditorView} from "codemirror"
 import {MatchDecorator,Decoration,ViewPlugin,WidgetType} from "@codemirror/view"
+import {translate} from "@/utils/i18n";
 
 class PlaceholderWidget extends WidgetType {
   field;
