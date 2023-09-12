@@ -120,6 +120,12 @@
         default: null,
       },
 
+      /* 后端字段列表对象，优先级高于fieldListApi */
+      fieldListData: {
+        type: Object,
+        default: null,
+      },
+
       /* 禁止显示的组件名称数组 */
       bannedWidgets: {
         type: Array,
@@ -188,7 +194,8 @@
 
         designer: createDesigner(this),
 
-        fieldList: [],
+        fieldList: [],  //字段名称列表
+        subFormList: [],  //子表单名称列表
 
         externalComponents:  {},  //外部组件实例集合
 
@@ -198,7 +205,8 @@
     },
     provide() {
       return {
-        serverFieldList: this.fieldList,
+        getServerFieldList: () => this.fieldList,
+        getServerSubFormList: () => this.subFormList,
         getDesignerConfig: () => this.designerConfig,
         getBannedWidgets: () => this.bannedWidgets,
       }
@@ -224,7 +232,7 @@
       this.initFormTemplates()
 
       this.loadCase()
-      this.loadFieldListFromServer()
+      this.initServerFields()
     },
     methods: {
       testEEH(eventName, eventParams) {
@@ -328,6 +336,26 @@
         }).catch(error => {
           this.$message.error(error)
         })
+      },
+
+      initServerFields() {
+        if (!!this.fieldListData && !!this.fieldListData.fieldList) {  //优先从fieldListData加载字段名称
+          this.fieldList.splice(0, this.fieldList.length, ...this.fieldListData.fieldList)
+          if (!!this.fieldListData.subFormList) {  //加载子表单名称
+            this.subFormList.splice(0, this.subFormList.length, ...this.fieldListData.subFormList)
+          }
+        } else {
+          this.loadFieldListFromServer()
+        }
+      },
+
+      setFieldListData(fieldListData) {
+        if (!!fieldListData && !!fieldListData.fieldList) {  //优先从fieldListData加载字段名称
+          this.fieldList.splice(0, this.fieldList.length, ...fieldListData.fieldList)
+          if (!!fieldListData.subFormList) {  //加载子表单名称
+            this.subFormList.splice(0, this.subFormList.length, ...fieldListData.subFormList)
+          }
+        }
       },
 
       handleLanguageChanged(command) {
@@ -615,6 +643,7 @@
       flex-direction: row;
       flex-shrink: 1;
       overflow: hidden;
+      position: relative;
 
       .el-aside.side-panel {
         height: 100%;
