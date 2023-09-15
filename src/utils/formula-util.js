@@ -98,11 +98,12 @@ export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
   })
 
   for (let i = 0; i < fieldList.length; i++) {
+    //debugger
     let fieldWidget = VFR.getWidgetRef(fieldList[i])
     if (!!fieldWidget && !!fieldWidget.field) {
       let formula = fieldWidget.field.options.formula // 字段结算公式
-      let enableFormula = fieldWidget.field.options.enableFormula // 启用计算公式
-      if (!!formula && enableFormula) {
+      let formulaEnabled = fieldWidget.field.options.formulaEnabled // 启用计算公式
+      if (!!formula && formulaEnabled) {
         localStorage.setItem("currentFormulaWidgetType", "main") // 计算公式赋值对象，sub子表单字段，main主表单字段
         // 获取字段组件值获取替换后的计算公式
         //VFR.formula = getFormula(VFR, formula)
@@ -164,6 +165,43 @@ export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
       }
     }
   }
+}
+
+export function calculateFormula(VFR, DSV, formulaJs, formulaFieldRef, changedFieldRef) {
+  let formula = formulaFieldRef.field.options.formula
+  formula = replaceFieldsOfFormula(VFR, formula, changedFieldRef)  //替换字段值
+
+  //替换formula-js函数
+  //todo
+
+  const formulaValue = evalFn(formula, DSV, VFR, formulaJs)
+  formulaFieldRef.setValue(formulaValue)
+}
+
+/**
+ * 判断字段是否用在计算公式中
+ * @param fieldName
+ * @param formula
+ * @param VFR
+ */
+export function fieldIsUsedInFormula(fieldName, formula, VFR) {
+  const regExp = /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g
+  const matchResult = formula.match(regExp)
+  if (!matchResult) {
+    return false
+  }
+
+  let foundResult = false
+  matchResult.forEach(mi => {
+    const firstPart = mi.split('.')[0]
+    const fieldId = firstPart.substring(2, firstPart.length)
+    const fieldSchema = getFieldWidgetById(VFR.formJsonObj.widgetList, fieldId, false)
+    if (fieldSchema.options.name === fieldName) {
+      foundResult = true
+    }
+  })
+
+  return foundResult
 }
 
 /**
@@ -255,9 +293,10 @@ export function getFormula(VFR, formula) {
  * 替换计算公式中的字段值
  * @param VFR
  * @param formula
+ * @param changedFieldRef
  * @returns {*}
  */
-export function replaceFieldsOfFormula(VFR, formula) {
+export function replaceFieldsOfFormula(VFR, formula, changedFieldRef) {
   const regExp = /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g
   const matchResult = formula.match(regExp)
   if (!matchResult) {
@@ -270,12 +309,20 @@ export function replaceFieldsOfFormula(VFR, formula) {
     const fieldId = firstPart.substring(2, firstPart.length)
     const fieldSchema = getFieldWidgetById(VFR.formJsonObj.widgetList, fieldId, false)
     if (!!fieldSchema) {
-      const fieldRef = VFR.getWidgetRef(fieldSchema.options.name)
+      let fieldRef = VFR.getWidgetRef(fieldSchema.options.name)
       if (!!fieldRef) {
         //是否要考虑字符串值的替换？？
         resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
       } else {  //getWidgetRef找不到，则可能是子表单字段
-
+        //console.error('888888888333333')
+        if (!!changedFieldRef.subFormName) {
+          //let subFormName = changedFieldRef.subFormName
+          let subFormRowId = changedFieldRef.subFormRowId
+          fieldRef = VFR.getWidgetRef(fieldSchema.options.name + '@row' + subFormRowId)
+          if (!!fieldRef) {
+            resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
+          }
+        }
       }
     }
   })

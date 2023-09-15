@@ -200,12 +200,13 @@
 
     },
     watch: {
-			formDataModel: {
-				handler: function(val, oldVal) {
-					handlerFormulaCal(this,this.globalDsv, val)
-				},
-				deep: true
-			},
+			// formDataModel: {
+			// 	handler: function(val, oldVal) {
+			// 		handlerFormulaCal(this, this.globalDsv, val)
+			// 	},
+			// 	deep: true
+			// },
+
     },
     created() {
       this.buildFormModel(!this.formJsonObj ? null : this.formJsonObj.widgetList)

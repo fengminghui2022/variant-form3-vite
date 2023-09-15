@@ -1,6 +1,6 @@
 <template>
-  <el-form-item :label="i18nt('designer.setting.enableFormula')">
-    <el-switch v-model="optionModel.enableFormula"></el-switch>
+  <el-form-item :label="i18nt('designer.setting.formulaEnabled')">
+    <el-switch v-model="optionModel.formulaEnabled"></el-switch>
   </el-form-item>
 </template>
 
@@ -8,7 +8,7 @@
   import i18n from "@/utils/i18n";
 
   export default {
-    name: "enableFormula-editor",
+    name: "formulaEnabled-editor",
     mixins: [i18n],
     props: {
       designer: Object,

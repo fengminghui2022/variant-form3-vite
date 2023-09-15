@@ -264,7 +264,7 @@ export default {
     },
 
     setting: {
-      enableFormula: "Enable Formula",
+      formulaEnabled: "Enable Formula",
       formula: "Formula",
       basicSetting: 'Basic Setting',
       attributeSetting: 'Attribute Setting',

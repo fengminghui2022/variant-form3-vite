@@ -2,9 +2,9 @@
   <div>
     <el-form-item
             :label="i18nt('designer.setting.formula')"
-            v-if="optionModel.enableFormula">
+            v-if="optionModel.formulaEnabled">
     </el-form-item>
-    <el-form-item label-width="0" v-if="optionModel.enableFormula">
+    <el-form-item label-width="0" v-if="optionModel.formulaEnabled">
       <el-tooltip
               :content="optionModel.formulaShow || '暂无'"
               placement="top">
@@ -557,7 +557,7 @@ export default {
         const fieldSchema = getFieldWidgetById(this.designer.widgetList, fieldId, false)
         const newLabel = fieldSchema.options.label || fieldSchema.options.name
         this.optionModel.formula = this.optionModel.formula.replaceAll(mi,
-            '{{' + firstPart + '.[' + newLabel + '].' + thirdPart + "}}")
+            firstPart + '.[' + newLabel + '].' + thirdPart)
       })
     },
 

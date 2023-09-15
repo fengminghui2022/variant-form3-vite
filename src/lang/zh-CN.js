@@ -251,7 +251,7 @@ export default {
     },
 
     setting: {
-      enableFormula: "启用计算公式",
+      formulaEnabled: "启用计算公式",
       formula: "计算公式",
       basicSetting: '基本属性',
       attributeSetting: '属性设置',
