@@ -6,7 +6,8 @@
     </el-form-item>
     <el-form-item label-width="0" v-if="optionModel.formulaEnabled">
       <el-tooltip
-              :content="optionModel.formulaShow || '暂无'"
+              :content="formulaForView"
+              effect="light"
               placement="top">
         <el-input v-model="formulaForView" readonly>
           <template #append>

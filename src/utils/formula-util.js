@@ -168,11 +168,26 @@ export function handlerFormulaCal(VFR, DSV, val = VFR.formDataModel) {
 }
 
 export function calculateFormula(VFR, DSV, formulaJs, formulaFieldRef, changedFieldRef) {
+  if (!!formulaFieldRef.subFormItemFlag && !!changedFieldRef.subFormItemFlag) {
+    /* 子表单字段变化，只能触发子表单同一行字段的计算公式重新计算！！ */
+    if (changedFieldRef.subFormRowId !== formulaFieldRef.subFormRowId) {
+      return
+    }
+  }
+
   let formula = formulaFieldRef.field.options.formula
-  formula = replaceFieldsOfFormula(VFR, formula, changedFieldRef)  //替换字段值
+  formula = replaceFieldsOfFormula(VFR, formulaFieldRef, changedFieldRef)  //替换字段值
 
   //替换formula-js函数
-  //todo
+  const matchResult = formula.match(/[A-Za-z]*/g)
+  if (!!matchResult) {
+    matchResult.forEach(mi => {
+      if (!!mi && (findCalFunStartIndex(mi) !== -1)) {
+        const funcName = mi.toUpperCase()
+        formula = formula.replace(mi, 'formulaJs.' + funcName)
+      }
+    })
+  }
 
   const formulaValue = evalFn(formula, DSV, VFR, formulaJs)
   formulaFieldRef.setValue(formulaValue)
@@ -292,12 +307,13 @@ export function getFormula(VFR, formula) {
 /**
  * 替换计算公式中的字段值
  * @param VFR
- * @param formula
+ * @param formulaFieldRef
  * @param changedFieldRef
  * @returns {*}
  */
-export function replaceFieldsOfFormula(VFR, formula, changedFieldRef) {
+export function replaceFieldsOfFormula(VFR, formulaFieldRef, changedFieldRef) {
   const regExp = /\{\{(\w+\.[\[\u4e00-\u9fa5_a-zA-Z0-9\]]+\.\w+)}}/g
+  let formula = formulaFieldRef.field.options.formula
   const matchResult = formula.match(regExp)
   if (!matchResult) {
     return formula
@@ -314,13 +330,22 @@ export function replaceFieldsOfFormula(VFR, formula, changedFieldRef) {
         //是否要考虑字符串值的替换？？
         resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
       } else {  //getWidgetRef找不到，则可能是子表单字段
-        //console.error('888888888333333')
-        if (!!changedFieldRef.subFormName) {
-          //let subFormName = changedFieldRef.subFormName
-          let subFormRowId = changedFieldRef.subFormRowId
-          fieldRef = VFR.getWidgetRef(fieldSchema.options.name + '@row' + subFormRowId)
-          if (!!fieldRef) {
-            resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
+        if (!!changedFieldRef.subFormItemFlag) {
+          if (!formulaFieldRef.subFormItemFlag) {  //
+            /* 在主表单字段的计算公式中使用子表单字段，应将子表单所有记录同字段的值代入！！ */
+            const subFormValue = VFR.formDataModel[changedFieldRef.subFormName]
+            let allSubFieldValues = ''
+            const subFieldName = fieldSchema.options.name
+            subFormValue.forEach((vi, idx) => {
+              allSubFieldValues = (idx === 0) ? vi[subFieldName] : allSubFieldValues + ', ' + vi[subFieldName]
+            })
+            resultFormula = resultFormula.replaceAll(mi, allSubFieldValues)
+          } else {
+            let subFormRowId = changedFieldRef.subFormRowId
+            fieldRef = VFR.getWidgetRef(fieldSchema.options.name + '@row' + subFormRowId)
+            if (!!fieldRef) {
+              resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
+            }
           }
         }
       }
