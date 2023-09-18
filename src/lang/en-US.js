@@ -230,6 +230,7 @@ export default {
       automaticDropdown: 'Automatic Dropdown',
       multiple: 'Multiple',
       multipleLimit: 'Multiple Limit',
+      collapseTags: 'Collapse Tags',
       checkStrictly: 'Any Level Selectable',
       showAllLevels: 'Show All Levels',
       contentPosition: 'Content Position',

@@ -12,6 +12,7 @@
                :reserve-keyword="false"
                :automatic-dropdown="field.options.automaticDropdown"
                :multiple="field.options.multiple" :multiple-limit="field.options.multipleLimit"
+               :collapse-tags="field.options.collapseTags"
                :placeholder="field.options.placeholder || i18nt('render.hint.selectPlaceholder')"
                :remote="field.options.remote" :remote-method="remoteMethod"
                @focus="handleFocusCustomEvent" @blur.capture="handleBlurCustomEvent"

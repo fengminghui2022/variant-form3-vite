@@ -1,5 +1,5 @@
 <template>
-  <el-form-item :label="i18nt('designer.setting.multipleLimit')">
+  <el-form-item v-if="optionModel.multiple" :label="i18nt('designer.setting.multipleLimit')">
     <el-input-number v-model="optionModel.multipleLimit" :min="0"
                      class="hide-spin-button" style="width: 100%"></el-input-number>
   </el-form-item>

@@ -1,11 +1,13 @@
 <template>
   <div id="app">
-    <VFormDesigner :designer-config="designerConfig" :global-dsv="globalDsv" ref="vfdRef">
+    <VFormDesigner :designer-config="designerConfig"
+                   :field-list-data="fieldListData"
+                   :global-dsv="globalDsv" ref="vfdRef">
       <!--
       <template #customToolButtons>
         <el-button link @click="doTest">test</el-button>
       </template>
-      --> 
+      -->
     </VFormDesigner>
   </div>
 </template>
@@ -26,6 +28,34 @@ export default {
 
       designerConfig: {
         //logoHeader: false,
+      },
+
+      /* 集成后端字段名称选择功能--演示 */
+      fieldListData: {
+        fieldList: [
+          {
+            label: '客户名称',
+            name: 'accountName'
+          },
+          {
+            label: '手机号',
+            name: 'mobilePhone'
+          },
+          {
+            label: '订单明细.产品编号',
+            name: 'productNo'
+          }
+        ],
+        subFormList: [
+          {
+            label: '订单明细',
+            name: 'orderDetail'
+          },
+          {
+            label: '发货明细',
+            name: 'deliveryDetail'
+          }
+        ]
       },
 
       //全局数据源变量

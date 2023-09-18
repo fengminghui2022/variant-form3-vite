@@ -788,6 +788,7 @@ export const basicFields = [
       automaticDropdown: false,  //自动下拉
       multiple: false,
       multipleLimit: 0,
+      collapseTags: false,  //对多选折叠已选项
       dsEnabled: false, // 是否使用数据源数据
       dsName: '', // 数据源名称
       dataSetName: '',  //数据集名称
