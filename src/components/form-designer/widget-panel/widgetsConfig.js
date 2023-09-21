@@ -550,10 +550,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -605,10 +601,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -653,9 +645,7 @@ export const basicFields = [
       validation: '',
       validationHint: '',
       formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
+      formula: "", // 计算公式
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -859,10 +849,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -907,10 +893,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -956,10 +938,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -1006,10 +984,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -1042,10 +1016,6 @@ export const basicFields = [
       labelWrap: false,  //标签超长换行
       disabled: false,
       hidden: false,
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算 
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -1085,10 +1055,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -1165,10 +1131,6 @@ export const basicFields = [
       requiredHint: '',
       validation: '',
       validationHint: '',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       labelIconClass: null,
@@ -1200,10 +1162,6 @@ export const basicFields = [
       textAlign: 'left',
       fontSize: '13px',
       preWrap: false,  //是否自动换行
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       //-------------------
@@ -1221,10 +1179,6 @@ export const basicFields = [
       columnWidth: '200px',
       hidden: false,
       htmlContent: '<b>html text</b>',
-      formulaEnabled: false, // 启用计算公式
-      formula: "", // 计算公式-展示
-      formulaTags: [],
-      formulaShow: "", // 计算公式-计算
       //-------------------
       customClass: '',  //自定义css类名
       //-------------------

@@ -66,9 +66,6 @@
   import DynamicDialog from './dynamic-dialog'
   import DynamicDrawer from './dynamic-drawer'
 
-  import * as formulajs from '@formulajs/formulajs'
-  import {handlerFormulaCal} from '@/utils/formula-util'
-
   export default {
     name: "VFormRender",
     componentName: 'VFormRender',
@@ -142,7 +139,6 @@
     },
     data() {
       return {
-        FUNAPI: formulajs,
         formJsonObj: this.formJson,
 
         formDataModel: {
@@ -200,13 +196,7 @@
 
     },
     watch: {
-			// formDataModel: {
-			// 	handler: function(val, oldVal) {
-			// 		handlerFormulaCal(this, this.globalDsv, val)
-			// 	},
-			// 	deep: true
-			// },
-
+      //
     },
     created() {
       this.buildFormModel(!this.formJsonObj ? null : this.formJsonObj.widgetList)

@@ -108,9 +108,9 @@
                   }}
                 </div>
                 <div class="function-list">
-                  <el-collapse>
+                  <el-collapse v-model="funcActiveCollapseNames">
                     <el-collapse-item
-                            v-for="(item, index) in formulas"
+                            v-for="(item, index) in funcList"
                             :key="index"
                             :title="i18nt(item.fClass)"
                             :name="index">
@@ -273,7 +273,8 @@ export default {
             this.i18nt("designer.hint.formulaPara") +
             '2</span><span class="cg">)</span>',
       },
-      formulas: formulas
+      funcList: formulas,
+      funcActiveCollapseNames: [0],
     };
   },
   mounted() {
@@ -340,7 +341,10 @@ export default {
             type: fld.field.type,
             formItemFlag: true
           }
-          this.fieldTreeData.push(fieldNode)
+
+          if (fieldNode.name !== this.optionModel.name) {  //排除当前设置公式字段
+            this.fieldTreeData.push(fieldNode)
+          }
         }
       })
 
@@ -362,128 +366,32 @@ export default {
             type: fld.type,
             formItemFlag: true
           }
-          subFormNode.children.push(fieldNode)
+
+          if (fieldNode.name !== this.optionModel.name) {  //排除当前设置公式字段
+            subFormNode.children.push(fieldNode)
+          }
         })
 
         this.fieldTreeData.push(subFormNode)
       })
     },
 
-    // // 插入字段
-    // insertField(obj, node, self) {
-    //   if (!!obj.formItemFlag) {
-    //     let fieldTitle = "";
-    //     let fieldName = "";
-    //     let parentType = node.parent.data.type;
-    //     // 判断若为子表单字段用[]包裹，主表单字段用{}包裹
-    //     if (parentType === "sub-form") {
-    //       fieldTitle =
-    //           "[" +
-    //           node.parent.data.label +
-    //           "." +
-    //           obj.label +
-    //           "]";
-    //       fieldName =
-    //           "[" + node.parent.data.id + "." + obj.id + "]";
-    //     } else if (parentType === "grid") {
-    //       fieldTitle =
-    //           "[" +
-    //           node.parent.parent.parent.data.label +
-    //           "." +
-    //           obj.label +
-    //           "]";
-    //       fieldName =
-    //           "[" +
-    //           node.parent.parent.parent.data.id +
-    //           "." +
-    //           obj.id +
-    //           "]";
-    //     } else {
-    //       //fieldTitle = '[' + obj.label + ']'
-    //       //fieldName = '{' + obj.id + '}'
-    //       fieldName = obj.id;
-    //       fieldTitle = obj.label;
-    //     }
-    //     this.tags.push({
-    //       name: fieldTitle,
-    //       value: fieldName,
-    //       paraType: "Field",
-    //       type: "",
-    //     });
-    //
-    //     //CodeMirror 模式
-    //     //this.formula += fieldName;
-    //     this.updateCodeMirror(fieldName, fieldTitle, "field");
-    //   }
-    // },
-
     // 插入字段
     insertField(obj, node, self) {
       if (!!obj.formItemFlag) {
-        let fieldLabel = "";
-        let fieldId = "";
-        let parentType = node.parent.data.type;
-        // 判断若为子表单字段用[]包裹，主表单字段用{}包裹
-        if (parentType === "sub-form") {
-          // fieldLabel = "[" + node.parent.data.label + "." + obj.label + "]";
-          // fieldId = "[" + node.parent.data.id + "." + obj.id + "]";
-
-          fieldId = obj.id
-          //fieldLabel = obj.label
-          fieldLabel = '[' + obj.label + ']'
-        } else {
-          //fieldTitle = '[' + obj.label + ']'
-          //fieldName = '{' + obj.id + '}'
-
-          fieldId = obj.id
-          //fieldLabel = obj.label
-          fieldLabel = '[' + obj.label + ']'
-        }
-        this.tags.push({
-          name: fieldLabel,
-          value: fieldId,
-          paraType: "Field",
-          type: "",
-        });
-
-        //CodeMirror 模式
-        //this.formula += fieldName;
+        let fieldId = obj.id
+        let fieldLabel = '[' + obj.label + ']'
         this.updateCodeMirror(fieldId, fieldLabel, "field");
       }
     },
 
     // 插入符号
     insertSymbol(opt) {
-      let tagType = "";
-      if (opt === "," || opt === "(" || opt === ")") {
-        tagType = "warning";
-      } else {
-        tagType = "success";
-      }
-      this.tags.push({
-        name: opt,
-        value: opt,
-        paraType: "Symbol",
-        type: tagType,
-      });
-
-      //CodeMirror 模式
-      //this.formula += opt;
-      // console.log(this.$refs.mirCode)
       this.updateCodeMirror(opt, opt, null);
     },
 
     // 插入函数
     insertFunction(opt) {
-      this.tags.push({
-        name: opt,
-        value: opt,
-        paraType: "Function",
-        type: "warning",
-      });
-
-      //CodeMirror 模式
-      //this.formula += opt;
       const val = opt.substring(0, opt.length - 1);
       this.updateCodeMirror(val, val, "func");
     },
@@ -554,10 +462,15 @@ export default {
       matchResult.forEach(mi => {
         const firstPart = mi.split('.')[0]
         const thirdPart = mi.split('.')[2]
+        const nodeType = thirdPart.substring(0, thirdPart.length -2)
+        if (nodeType === 'func') {
+          return
+        }
+
         const fieldId = firstPart.substring(2, firstPart.length)
         const fieldSchema = getFieldWidgetById(this.designer.widgetList, fieldId, false)
         const newLabel = fieldSchema.options.label || fieldSchema.options.name
-        this.optionModel.formula = this.optionModel.formula.replaceAll(mi,
+        this.optionModel.formula = this.optionModel.formula.replace(mi,
             firstPart + '.[' + newLabel + '].' + thirdPart)
       })
     },
@@ -598,48 +511,9 @@ export default {
       })
     },
 
-    // 保存计算公式-展示和计算公式-计算
+    // 保存计算公式
     saveFormula() {
-      this.optionModel.formula = "";
-      this.optionModel.formulaShow = "";
-
-      this.optionModel.formula = this.codeMirror.state.doc.text.join("\r\n");
-      this.optionModel.formulaShow = this.optionModel.formula;
-      let re = /\{\{(\w+\.[\u4e00-\u9fa5_a-zA-Z0-9]+\.\w+)}}/g;
-      let array = [];
-      let temp;
-      //提取大括号内数据
-      while (temp = re.exec(this.optionModel.formula)) {
-        array.push(temp[0].match(/{{([^}]*)}}/)[1]);
-      }
-      array.forEach(item => {
-        const strs = item.split(".");
-        //字段需要加大括号 否则计算时会报错
-        const val = strs[2] === "field" ? `{${strs[0]}}` : strs[0];
-        this.optionModel.formula = this.optionModel.formula.replace("{{" + item + "}}", val);
-      })
-
-      console.log("表达式===>", this.optionModel.formula);
-
-      //CodeMirror 模式
-      //  this.optionModel.formulaShow = this.formula;
-      // this.optionModel.formula = this.formula;
-      ////CodeMirror 模式 end
-      //===el-tag模式====
-      // for (let i = 0; i < this.tags.length; i++) {
-      //     this.optionModel.formulaShow =
-      //         this.optionModel.formulaShow + this.tags[i].name;
-      //     this.optionModel.formula =
-      //         this.optionModel.formula + this.tags[i].value;
-      // }
-      //===el-tag模式 end====
-
-
-      //  if (!this.isValid(this.optionModel.formula)) {
-      //    this.$message.error("函数缺失右括号)");
-      //     return false;
-      //  }
-      // this.optionModel.formulaTags = this.tags;
+      this.optionModel.formula = this.codeMirror.state.doc.text.join('')
       this.formulaDialogVisible = false;
     },
 
