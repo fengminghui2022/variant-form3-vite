@@ -12,7 +12,7 @@
               @change="handleChangeEvent">
     </el-input>
     <template v-if="isReadMode">
-      <div v-html="fieldModel" class="readonly-mode-field"></div>
+      <div v-html="contentForReadMode" class="readonly-mode-field"></div>
     </template>
   </form-item-wrapper>
 </template>
@@ -70,6 +70,10 @@
         return this.widgetKey || this.field.id
       },
 
+      contentForReadMode() {
+        return this.fieldModel ? this.fieldModel : '--'
+      }
+
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */
@@ -110,5 +114,6 @@
     display: inline-block;
     white-space: pre-wrap;
     line-height: 1.5;
+    min-height: 32px;
   }
 </style>
