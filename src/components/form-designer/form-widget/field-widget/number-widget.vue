@@ -13,7 +13,7 @@
                      @change="handleChangeEvent">
     </el-input-number>
     <template v-if="isReadMode">
-      <span class="readonly-mode-field">{{fieldModel}}</span>
+      <span class="readonly-mode-field">{{contentForReadMode}}</span>
     </template>
   </form-item-wrapper>
 </template>
@@ -68,6 +68,10 @@
       showControls() {
         return this.field.options.controls === undefined ? true : this.field.options.controls
       },
+
+      contentForReadMode() {
+        return (this.fieldModel === null || this.fieldModel === undefined) ? '--' : this.fieldModel
+      }
 
     },
     beforeCreate() {
