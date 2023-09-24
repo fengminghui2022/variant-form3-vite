@@ -810,9 +810,9 @@ export function createDesigner(vueInstance) {
     },
 
     buildColsOfGrid(gridCon, colNum) {
-      let newCol = deepClone( this.getContainerByType('grid-col') )
       const newSpan = 24 / colNum
       for (let i = 0; i < colNum; i++) {
+        let newCol = deepClone( this.getContainerByType('grid-col') )
         let tmpId = generateId()
         newCol.id = 'grid-col-' + tmpId
         newCol.options.name = 'gridCol' + tmpId
