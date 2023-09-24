@@ -5,7 +5,7 @@
                    :global-dsv="globalDsv" ref="vfdRef">
       <!--
       <template #customToolButtons>
-        <el-button link @click="doTest">test</el-button>
+        <el-button link @click="changeThemePrimaryColor">改色</el-button>
       </template>
       -->
     </VFormDesigner>
@@ -71,6 +71,12 @@ export default {
   methods: {
     doTest() {
       console.info('form data schema is: ' + JSON.stringify( this.$refs.vfdRef.buildFormDataSchema() ))
+    },
+
+    changeThemePrimaryColor() {
+      const bodyElement = document.getElementsByTagName("body")[0]
+      bodyElement.style.setProperty("--vf-color-primary", "red");
+      bodyElement.style.setProperty("--el-color-primary", "red");
     },
 
   }

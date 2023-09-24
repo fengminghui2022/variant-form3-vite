@@ -2,9 +2,54 @@
 export const containers = [
   {
     type: 'grid',
-    alias: '',  //组件别名，可以自定义
+    alias: 'column-1-grid',  //组件别名，可以自定义
     category: 'container',
-    icon: 'grid',
+    icon: 'column-1-grid',
+    cols: [],
+    options: {
+      name: '',
+      hidden: false,
+      gutter: 12,
+      colHeight: null,  //栅格列统一高度属性，用于解决栅格列设置响应式布局浮动后被挂住的问题！！
+      customClass: '',  //自定义css类名
+    }
+  },
+
+  {
+    type: 'grid',
+    alias: 'column-2-grid',  //组件别名，可以自定义
+    category: 'container',
+    icon: 'column-2-grid',
+    cols: [],
+    options: {
+      name: '',
+      hidden: false,
+      gutter: 12,
+      colHeight: null,  //栅格列统一高度属性，用于解决栅格列设置响应式布局浮动后被挂住的问题！！
+      customClass: '',  //自定义css类名
+    }
+  },
+
+  {
+    type: 'grid',
+    alias: 'column-3-grid',  //组件别名，可以自定义
+    category: 'container',
+    icon: 'column-3-grid',
+    cols: [],
+    options: {
+      name: '',
+      hidden: false,
+      gutter: 12,
+      colHeight: null,  //栅格列统一高度属性，用于解决栅格列设置响应式布局浮动后被挂住的问题！！
+      customClass: '',  //自定义css类名
+    }
+  },
+
+  {
+    type: 'grid',
+    alias: 'column-4-grid',  //组件别名，可以自定义
+    category: 'container',
+    icon: 'column-4-grid',
     cols: [],
     options: {
       name: '',

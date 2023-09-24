@@ -24,6 +24,10 @@ export default {
 
     widgetLabel: {
       grid:             '栅格',
+      'column-1-grid':  '单列栅格',
+      'column-2-grid':  '双列栅格',
+      'column-3-grid':  '三列栅格',
+      'column-4-grid':  '四列栅格',
       table:            '表格',
       tab:              '标签页',
       section:          '区块',

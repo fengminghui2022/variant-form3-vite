@@ -24,6 +24,10 @@ export default {
 
     widgetLabel: {
       grid:             'Grid',
+      'column-1-grid':  '1-Col-Grid',
+      'column-2-grid':  '2-Col-Grid',
+      'column-3-grid':  '3-Col-Grid',
+      'column-4-grid':  '4-Col-Grid',
       table:            'Table',
       tab:              'Tab',
       section:          'Section',

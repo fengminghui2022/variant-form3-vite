@@ -624,6 +624,12 @@
         this.rightAsideVisible =!this.rightAsideVisible
       },
 
+      /*修改主题色*/
+      changePrimaryColor(newColor) {
+        document.documentElement.style.setProperty("--el-color-primary", newColor);
+        document.documentElement.style.setProperty("--vf-color-primary", newColor);
+      }
+
       //TODO: 增加更多方法！！
 
     }

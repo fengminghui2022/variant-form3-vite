@@ -5,7 +5,7 @@
              :ref="widget.id" v-show="!widget.options.hidden">
       <template #header>
         <div class="clear-fix">
-          <span>{{widget.options.label}}</span>
+          <span @click="toggleCard">{{widget.options.label}}</span>
           <i v-if="widget.options.showFold" class="float-right" @click="toggleCard">
             <template v-if="!widget.options.folded">
               <el-icon><ArrowDown /></el-icon>
@@ -93,6 +93,10 @@
     },
     methods: {
       toggleCard() {
+        if (!this.widget.options.showFold) {
+          return
+        }
+
         this.widget.options.folded = !this.widget.options.folded
       },
 

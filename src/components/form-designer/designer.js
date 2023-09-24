@@ -809,22 +809,47 @@ export function createDesigner(vueInstance) {
       return newWidget
     },
 
+    buildColsOfGrid(gridCon, colNum) {
+      let newCol = deepClone( this.getContainerByType('grid-col') )
+      const newSpan = 24 / colNum
+      for (let i = 0; i < colNum; i++) {
+        let tmpId = generateId()
+        newCol.id = 'grid-col-' + tmpId
+        newCol.options.name = 'gridCol' + tmpId
+        newCol.options.span = newSpan
+        newCol.options.md = newSpan
+        newCol.options.sm = newSpan
+        newCol.options.xs = newSpan
+        gridCon.cols.push(newCol)
+      }
+    },
+
     copyNewContainerWidget(origin) {
       let newCon = deepClone(origin)
       newCon.id = newCon.type.replace(/-/g, '') + generateId()
       newCon.options.name = newCon.id
       if (newCon.type === 'grid') {
-        let newCol = deepClone( this.getContainerByType('grid-col') )
-        let tmpId = generateId()
-        newCol.id = 'grid-col-' + tmpId
-        newCol.options.name = 'gridCol' + tmpId
-        newCon.cols.push(newCol)
-        //
-        newCol = deepClone(newCol)
-        tmpId = generateId()
-        newCol.id = 'grid-col-' + tmpId
-        newCol.options.name = 'gridCol' + tmpId
-        newCon.cols.push(newCol)
+        // let newCol = deepClone( this.getContainerByType('grid-col') )
+        // let tmpId = generateId()
+        // newCol.id = 'grid-col-' + tmpId
+        // newCol.options.name = 'gridCol' + tmpId
+        // newCon.cols.push(newCol)
+        // //
+        // newCol = deepClone(newCol)
+        // tmpId = generateId()
+        // newCol.id = 'grid-col-' + tmpId
+        // newCol.options.name = 'gridCol' + tmpId
+        // newCon.cols.push(newCol)
+
+        if (newCon.alias === 'column-1-grid') {
+          this.buildColsOfGrid(newCon, 1)
+        } else if (newCon.alias === 'column-2-grid') {
+          this.buildColsOfGrid(newCon, 2)
+        } else if (newCon.alias === 'column-3-grid') {
+          this.buildColsOfGrid(newCon, 3)
+        } else if (newCon.alias === 'column-4-grid') {
+          this.buildColsOfGrid(newCon, 4)
+        }
       } else if (newCon.type === 'table') {
         let newRow = {cols: []}
         newRow.id = 'table-row-' + generateId()
