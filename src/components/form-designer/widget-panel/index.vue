@@ -3,6 +3,56 @@
     <div class="panel-container">
 
     <el-tabs v-model="firstTab" class="no-bottom-margin indent-left-margin">
+
+      <el-tab-pane v-if="false" name="chartLib">
+        <template #label>
+          <span><svg-icon icon-class="el-chart" /> {{i18nt('designer.chartLib')}}</span>
+        </template>
+
+        <el-collapse v-model="activeNames" class="widget-collapse">
+          <el-collapse-item name="1" :title="i18nt('designer.containerTitle')">
+            <!-- 图表组件不支持拖拽添加到画布，必须鼠标双击添加！！ -->
+            <draggable tag="ul" :list="chartContainers" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :clone="handleContainerWidgetClone" ghost-class="ghost" :sort="false" :disabled="true"
+                       :move="checkContainerMove" @end="onContainerDragEnd">
+              <template #item="{ element: ctn }">
+                <li class="chart-container-widget-item" :title="ctn.displayName" @dblclick="addChartContainerByDbClick(ctn)">
+                  <span><svg-icon :icon-class="ctn.icon" class-name="color-svg-icon" />{{getWidgetLabel(ctn)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
+
+          <el-collapse-item name="2" :title="i18nt('designer.chartTitle')">
+            <!-- 图表组件不支持拖拽添加到画布，必须鼠标双击添加！！ -->
+            <draggable tag="ul" :list="chartWidgets" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :move="checkFieldMove" :disabled="true"
+                       :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+              <template #item="{ element: chart }">
+                <li class="chart-widget-item" :title="chart.displayName" @dblclick="addChartByDbClick(chart)">
+                  <span><svg-icon :icon-class="chart.icon" class-name="color-svg-icon" />{{getWidgetLabel(chart)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
+        </el-collapse>
+
+      </el-tab-pane>
+
+      <el-tab-pane v-if="false" name="metadataLib">
+        <template #label>
+          <span><svg-icon icon-class="el-module" /> {{i18nt('designer.metadataLib')}}</span>
+        </template>
+
+        <el-collapse v-model="metadataActiveNames" class="widget-collapse">
+          <el-collapse-item name="1" :title="'主实体'">
+          </el-collapse-item>
+
+          <el-collapse-item name="2" :title="'明细实体'">
+          </el-collapse-item>
+        </el-collapse>
+      </el-tab-pane>
+
       <el-tab-pane name="componentLib">
         <template #label>
           <span><svg-icon icon-class="el-set-up" /> {{i18nt('designer.componentLib')}}</span>
@@ -92,7 +142,8 @@
 
 <script>
   import SvgIcon from '@/components/svg-icon'
-  import {containers as CONS, basicFields as BFS, advancedFields as AFS, customFields as CFS} from "./widgetsConfig"
+  import {containers as CONS, basicFields as BFS, advancedFields as AFS, customFields as CFS, chartContainers as CHART_CONS,
+    chartWidgets as CWS} from "./widgetsConfig"
   import {formTemplates} from './templatesConfig'
   import {addWindowResizeHandler, generateId} from "@/utils/util"
   import i18n, {getLocale} from "@/utils/i18n"
@@ -122,13 +173,17 @@
         designerConfig: this.getDesignerConfig(),
 
         firstTab: 'componentLib',
+        // firstTab: 'chartLib',
 
         activeNames: ['1', '2', '3', '4'],
+        metadataActiveNames: ['1', '2', '3', '4'],
 
         containers: [],
         basicFields: [],
         advancedFields: [],
         customFields: [],
+        chartContainers: [],
+        chartWidgets: [],
 
         formTemplates: formTemplates,
         // ftImages: [
@@ -222,6 +277,26 @@
         }).filter(fld => {
           return !this.isBanned(fld.type)
         })
+
+        this.chartContainers = CHART_CONS.map(con => {
+          return {
+            key: generateId(),
+            ...con,
+            displayName: this.i18n2t(`designer.widgetLabel.${con.type}`, `extension.widgetLabel.${con.type}`)
+          }
+        }).filter(con => {
+          return !con.internal && !this.isBanned(con.type)
+        })
+
+        this.chartWidgets = CWS.map(wgt => {
+          return {
+            key: generateId(),
+            ...wgt,
+            displayName: this.i18n2t(`designer.widgetLabel.${wgt.type}`, `extension.widgetLabel.${wgt.type}`)
+          }
+        }).filter(wgt => {
+          return !this.isBanned(wgt.type)
+        })
       },
 
       handleContainerWidgetClone(origin) {
@@ -253,6 +328,14 @@
 
       addFieldByDbClick(widget) {
         this.designer.addFieldByDbClick(widget)
+      },
+
+      addChartContainerByDbClick(container) {
+        this.designer.addChartContainerByDbClick(container)
+      },
+
+      addChartByDbClick(chart) {
+        this.designer.addChartByDbClick(chart)
       },
 
       loadFormTemplate(jsonUrl, jsonStr) {
@@ -346,7 +429,7 @@
           clear: both;
         }
 
-        .container-widget-item, .field-widget-item {
+        .container-widget-item, .field-widget-item, .chart-container-widget-item, .chart-widget-item {
           //text-align: center; // 居中显示不太美观
           display: inline-block;
           height: 32px;
@@ -364,13 +447,17 @@
           padding: 0 8px;
         }
 
-        .container-widget-item:hover, .field-widget-item:hover {
+        .container-widget-item:hover, .field-widget-item:hover, .chart-container-widget-item:hover, .chart-widget-item:hover {
           background: #F1F2F3;
           border-color: $--color-primary;
 
           .color-svg-icon {
             color: $--color-primary;
           }
+        }
+
+        .chart-container-widget-item, .chart-widget-item {
+          cursor: default !important;
         }
 
         .drag-handler {

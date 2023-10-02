@@ -7,7 +7,13 @@
  */
 
 import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils/util"
-import {containers, advancedFields, basicFields, customFields} from "@/components/form-designer/widget-panel/widgetsConfig.js"
+import {
+  containers,
+  advancedFields,
+  basicFields,
+  customFields,
+  chartContainers, chartWidgets
+} from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
 
@@ -624,7 +630,8 @@ export function createDesigner(vueInstance) {
     },
 
     getContainerByType(typeName) {
-      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields]
+      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields,
+        ...chartContainers, ...chartWidgets]
       let foundCon = null
       allWidgets.forEach(con => {
         if (!!con.category && !!con.type && (con.type === typeName)) {
@@ -636,7 +643,7 @@ export function createDesigner(vueInstance) {
     },
 
     getFieldWidgetByType(typeName) {
-      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields]
+      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields, ...chartContainers, ...chartWidgets]
       let foundWidget = null
       allWidgets.forEach(widget => {
         if (!!!widget.category && !!widget.type && (widget.type === typeName)) {
@@ -901,6 +908,71 @@ export function createDesigner(vueInstance) {
 
       this.setSelected(newWidget)
       this.emitHistoryChange()
+    },
+
+    findDashboardContainer() {
+      if (this.widgetList.length < 1) {
+        console.error('Dashboard container not found')
+        return null
+      }
+
+      let dashboardCon = null
+      this.widgetList.forEach(w => {
+        if (w.type === 'dashboard-container') {
+          dashboardCon = w
+        }
+      })
+
+      if (!dashboardCon) {
+        console.error('Dashboard container not found')
+        return null
+      } else {
+        return dashboardCon
+      }
+    },
+
+    addChartContainerByDbClick(container) {
+      const dbCon = this.findDashboardContainer()
+      if (dbCon) {
+        const newCon = deepClone(container)
+        newCon.id = 'chartCon' + generateId()
+        newCon.options.name = newCon.id
+
+        const ccLayout = {
+          x: newCon.options.x,
+          y: newCon.options.y,
+          w: newCon.options.w,
+          h: newCon.options.h,
+          i: newCon.id
+        }
+        dbCon.options.layout.push(ccLayout)
+        dbCon.widgetList.push(newCon)
+
+        this.setSelected(newCon)
+        this.emitHistoryChange()
+      }
+    },
+
+    addChartByDbClick(chart) {
+      const dbCon = this.findDashboardContainer()
+      if (dbCon) {
+        const newChart = deepClone(chart)
+        newChart.id = 'chart' + generateId()
+        newChart.options.name = newChart.id
+
+        const chartLayout = {
+          x: newChart.options.x,
+          y: newChart.options.y,
+          w: newChart.options.w,
+          h: newChart.options.h,
+          i: newChart.id
+        }
+        dbCon.options.layout.push(chartLayout)
+        dbCon.widgetList.push(newChart)
+
+        this.setSelected(chart)
+        this.emitHistoryChange()
+      }
     },
 
     deleteColOfGrid(gridWidget, colIdx) {

@@ -11,6 +11,8 @@ export default {
   },
 
   designer: {
+    chartLib: 'Charts',
+    metadataLib: 'Data Module',
     componentLib: 'Components',
     formLib: 'Templates',
     containerTitle: 'Container',
@@ -19,6 +21,7 @@ export default {
     basicFieldTitle: 'Basic Field',
     advancedFieldTitle: 'Advanced Field',
     customFieldTitle: 'Customized Field',
+    chartTitle: 'Chart Widget',
 
     noWidgetHint: 'Please select a widget from the left list, drag and drop to this container.',
 

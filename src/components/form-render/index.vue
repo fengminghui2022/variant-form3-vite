@@ -858,6 +858,46 @@
       },
 
       /**
+       * 批量设置字段是否必填
+       * @param widgetNames
+       * @param required true/false
+       */
+      setWidgetsRequired(widgetNames, required) {
+        if (!!widgetNames) {
+          if (typeof widgetNames === 'string') {
+            this.findWidgetAndSetRequired(widgetNames, required)
+          } else if (Array.isArray(widgetNames)) {
+            widgetNames.forEach(wn => {
+              this.findWidgetAndSetRequired(wn, required)
+            })
+          }
+        }
+      },
+
+      findWidgetAndSetRequired(widgetName, required) {
+        let foundW = this.getWidgetRef(widgetName)
+        if (!!foundW && !!foundW.setRequired) {
+          foundW.setRequired(required)
+        } else { //没找到，可能是子表单中的组件
+          this.findWidgetOfSubFormAndSetRequired(widgetName, required)
+        }
+      },
+
+      findWidgetOfSubFormAndSetRequired(widgetName, required) {
+        const widgetSchema = getFieldWidgetByName(this.formJsonObj.widgetList, widgetName, true)
+        if (!!widgetSchema && !!widgetSchema.options && widgetSchema.options.hasOwnProperty('required')) {
+          widgetSchema.options.required = required
+        }
+
+        this.findWidgetNameInSubForm(widgetName).forEach(wn => {
+          let sw = this.getWidgetRef(wn)
+          if (!!sw && !!sw.setRequired) {
+            sw.setRequired(required)
+          }
+        })
+      },
+
+      /**
        * 获取所有字段组件
        * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认不包含
        * @returns {*[]}

@@ -22,7 +22,7 @@ import {
   addContainerWidgetSchema,
   addBasicFieldSchema,
   addAdvancedFieldSchema,
-  addCustomWidgetSchema
+  addCustomWidgetSchema, addChartContainerSchema, addChartSchema
 } from '@/components/form-designer/widget-panel/widgetsConfig'
 import * as PERegister from '@/components/form-designer/setting-panel/propertyRegister'
 import * as PEFactory from '@/components/form-designer/setting-panel/property-editor-factory.jsx'
@@ -32,6 +32,7 @@ import {
 } from '@/utils/sfc-generator'
 
 import i18n, {addENExtensionLang, addZHExtensionLang} from "@/utils/i18n"
+import * as Utils from '@/utils/util'
 import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin"
 import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
@@ -109,6 +110,8 @@ const VFormSDK = {
   addBasicFieldSchema,
   addAdvancedFieldSchema,
   addCustomWidgetSchema,
+  addChartContainerSchema,
+  addChartSchema,
   PERegister,
   PEFactory,
   registerCWGenerator,
@@ -117,6 +120,7 @@ const VFormSDK = {
   addENExtensionLang,
 
   i18n,
+  Utils,
   containerMixin,
   Draggable,
   ContainerWrapper,
