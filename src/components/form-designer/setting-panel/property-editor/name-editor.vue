@@ -50,7 +50,7 @@
       },
 
       widgetNameReadonly() {
-        return !!this.getDesignerConfig().widgetNameReadonly
+        return !!this.getDesignerConfig().widgetNameReadonly || !!this.selectedWidget.nameReadonly
       },
 
     },

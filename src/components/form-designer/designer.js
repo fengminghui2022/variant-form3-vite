@@ -148,13 +148,13 @@ export function createDesigner(vueInstance) {
 
         if (!!evt.to) {
           /* 单行子表单只允许拖入非容器组件！！ */
-          if ((evt.to.className === 'sub-form-table') && (wgCategory === 'container')) {
+          if ((evt.to.className === 'sub-form-drag-drop-zone') && (wgCategory === 'container')) {
             //this.$message.info(this.vueInstance.i18nt('designer.hint.onlyFieldWidgetAcceptable'))
             return false
           }
 
           /* 多行子表单只允许拖入栅格组件！！ */
-          if ((evt.to.className === 'grid-sub-form') && (wgType !== 'grid')) {
+          if ((evt.to.className === 'grid-sub-form-drag-drop-zone') && (wgType !== 'grid')) {
             return false
           }
 
@@ -809,8 +809,11 @@ export function createDesigner(vueInstance) {
       let tempId = generateId()
       newWidget.id = newWidget.type.replace(/-/g, '') + tempId
       //console.log('test id===', newWidget.id)
-      newWidget.options.name = newWidget.id
-      newWidget.options.label = newWidget.options.label || newWidget.type.toLowerCase()
+
+      if (!newWidget.nameReadonly) {
+        newWidget.options.name = newWidget.id
+        newWidget.options.label = newWidget.options.label || newWidget.type.toLowerCase()
+      }
 
       delete newWidget.displayName
       return newWidget

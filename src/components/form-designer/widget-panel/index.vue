@@ -4,7 +4,7 @@
 
     <el-tabs v-model="firstTab" class="no-bottom-margin indent-left-margin">
 
-      <el-tab-pane v-if="false" name="chartLib">
+      <el-tab-pane v-if="showChartLib" name="chartLib">
         <template #label>
           <span><svg-icon icon-class="el-chart" /> {{i18nt('designer.chartLib')}}</span>
         </template>
@@ -39,17 +39,41 @@
 
       </el-tab-pane>
 
-      <el-tab-pane v-if="false" name="metadataLib">
+      <el-tab-pane v-if="showMetadataLib" name="metadataLib">
         <template #label>
           <span><svg-icon icon-class="el-module" /> {{i18nt('designer.metadataLib')}}</span>
         </template>
 
         <el-collapse v-model="metadataActiveNames" class="widget-collapse">
-          <el-collapse-item name="1" :title="'主实体'">
-          </el-collapse-item>
+          <template v-if="metaFields.main.entityName">
+            <el-collapse-item name="1" :title="metaFields.main.entityLabel">
+              <draggable tag="ul" :list="metaFields.main.fieldList" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                         :move="checkFieldMove"
+                         :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+                <template #item="{ element: fld }">
+                  <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                    <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getMetaFieldLabel(fld)}}</span>
+                  </li>
+                </template>
+              </draggable>
+            </el-collapse-item>
+          </template>
 
-          <el-collapse-item name="2" :title="'明细实体'">
-          </el-collapse-item>
+          <template v-if="metaFields.detail && (metaFields.detail.length > 0)">
+            <template v-for="(de, index) in metaFields.detail">
+              <el-collapse-item name="index + 2 + ''" :title="de.entityLabel">
+                <draggable tag="ul" :list="de.fieldList" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                           :move="checkFieldMove"
+                           :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+                  <template #item="{ element: fld }">
+                    <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                      <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getMetaFieldLabel(fld)}}</span>
+                    </li>
+                  </template>
+                </draggable>
+              </el-collapse-item>
+            </template>
+          </template>
         </el-collapse>
       </el-tab-pane>
 
@@ -112,7 +136,7 @@
 
       </el-tab-pane>
 
-      <el-tab-pane v-if="showFormTemplates()" name="formLib" style="padding: 8px">
+      <el-tab-pane v-if="showFormTemplates" name="formLib" style="padding: 8px">
         <template #label>
           <span><svg-icon icon-class="el-form-template" /> {{i18nt('designer.formLib')}}</span>
         </template>
@@ -185,6 +209,36 @@
         chartContainers: [],
         chartWidgets: [],
 
+        metaFields: {
+          main: {
+            entityName: '',
+            entityLabel: '',
+            fieldList: [
+              {
+                type: '',
+                icon: '',
+                displayName: '',
+                options: {},
+              }
+            ]
+          },
+          detail: [
+            {
+              entityName: '',
+              entityLabel: '',
+              fieldList: [
+                {
+                  type: '',
+                  icon: '',
+                  displayName: '',
+                  options: {},
+                }
+              ],
+
+            }
+          ]
+        },
+
         formTemplates: formTemplates,
         // ftImages: [
         //   {imgUrl: ftImg1},
@@ -199,15 +253,51 @@
       }
     },
     computed: {
-      //
+      showFormTemplates() {
+        if (this.designerConfig['formTemplates'] === undefined) {
+          return true
+        }
+
+        return !!this.designerConfig['formTemplates']
+      },
+
+      showChartLib() {
+        if (this.designerConfig['chartLib'] === undefined) {
+          return false
+        }
+
+        return !!this.designerConfig['chartLib']
+      },
+
+      showMetadataLib() {
+        if (this.designerConfig['metadataLib'] === undefined) {
+          return false
+        }
+
+        return !!this.designerConfig['metadataLib']
+      },
+
     },
     created() {
+      if (!!this.designerConfig['chartLib']) {
+        this.firstTab = 'chartLib'
+      }
+
+      // if (!!this.designerConfig['metadataLib']) {
+      //   this.firstTab = 'metadataLib'
+      // }
+
       this.loadWidgets()
     },
     mounted() {
       //
     },
     methods: {
+      getMetaFieldLabel(widget) {
+        const dName = widget.displayName
+        return dName.substring(dName.indexOf('.') + 1, dName.length)
+      },
+
       getWidgetLabel(widget) {
         if (!!widget.alias) {  //优先显示组件别名
           return this.i18n2t(`designer.widgetLabel.${widget.alias}`, `extension.widgetLabel.${widget.alias}`)
@@ -218,14 +308,6 @@
 
       isBanned(wName) {
         return this.getBannedWidgets().indexOf(wName) > -1
-      },
-
-      showFormTemplates() {
-        if (this.designerConfig['formTemplates'] === undefined) {
-          return true
-        }
-
-        return !!this.designerConfig['formTemplates']
       },
 
       getFTTitle(ft) {
@@ -367,6 +449,10 @@
         }).catch(error => {
           console.error(error)
         })
+      },
+
+      setMetaFields(metaFields) {
+        this.metaFields = metaFields
       }
 
     }
