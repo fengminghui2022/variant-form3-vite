@@ -277,6 +277,8 @@ export default {
       addColumn: 'Add Column',
       responsive: 'Responsive',
 
+      tabType: 'Tab Style',
+      tabPosition: 'Position Of Tab',
       tabPaneSetting: 'Tab Panes',
       addTabPane: 'Add Tab Pane',
       paneActive: 'Active',

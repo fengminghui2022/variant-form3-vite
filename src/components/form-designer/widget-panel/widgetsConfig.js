@@ -5,6 +5,7 @@ export const containers = [
     alias: 'column-1-grid',  //组件别名，可以自定义
     category: 'container',
     icon: 'column-1-grid',
+    commonFlag: true,
     cols: [],
     options: {
       name: '',
@@ -20,6 +21,7 @@ export const containers = [
     alias: 'column-2-grid',  //组件别名，可以自定义
     category: 'container',
     icon: 'column-2-grid',
+    commonFlag: true,
     cols: [],
     options: {
       name: '',
@@ -35,6 +37,7 @@ export const containers = [
     alias: 'column-3-grid',  //组件别名，可以自定义
     category: 'container',
     icon: 'column-3-grid',
+    commonFlag: true,
     cols: [],
     options: {
       name: '',
@@ -50,6 +53,7 @@ export const containers = [
     alias: 'column-4-grid',  //组件别名，可以自定义
     category: 'container',
     icon: 'column-4-grid',
+    commonFlag: true,
     cols: [],
     options: {
       name: '',
@@ -76,10 +80,13 @@ export const containers = [
     type: 'tab',
     category: 'container',
     icon: 'tab',
-    displayType: 'border-card',
+    commonFlag: true,
+    //displayType: 'border-card',
     tabs: [],
     options: {
       name: '',
+      tabType: 'border-card',
+      tabPosition: 'top',
       hidden: false,
       customClass: '',  //自定义css类名
       onTabClick: '',  //tab被选中时触发
@@ -90,6 +97,7 @@ export const containers = [
     type: 'sub-form',
     category: 'container',
     icon: 'sub-form',
+    commonFlag: true,
     widgetList: [],
     options: {
       name: '',
@@ -111,6 +119,7 @@ export const containers = [
     type: 'grid-sub-form',
     category: 'container',
     icon: 'grid-sub-form',
+    commonFlag: true,
     widgetList: [],
     options: {
       name: '',

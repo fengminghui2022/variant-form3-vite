@@ -79,6 +79,8 @@ const COMMON_PROPERTIES = {
 
   //容器
   'showBlankRow'       :            'showBlankRow-editor',
+  'tabType'            :            'tabType-editor',
+  'tabPosition'        :            'tabPosition-editor',
   'showRowNumber'      :            'showRowNumber-editor',
   'actionColumnPosition':           'actionColumnPosition-editor',
   'cellWidth'          :            'cellWidth-editor',

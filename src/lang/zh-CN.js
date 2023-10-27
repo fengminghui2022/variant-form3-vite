@@ -277,6 +277,8 @@ export default {
       addColumn: '增加栅格',
       responsive: '响应式布局',
 
+      tabType: '标签样式',
+      tabPosition: '标签位置 ',
       tabPaneSetting: '选项卡设置',
       addTabPane: '增加选项卡页',
       paneActive: '激活',
