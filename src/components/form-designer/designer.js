@@ -146,6 +146,7 @@ export function createDesigner(vueInstance) {
         let wgCategory = evt.draggedContext.element.category
         let wgType = evt.draggedContext.element.type + ''
 
+        //console.log('evt to className: ', evt.to.className)
         if (!!evt.to) {
           /* 单行子表单只允许拖入非容器组件！！ */
           if ((evt.to.className === 'sub-form-drag-drop-zone') && (wgCategory === 'container')) {
@@ -175,8 +176,9 @@ export function createDesigner(vueInstance) {
           }
 
           /* 对象容器不允许拖入子表单、弹窗和抽屉，对象容器自身也不允许嵌套 */
-          if ((evt.to.className === 'object-group') && (wgType === 'object-group' || wgType === 'sub-form' || wgType === 'grid-sub-form'
-              || wgType === 'table-sub-form' || wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
+          if ((evt.to.className === 'object-group-drag-drop-zone') && (wgType === 'object-group' || wgType === 'sub-form'
+              || wgType === 'grid-sub-form' || wgType === 'table-sub-form' || wgType === 'vf-dialog'
+              || wgType === 'vf-drawer')) {
             return false
           }
 
@@ -816,11 +818,13 @@ export function createDesigner(vueInstance) {
       }
 
       delete newWidget.displayName
+      this.emitEvent('canvas-add-field', newWidget.options.name)
+
       return newWidget
     },
 
-    buildColsOfGrid(gridCon, colNum) {
-      const newSpan = 24 / colNum
+    buildColsOfGrid(gridCon, colNum, colSpan) {
+      const newSpan = !!colSpan ? colSpan : 24 / colNum
       for (let i = 0; i < colNum; i++) {
         let newCol = deepClone( this.getContainerByType('grid-col') )
         let tmpId = generateId()
@@ -839,18 +843,6 @@ export function createDesigner(vueInstance) {
       newCon.id = newCon.type.replace(/-/g, '') + generateId()
       newCon.options.name = newCon.id
       if (newCon.type === 'grid') {
-        // let newCol = deepClone( this.getContainerByType('grid-col') )
-        // let tmpId = generateId()
-        // newCol.id = 'grid-col-' + tmpId
-        // newCol.options.name = 'gridCol' + tmpId
-        // newCon.cols.push(newCol)
-        // //
-        // newCol = deepClone(newCol)
-        // tmpId = generateId()
-        // newCol.id = 'grid-col-' + tmpId
-        // newCol.options.name = 'gridCol' + tmpId
-        // newCon.cols.push(newCol)
-
         if (newCon.alias === 'column-1-grid') {
           this.buildColsOfGrid(newCon, 1)
         } else if (newCon.alias === 'column-2-grid') {
@@ -878,10 +870,16 @@ export function createDesigner(vueInstance) {
         newTabPane.options.name = 'tab1'
         newTabPane.options.label = 'tab 1'
         newCon.tabs.push(newTabPane)
+      } else if (newCon.type === 'grid-sub-form') {
+        const col2Grid = deepClone( this.getContainerByType('grid'))
+        col2Grid.id = newCon.type.replace(/-/g, '') + generateId()
+        col2Grid.options.name = col2Grid.id
+        this.buildColsOfGrid(col2Grid, 4, 12)
+        newCon.widgetList.push(col2Grid)
       }
-      //newCon.options.customClass = []
 
       delete newCon.displayName
+      delete newCon.commonFlag
       return newCon
     },
 
@@ -910,6 +908,7 @@ export function createDesigner(vueInstance) {
       }
 
       this.setSelected(newWidget)
+      this.emitEvent('canvas-add-field', newWidget.options.name)
       this.emitHistoryChange()
     },
 
@@ -981,6 +980,30 @@ export function createDesigner(vueInstance) {
     deleteColOfGrid(gridWidget, colIdx) {
       if (!!gridWidget && !!gridWidget.cols) {
         gridWidget.cols.splice(colIdx, 1)
+      }
+    },
+
+    insertNewColOfGrid(gridWidget, colIdx) {
+      const cols = gridWidget.cols
+      let newGridCol = deepClone(this.getContainerByType('grid-col'))
+      let tmpId = generateId()
+      newGridCol.id = 'grid-col-' + tmpId
+      newGridCol.options.name = 'gridCol' + tmpId
+      if ((!!cols) && (cols.length > 0)) {
+        let spanSum = 0
+        cols.forEach((col) => {
+          spanSum += col.options.span
+        })
+
+        if (spanSum >= 24) {
+          console.log('列栅格之和超出24')
+          gridWidget.cols.splice(colIdx + 1, 0, newGridCol)
+        } else {
+          newGridCol.options.span = (24 - spanSum) > 12 ? 12 : (24 - spanSum)
+          gridWidget.cols.splice(colIdx + 1, 0, newGridCol)
+        }
+      } else {
+        gridWidget.cols = [newGridCol]
       }
     },
 

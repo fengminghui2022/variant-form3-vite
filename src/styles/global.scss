@@ -67,7 +67,7 @@ $--color-primary: var(--vf-color-primary, #409EFF);
 }
 
 .readonly-mode-form .el-form-item__content {
-  background-color: #f1f2f3;  /* 只读查看状态-默认底色 */
+  background-color: #f8f8f8;  /* 只读查看状态-默认底色 */
 }
 
 input[type="password"]::-ms-reveal {  /* 隐藏IE/Edge原生的密码查看按钮 */

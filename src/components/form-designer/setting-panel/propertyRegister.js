@@ -64,6 +64,8 @@ const COMMON_PROPERTIES = {
   'fileMaxSize'       :            'fileMaxSize-editor',
   'fileTypes'         :            'fileTypes-editor',
   'contentHeight'     :            'contentHeight-editor',
+  'tabType'            :            'tabType-editor',
+  'tabPosition'        :            'tabPosition-editor',
   'customClass'       :            'customClass-editor',
 	// tree
   'showCheckBox':            				'show-checkbox-editor',
@@ -79,8 +81,6 @@ const COMMON_PROPERTIES = {
 
   //容器
   'showBlankRow'       :            'showBlankRow-editor',
-  'tabType'            :            'tabType-editor',
-  'tabPosition'        :            'tabPosition-editor',
   'showRowNumber'      :            'showRowNumber-editor',
   'actionColumnPosition':           'actionColumnPosition-editor',
   'cellWidth'          :            'cellWidth-editor',

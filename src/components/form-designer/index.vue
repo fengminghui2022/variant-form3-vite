@@ -140,7 +140,8 @@
             languageMenu: true,  //是否显示语言切换菜单
             externalLink: true,  //是否显示GitHub、文档等外部链接
             formTemplates: true,  //是否显示表单模板
-            chartLib: false,  //是否显示图表组件库
+            componentLib: true,  //是否显示组件库
+            chartLib: false,  //是否显示图表库
             metadataLib: false,  //是否显示元数据
             layoutTypeButton: true,  //是否显示表单布局适配按钮组
             eventCollapse: true,  //是否显示组件事件属性折叠面板
@@ -237,6 +238,23 @@
       this.designer.initDesigner( !!this.designerConfig.resetFormJson )
       this.vsCodeFlag = getQueryParam('vscode') == 1
       this.caseName = getQueryParam('case')
+
+      this.designer.handleEvent('canvas-add-field', (fieldWidgetName) => {
+        this.$emit('field-widget-used', fieldWidgetName)
+      })
+      this.designer.handleEvent('canvas-remove-field', (fieldWidgetName) => {
+        this.$emit('field-widget-removed', fieldWidgetName)
+      })
+
+      this.designer.handleEvent('form-json-imported', () => {
+        this.$emit('form-json-updated', 'form-json-imported')
+      })
+      this.designer.handleEvent('canvas-undo', () => {
+        this.$emit('form-json-updated', 'canvas-undo')
+      })
+      this.designer.handleEvent('canvas-redo', () => {
+        this.$emit('form-json-updated', 'canvas-redo')
+      })
     },
     mounted() {
       this.initLocale()
@@ -403,7 +421,6 @@
       clearDesigner() {
         this.$refs.toolbarRef.clearFormWidget()
       },
-
 
       /**
        * 刷新表单设计器

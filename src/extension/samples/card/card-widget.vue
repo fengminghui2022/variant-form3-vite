@@ -4,10 +4,10 @@
     <el-card class="card-container" @click.stop="selectWidget(widget)"
              :shadow="widget.options.shadow" :style="{width: widget.options.cardWidth + '!important' || ''}"
              :class="[selected ? 'selected' : '', !!widget.options.folded ? 'folded' : '', customClass]">
-      <template #header>
-        <div class="clear-fix">
+      <template #header v-if="!widget.options.headerHidden" >
+        <div class="clear-fix" @click="toggleCard">
           <span>{{widget.options.label}}</span>
-          <i v-if="widget.options.showFold" class="float-right" @click="toggleCard">
+          <i v-if="widget.options.showFold" class="float-right" @click.stop="toggleCard">
             <template v-if="!widget.options.folded">
               <el-icon><ArrowDown /></el-icon>
             </template>

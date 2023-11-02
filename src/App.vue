@@ -2,7 +2,11 @@
   <div id="app">
     <VFormDesigner :designer-config="designerConfig"
                    :field-list-data="fieldListData"
-                   :global-dsv="globalDsv" ref="vfdRef">
+                   :global-dsv="globalDsv"
+                   @field-widget-used="handleFWU"
+                   @field-widget-removed="handleFWR"
+                   @form-json-updated="handleFJU"
+                   ref="vfdRef">
       <!--
       <template #customToolButtons>
         <el-button link @click="changeThemePrimaryColor">改色</el-button>
@@ -28,6 +32,11 @@ export default {
 
       designerConfig: {
         //logoHeader: false,
+
+        //chartLib: true,
+        metadataLib: true,
+        //componentLib: false,
+        //layoutTypeButton: false,
       },
 
       /* 集成后端字段名称选择功能--演示 */
@@ -78,6 +87,18 @@ export default {
       bodyElement.style.setProperty("--vf-color-primary", "red");
       bodyElement.style.setProperty("--el-color-primary", "red");
     },
+
+    handleFWU(fwName) {
+      console.error(fwName)
+    },
+
+    handleFWR(fwName) {
+      console.info(fwName)
+    },
+
+    handleFJU(reason) {
+      console.warn('form json updated...', reason)
+    }
 
   }
 }

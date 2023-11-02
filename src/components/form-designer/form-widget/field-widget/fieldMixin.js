@@ -44,6 +44,8 @@ export default {
         this.field.options.optionItems.forEach(oItem => {
           if ((oItem.value === this.fieldModel) || (this.findInArray(this.fieldModel, oItem.value)) !== -1) {
             resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
+          } else if ((oItem.value === this.fieldModel.value) || (this.findInArray(this.fieldModel.value, oItem.value)) !== -1) {
+            resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
           }
         })
 

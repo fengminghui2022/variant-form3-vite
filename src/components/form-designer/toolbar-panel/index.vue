@@ -431,10 +431,12 @@
 
       undoHistory() {
         this.designer.undoHistoryStep()
+        this.designer.emitEvent('canvas-undo', null)
       },
 
       redoHistory() {
         this.designer.redoHistoryStep()
+        this.designer.emitEvent('canvas-redo', null)
       },
 
       changeLayoutType(newType) {
@@ -512,8 +514,6 @@
           this.$message.success(this.i18nt('designer.hint.importJsonSuccess'))
 
           this.designer.emitHistoryChange()
-
-          this.designer.emitEvent('form-json-imported', [])
         } catch(ex) {
           this.$message.error(ex + '')
         }
