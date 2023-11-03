@@ -578,6 +578,7 @@ export function cloneFormConfigWithoutEventHandler(formConfig) {
   newFC.onFormCreated = ''
   newFC.onFormMounted = ''
   newFC.onFormDataChange = ''
+  newFC.onFormValidate = ''
 
   return newFC
 }
@@ -598,10 +599,18 @@ export function translateOptionItems(rawData, widgetType, labelKey, valueKey) {
   let result = []
   if (!!rawData && (rawData.length > 0)) {
     rawData.forEach(ri => {
-      result.push({
-        label: ri[labelKey],
-        value: ri[valueKey]
-      })
+      if (ri.hasOwnProperty('disabled')) {
+        result.push({
+          label: ri[labelKey],
+          value: ri[valueKey],
+          disabled: ri['disabled']
+        })
+      } else {
+        result.push({
+          label: ri[labelKey],
+          value: ri[valueKey]
+        })
+      }
     })
   }
 

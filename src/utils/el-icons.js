@@ -27,6 +27,8 @@ export function registerIcon(app) {
   //全部注册，供图标选择器组件使用
   for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     eleIcons.push(key)
-    app.component(key, component)
+    if (!app.component(key)) {
+      app.component(key, component)
+    }
   }
 }

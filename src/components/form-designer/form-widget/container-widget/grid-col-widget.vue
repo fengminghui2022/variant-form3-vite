@@ -288,9 +288,13 @@
     outline: 1px dashed #336699;
     position: relative;
 
-    .form-widget-list, .drag-drop-zone {
+    .form-widget-list {
       min-height: 28px;
-      //display: inline;
+      display: inline;
+    }
+
+    .drag-drop-zone {
+      min-height: 28px;
     }
 
     .grid-col-action{

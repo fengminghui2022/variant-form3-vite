@@ -14,7 +14,7 @@
 
     <div class="tab-container"
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
-      <el-tabs :type="widget.displayType" v-model="activeTab" @tab-click="onTabClick">
+      <el-tabs :type="tabDisplayType" :tab-position="widget.options.tabPosition" v-model="activeTab" @tab-click="onTabClick">
 
         <el-tab-pane v-for="(tab, index) in widget.tabs" :key="index" :label="tab.options.label" :name="tab.options.name"
                      @click.stop="selectWidget(widget)">
@@ -73,6 +73,10 @@
       }
     },
     computed: {
+      tabDisplayType() {
+        return !this.widget.options.tabType ? 'border-card' : this.widget.options.tabType
+      },
+
       selected() {
         return this.widget.id === this.designer.selectedId
       },

@@ -3,17 +3,17 @@
     <el-card class="card-container" :class="[!!widget.options.folded ? 'folded' : '', customClass]"
              :shadow="widget.options.shadow" :style="{width: widget.options.cardWidth + '!important' || ''}"
              :ref="widget.id" v-show="!widget.options.hidden">
-      <template #header>
-        <div class="clear-fix">
+      <template #header v-if="!widget.options.headerHidden" >
+        <div class="clear-fix" @click="toggleCard">
           <span>{{widget.options.label}}</span>
-          <i v-if="widget.options.showFold" class="float-right" @click="toggleCard">
+          <span v-if="widget.options.showFold" class="float-right" @click.stop="toggleCard">
             <template v-if="!widget.options.folded">
               <el-icon><ArrowDown /></el-icon>
             </template>
             <template v-else>
               <el-icon><ArrowUp /></el-icon>
             </template>
-          </i>
+          </span>
         </div>
       </template>
       <template v-if="!!widget.widgetList && (widget.widgetList.length > 0)">
@@ -93,6 +93,10 @@
     },
     methods: {
       toggleCard() {
+        if (!this.widget.options.showFold) {
+          return
+        }
+
         this.widget.options.folded = !this.widget.options.folded
       },
 

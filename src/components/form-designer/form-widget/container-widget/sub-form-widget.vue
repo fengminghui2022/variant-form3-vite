@@ -17,7 +17,7 @@
       <el-form label-position="top">
         <div class="sub-form-table">
           <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
-                     tag="div" :component-data="{name: 'fade', class: 'drag-drop-zone'}"
+                     tag="div" :component-data="{name: 'fade', class: 'sub-form-drag-drop-zone'}"
                      handle=".drag-handler"
                      @add="(evt) => onSubFormDragAdd(evt, widget.widgetList)"
                      @end="onSubFormDragEnd"
@@ -114,6 +114,10 @@
 
     :deep(.sub-form-table) {
       min-height: 68px;
+
+      .sub-form-drag-drop-zone {
+        min-height: 28px;
+      }
 
       div.sub-form-table-column {
         display: inline-block;

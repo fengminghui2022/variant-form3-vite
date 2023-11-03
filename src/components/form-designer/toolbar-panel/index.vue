@@ -5,7 +5,7 @@
         <svg-icon icon-class="undo" /></el-button>
       <el-button link type="primary" :disabled="redoDisabled" :title="i18nt('designer.toolbar.redoHint')" @click="redoHistory">
         <svg-icon icon-class="redo" /></el-button>
-      <el-button-group style="margin-left: 20px">
+      <el-button-group v-if="showLayoutTypeButton" style="margin-left: 20px">
         <el-button :type="layoutType === 'PC' ? 'info': ''" @click="changeLayoutType('PC')">
           {{i18nt('designer.toolbar.pcLayout')}}</el-button>
         <el-button :type="layoutType === 'Pad' ? 'info': ''" @click="changeLayoutType('Pad')">
@@ -236,7 +236,7 @@
         default: () => ({})
       },
     },
-    inject: ['getDesignerConfig'],
+    inject: ['getDesignerConfig', 'getTestOptionData'],
     data() {
       return {
         formJson: {},
@@ -279,14 +279,6 @@
 
           'select62173': 2,
         },
-        testOptionData: {
-          // 'select62173': [
-          //   {label: '01', value: 1},
-          //   {label: '22', value: 2},
-          //   {label: '333', value: 3},
-          // ]
-
-        },
 
       }
     },
@@ -305,7 +297,19 @@
 
       designerDsv() {
         return this.globalDsv
-      }
+      },
+
+      testOptionData() {
+        return this.getTestOptionData()
+      },
+
+      showLayoutTypeButton() {
+        if (this.designerConfig['layoutTypeButton'] === undefined) {
+          return true
+        }
+
+        return !!this.designerConfig['layoutTypeButton']
+      },
 
     },
     watch: {
@@ -427,10 +431,12 @@
 
       undoHistory() {
         this.designer.undoHistoryStep()
+        this.designer.emitEvent('canvas-undo', null)
       },
 
       redoHistory() {
         this.designer.redoHistoryStep()
+        this.designer.emitEvent('canvas-redo', null)
       },
 
       changeLayoutType(newType) {
@@ -508,8 +514,6 @@
           this.$message.success(this.i18nt('designer.hint.importJsonSuccess'))
 
           this.designer.emitHistoryChange()
-
-          this.designer.emitEvent('form-json-imported', [])
         } catch(ex) {
           this.$message.error(ex + '')
         }

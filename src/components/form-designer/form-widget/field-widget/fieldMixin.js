@@ -44,6 +44,8 @@ export default {
         this.field.options.optionItems.forEach(oItem => {
           if ((oItem.value === this.fieldModel) || (this.findInArray(this.fieldModel, oItem.value)) !== -1) {
             resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
+          } else if ((oItem.value === this.fieldModel.value) || (this.findInArray(this.fieldModel.value, oItem.value)) !== -1) {
+            resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
           }
         })
 
@@ -184,6 +186,33 @@ export default {
           this.handleOnChangeForSubForm(values[0], values[1], subFormData, this.subFormRowId)
         } else {
           this.handleOnChange(values[0], values[1])
+        }
+      })
+
+      this.on$('sync-field-value', (params) => {
+        const pName = params[0], pKeyName = params[1]
+        //if ((this.field.options.name === pName) || !this.field.options.keyName) {
+        if (this.field.options.name === pName) {
+          return
+        }
+
+        if (!pKeyName && (this.field.options.keyName !== pName)) {
+          return
+        }
+
+        if (!this.field.options.keyName && (this.field.options.name !== pKeyName)) {
+          return
+        }
+
+        if (!!this.field.options.keyName && !!pKeyName && (this.field.options.keyName !== pKeyName)) {
+          return
+        }
+
+        const pSubFormName = params[2], pSubFormRowId = params[3], newValue = params[4]
+        if (!this.subFormName && !pSubFormName) {
+          this.setValue(newValue, true)
+        } else if ((this.subFormName === pSubFormName) && (this.subFormRowId === pSubFormRowId)) {
+          this.setValue(newValue, true)
         }
       })
 
@@ -466,6 +495,10 @@ export default {
 
     emitFieldDataChange(newValue, oldValue) {
       this.emit$('field-value-changed', [newValue, oldValue])
+
+      /* 同步更新keyName属性一致的字段组件值！！ */
+      this.broadcast('FieldWidget', 'sync-field-value',
+          [this.field.options.name, this.field.options.keyName, this.subFormName, this.subFormRowId, newValue])
 
       /* 必须用dispatch向指定父组件派发消息！！ */
       this.dispatch('VFormRender', 'fieldChange',

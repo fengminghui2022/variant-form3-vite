@@ -37,7 +37,7 @@
 
     <el-container class="main-content">
       <el-aside v-show="leftAsideVisible" class="side-panel">
-        <widget-panel :designer="designer" />
+        <widget-panel ref="widgetPanelRef" :designer="designer" />
       </el-aside>
 
       <div class="left-aside-toggle-bar" :class="{'aside-hidden': !leftAsideVisible}" @click="toggleLeftAside">
@@ -140,6 +140,10 @@
             languageMenu: true,  //是否显示语言切换菜单
             externalLink: true,  //是否显示GitHub、文档等外部链接
             formTemplates: true,  //是否显示表单模板
+            componentLib: true,  //是否显示组件库
+            chartLib: false,  //是否显示图表库
+            metadataLib: false,  //是否显示元数据
+            layoutTypeButton: true,  //是否显示表单布局适配按钮组
             eventCollapse: true,  //是否显示组件事件属性折叠面板
             widgetNameReadonly: false,  //禁止修改组件名称
 
@@ -175,7 +179,13 @@
       formTemplates: {
         type: Array,
         default: null
-      }
+      },
+
+      /* 设计期间用于测试的选项数据，预览表单时会用到 */
+      testOptionData: {
+        type: Object,
+        default: null
+      },
 
     },
     data() {
@@ -196,6 +206,7 @@
 
         fieldList: [],  //字段名称列表
         subFormList: [],  //子表单名称列表
+        optionData: this.testOptionData,
 
         externalComponents:  {},  //外部组件实例集合
 
@@ -209,6 +220,7 @@
         getServerSubFormList: () => this.subFormList,
         getDesignerConfig: () => this.designerConfig,
         getBannedWidgets: () => this.bannedWidgets,
+        getTestOptionData: () => this.optionData,
       }
     },
     computed: {
@@ -226,6 +238,23 @@
       this.designer.initDesigner( !!this.designerConfig.resetFormJson )
       this.vsCodeFlag = getQueryParam('vscode') == 1
       this.caseName = getQueryParam('case')
+
+      this.designer.handleEvent('canvas-add-field', (fieldWidgetName) => {
+        this.$emit('field-widget-used', fieldWidgetName)
+      })
+      this.designer.handleEvent('canvas-remove-field', (fieldWidgetName) => {
+        this.$emit('field-widget-removed', fieldWidgetName)
+      })
+
+      this.designer.handleEvent('form-json-imported', () => {
+        this.$emit('form-json-updated', 'form-json-imported')
+      })
+      this.designer.handleEvent('canvas-undo', () => {
+        this.$emit('form-json-updated', 'canvas-undo')
+      })
+      this.designer.handleEvent('canvas-redo', () => {
+        this.$emit('form-json-updated', 'canvas-redo')
+      })
     },
     mounted() {
       this.initLocale()
@@ -392,7 +421,6 @@
       clearDesigner() {
         this.$refs.toolbarRef.clearFormWidget()
       },
-
 
       /**
        * 刷新表单设计器
@@ -623,6 +651,20 @@
       toggleRightAside() {
         this.rightAsideVisible =!this.rightAsideVisible
       },
+
+      /*修改主题色*/
+      changePrimaryColor(newColor) {
+        document.documentElement.style.setProperty("--el-color-primary", newColor);
+        document.documentElement.style.setProperty("--vf-color-primary", newColor);
+      },
+
+      setMetaFields(metaFields) {
+        this.$refs.widgetPanelRef.setMetaFields(metaFields)
+      },
+
+      setTestOptionData(optionData) {
+        this.optionData = optionData
+      }
 
       //TODO: 增加更多方法！！
 

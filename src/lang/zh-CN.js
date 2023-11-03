@@ -11,6 +11,8 @@ export default {
   },
 
   designer: {
+    chartLib: '图表',
+    metadataLib: '元数据',
     componentLib: '组件库',
     formLib: '表单模板',
     containerTitle: '容器',
@@ -19,11 +21,16 @@ export default {
     basicFieldTitle: '基础字段',
     advancedFieldTitle: '高级字段',
     customFieldTitle: '自定义扩展字段',
+    chartTitle: '图表组件',
 
     noWidgetHint: '请从左侧列表中选择一个组件, 然后用鼠标拖动组件放置于此处.',
 
     widgetLabel: {
       grid:             '栅格',
+      'column-1-grid':  '单列栅格',
+      'column-2-grid':  '双列栅格',
+      'column-3-grid':  '三列栅格',
+      'column-4-grid':  '四列栅格',
       table:            '表格',
       tab:              '标签页',
       section:          '区块',
@@ -125,7 +132,7 @@ export default {
       noSelectedWidgetHint: '当前没有选中设置的组件',
 
       widgetSetting: '组件设置',
-      formSetting: '表单设置',
+      formSetting: '全局设置',
 
       prompt: '提示',
       confirm: '确定',
@@ -270,6 +277,8 @@ export default {
       addColumn: '增加栅格',
       responsive: '响应式布局',
 
+      tabType: '标签样式',
+      tabPosition: '标签位置 ',
       tabPaneSetting: '选项卡设置',
       addTabPane: '增加选项卡页',
       paneActive: '激活',

@@ -64,6 +64,8 @@ const COMMON_PROPERTIES = {
   'fileMaxSize'       :            'fileMaxSize-editor',
   'fileTypes'         :            'fileTypes-editor',
   'contentHeight'     :            'contentHeight-editor',
+  'tabType'            :            'tabType-editor',
+  'tabPosition'        :            'tabPosition-editor',
   'customClass'       :            'customClass-editor',
 	// tree
   'showCheckBox':            				'show-checkbox-editor',
