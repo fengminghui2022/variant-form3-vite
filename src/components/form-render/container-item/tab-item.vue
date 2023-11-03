@@ -3,7 +3,8 @@
 
     <div class="tab-container"
          v-show="!widget.options.hidden">
-      <el-tabs v-model="activeTabName" :type="widget.displayType" :ref="widget.id" :class="[customClass]"
+      <el-tabs v-model="activeTabName" :type="tabDisplayType" :tab-position="widget.options.tabPosition"
+               :ref="widget.id" :class="[customClass]"
                @tab-click="handleTabClick">
         <el-tab-pane v-for="(tab, index) in visibleTabs" :key="index" :label="tab.options.label"
                      :disabled="tab.options.disabled" :name="tab.options.name">
@@ -75,6 +76,10 @@
       }
     },
     computed: {
+      tabDisplayType() {
+        return !this.widget.options.tabType ? 'border-card' : this.widget.options.tabType
+      },
+
       visibleTabs() {
         return this.widget.tabs.filter(tp => {
           return !tp.options.hidden

@@ -15,6 +15,8 @@
                          class="cell-span-input"></el-input-number>
         <el-button circle plain size="small" type="danger" @click="deleteCol(selectedWidget, colIdx)"
                    icon="el-icon-minus" class="col-delete-button"></el-button>
+        <el-button circle plain size="small" type="warning" @click="insertCol(selectedWidget, colIdx)"
+                   icon="el-icon-plus"></el-button>
       </li>
       <div>
         <el-button link type="primary" @click="addNewCol(selectedWidget)">{{i18nt('designer.setting.addColumn')}}</el-button>
@@ -54,6 +56,11 @@
         this.designer.emitHistoryChange()
       },
 
+      insertCol(curGrid, colIdx) {
+        this.designer.insertNewColOfGrid(curGrid, colIdx)
+        this.designer.emitHistoryChange()
+      },
+
       addNewCol(curGrid) {
         this.designer.addNewColOfGrid(curGrid)
         this.designer.emitHistoryChange()
@@ -71,6 +78,10 @@
       display: inline-block;
       font-size: 13px;
       width: 120px;
+    }
+
+    .cell-span-input {
+      width: 90px;
     }
 
     .col-delete-button {

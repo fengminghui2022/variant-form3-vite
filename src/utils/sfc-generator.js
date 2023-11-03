@@ -703,7 +703,7 @@ const elTemplates = {  //字段组件属性
   },
 
   'html-text': (widget, formConfig) => {
-    return `<div v-html="${widget.options.htmlContent}"></div>`
+    return `<div v-html="'${widget.options.htmlContent}'"></div>`
   },
 
   'button': (widget, formConfig, parentWidget) => {

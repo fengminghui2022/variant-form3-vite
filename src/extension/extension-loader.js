@@ -33,6 +33,9 @@ export const loadExtension = function (app) {
   app.component(CardWidget.name, CardWidget)  //注册设计期的容器组件
   app.component(CardItem.name, CardItem)  //注册运行期的容器组件
   /* -------------------------------------------------- */
+  PERegister.registerCPEditor(app, 'card-headerHidden', 'card-headerHidden-editor',
+      PEFactory.createBooleanEditor('headerHidden', 'extension.setting.headerHidden'))
+
   PERegister.registerCPEditor(app, 'card-folded', 'card-folded-editor',
       PEFactory.createBooleanEditor('folded', 'extension.setting.cardFolded'))
 

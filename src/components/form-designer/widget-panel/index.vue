@@ -3,66 +3,155 @@
     <div class="panel-container">
 
     <el-tabs v-model="firstTab" class="no-bottom-margin indent-left-margin">
-      <el-tab-pane name="componentLib">
+
+      <el-tab-pane v-if="showChartLib" name="chartLib">
+        <template #label>
+          <span><svg-icon icon-class="el-chart" /> {{i18nt('designer.chartLib')}}</span>
+        </template>
+
+        <el-collapse v-model="activeNames" class="widget-collapse">
+          <el-collapse-item name="1" :title="i18nt('designer.containerTitle')">
+            <!-- 图表组件不支持拖拽添加到画布，必须鼠标双击添加！！ -->
+            <draggable tag="ul" :list="chartContainers" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :clone="handleContainerWidgetClone" ghost-class="ghost" :sort="false" :disabled="true"
+                       :move="checkContainerMove" @end="onContainerDragEnd">
+              <template #item="{ element: ctn }">
+                <li class="chart-container-widget-item" :title="ctn.displayName" @dblclick="addChartContainerByDbClick(ctn)">
+                  <span><svg-icon :icon-class="ctn.icon" class-name="color-svg-icon" />{{getWidgetLabel(ctn)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
+
+          <el-collapse-item name="2" :title="i18nt('designer.chartTitle')">
+            <!-- 图表组件不支持拖拽添加到画布，必须鼠标双击添加！！ -->
+            <draggable tag="ul" :list="chartWidgets" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :move="checkFieldMove" :disabled="true"
+                       :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+              <template #item="{ element: chart }">
+                <li class="chart-widget-item" :title="chart.displayName" @dblclick="addChartByDbClick(chart)">
+                  <div class="svg-icon-label">
+                    <svg-icon :icon-class="chart.icon" class-name="color-svg-icon" />
+                    <span class="chart-widget-item__label">{{getWidgetLabel(chart)}}</span>
+                  </div>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
+        </el-collapse>
+
+      </el-tab-pane>
+
+      <el-tab-pane v-if="showMetadataLib" name="metadataLib">
+        <template #label>
+          <span><svg-icon icon-class="el-module" /> {{i18nt('designer.metadataLib')}}</span>
+        </template>
+
+        <el-collapse v-model="metadataActiveNames" class="widget-collapse">
+          <el-collapse-item name="0" :title="i18nt('designer.containerTitle')">
+            <draggable tag="ul" :list="commonContainers" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :clone="handleContainerWidgetClone" ghost-class="ghost" :sort="false"
+                       :move="checkContainerMove" @end="onContainerDragEnd">
+              <template #item="{ element: ctn }">
+                <li class="container-widget-item" :title="ctn.displayName" @dblclick="addContainerByDbClick(ctn)">
+                  <span><svg-icon :icon-class="ctn.icon" class-name="color-svg-icon" />{{getWidgetLabel(ctn)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
+
+          <template v-if="metaFields.main.entityName">
+            <el-collapse-item name="1" :title="metaFields.main.entityLabel">
+              <draggable tag="ul" :list="metaFields.main.fieldList" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                         :move="checkFieldMove"
+                         :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+                <template #item="{ element: fld }">
+                  <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                    <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getMetaFieldLabel(fld)}}</span>
+                  </li>
+                </template>
+              </draggable>
+            </el-collapse-item>
+          </template>
+
+          <template v-if="metaFields.detail && (metaFields.detail.length > 0)">
+            <template v-for="(de, index) in metaFields.detail">
+              <el-collapse-item name="index + 2 + ''" :title="de.entityLabel">
+                <draggable tag="ul" :list="de.fieldList" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                           :move="checkFieldMove"
+                           :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+                  <template #item="{ element: fld }">
+                    <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                      <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getMetaFieldLabel(fld)}}</span>
+                    </li>
+                  </template>
+                </draggable>
+              </el-collapse-item>
+            </template>
+          </template>
+        </el-collapse>
+      </el-tab-pane>
+
+      <el-tab-pane v-if="showComponentLib" name="componentLib">
         <template #label>
           <span><svg-icon icon-class="el-set-up" /> {{i18nt('designer.componentLib')}}</span>
         </template>
 
-      <el-collapse v-model="activeNames" class="widget-collapse">
-        <el-collapse-item name="1" :title="i18nt('designer.containerTitle')">
-          <draggable tag="ul" :list="containers" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
-                     :clone="handleContainerWidgetClone" ghost-class="ghost" :sort="false"
-                     :move="checkContainerMove" @end="onContainerDragEnd">
-            <template #item="{ element: ctn }">
-              <li class="container-widget-item" :title="ctn.displayName" @dblclick="addContainerByDbClick(ctn)">
-                <span><svg-icon :icon-class="ctn.icon" class-name="color-svg-icon" />{{getWidgetLabel(ctn)}}</span>
-              </li>
-            </template>
-          </draggable>
-        </el-collapse-item>
+        <el-collapse v-model="activeNames" class="widget-collapse">
+          <el-collapse-item name="1" :title="i18nt('designer.containerTitle')">
+            <draggable tag="ul" :list="containers" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :clone="handleContainerWidgetClone" ghost-class="ghost" :sort="false"
+                       :move="checkContainerMove" @end="onContainerDragEnd">
+              <template #item="{ element: ctn }">
+                <li class="container-widget-item" :title="ctn.displayName" @dblclick="addContainerByDbClick(ctn)">
+                  <span><svg-icon :icon-class="ctn.icon" class-name="color-svg-icon" />{{getWidgetLabel(ctn)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
 
-        <el-collapse-item name="2" :title="i18nt('designer.basicFieldTitle')">
-          <draggable tag="ul" :list="basicFields" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
-                     :move="checkFieldMove"
-                     :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
-            <template #item="{ element: fld }">
-              <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
-                <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getWidgetLabel(fld)}}</span>
-              </li>
-            </template>
-          </draggable>
-        </el-collapse-item>
+          <el-collapse-item name="2" :title="i18nt('designer.basicFieldTitle')">
+            <draggable tag="ul" :list="basicFields" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :move="checkFieldMove"
+                       :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+              <template #item="{ element: fld }">
+                <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                  <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getWidgetLabel(fld)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
 
-        <el-collapse-item name="3" :title="i18nt('designer.advancedFieldTitle')">
-          <draggable tag="ul" :list="advancedFields" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
-                     :move="checkFieldMove"
-                     :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
-            <template #item="{ element: fld }">
-              <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
-                <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getWidgetLabel(fld)}}</span>
-              </li>
-            </template>
-          </draggable>
-        </el-collapse-item>
+          <el-collapse-item name="3" :title="i18nt('designer.advancedFieldTitle')">
+            <draggable tag="ul" :list="advancedFields" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :move="checkFieldMove"
+                       :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+              <template #item="{ element: fld }">
+                <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                  <span><svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getWidgetLabel(fld)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
 
-        <el-collapse-item name="4" :title="i18nt('designer.customFieldTitle')">
-          <draggable tag="ul" :list="customFields" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
-                     :move="checkFieldMove"
-                     :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
-            <template #item="{ element: fld }">
-              <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
-                <span>
-                  <svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getWidgetLabel(fld)}}</span>
-              </li>
-            </template>
-          </draggable>
-        </el-collapse-item>
+          <el-collapse-item name="4" :title="i18nt('designer.customFieldTitle')">
+            <draggable tag="ul" :list="customFields" item-key="key" :group="{name: 'dragGroup', pull: 'clone', put: false}"
+                       :move="checkFieldMove"
+                       :clone="handleFieldWidgetClone" ghost-class="ghost" :sort="false">
+              <template #item="{ element: fld }">
+                <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
+                  <span>
+                    <svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{getWidgetLabel(fld)}}</span>
+                </li>
+              </template>
+            </draggable>
+          </el-collapse-item>
 
-      </el-collapse>
+        </el-collapse>
 
       </el-tab-pane>
 
-      <el-tab-pane v-if="showFormTemplates()" name="formLib" style="padding: 8px">
+      <el-tab-pane v-if="showFormTemplates" name="formLib" style="padding: 8px">
         <template #label>
           <span><svg-icon icon-class="el-form-template" /> {{i18nt('designer.formLib')}}</span>
         </template>
@@ -92,7 +181,8 @@
 
 <script>
   import SvgIcon from '@/components/svg-icon'
-  import {containers as CONS, basicFields as BFS, advancedFields as AFS, customFields as CFS} from "./widgetsConfig"
+  import {containers as CONS, basicFields as BFS, advancedFields as AFS, customFields as CFS, chartContainers as CHART_CONS,
+    chartWidgets as CWS} from "./widgetsConfig"
   import {formTemplates} from './templatesConfig'
   import {addWindowResizeHandler, generateId} from "@/utils/util"
   import i18n, {getLocale} from "@/utils/i18n"
@@ -122,13 +212,46 @@
         designerConfig: this.getDesignerConfig(),
 
         firstTab: 'componentLib',
-
         activeNames: ['1', '2', '3', '4'],
+        metadataActiveNames: ['0', '1', '2', '3', '4'],
 
         containers: [],
+        commonContainers: [],
         basicFields: [],
         advancedFields: [],
         customFields: [],
+        chartContainers: [],
+        chartWidgets: [],
+
+        metaFields: {
+          main: {
+            entityName: '',
+            entityLabel: '',
+            fieldList: [
+              {
+                type: '',
+                icon: '',
+                displayName: '',
+                options: {},
+              }
+            ]
+          },
+          detail: [
+            {
+              entityName: '',
+              entityLabel: '',
+              fieldList: [
+                {
+                  type: '',
+                  icon: '',
+                  displayName: '',
+                  options: {},
+                }
+              ],
+
+            }
+          ]
+        },
 
         formTemplates: formTemplates,
         // ftImages: [
@@ -144,15 +267,59 @@
       }
     },
     computed: {
-      //
+      showComponentLib() {
+        if (this.designerConfig['componentLib'] === undefined) {
+          return true
+        }
+
+        return !!this.designerConfig['componentLib']
+      },
+
+      showFormTemplates() {
+        if (this.designerConfig['formTemplates'] === undefined) {
+          return true
+        }
+
+        return !!this.designerConfig['formTemplates']
+      },
+
+      showChartLib() {
+        if (this.designerConfig['chartLib'] === undefined) {
+          return false
+        }
+
+        return !!this.designerConfig['chartLib']
+      },
+
+      showMetadataLib() {
+        if (this.designerConfig['metadataLib'] === undefined) {
+          return false
+        }
+
+        return !!this.designerConfig['metadataLib']
+      },
+
     },
     created() {
+      if (!!this.designerConfig['chartLib']) {
+        this.firstTab = 'chartLib'
+      }
+
+      if (!!this.designerConfig['metadataLib']) {
+        this.firstTab = 'metadataLib'
+      }
+
       this.loadWidgets()
     },
     mounted() {
       //
     },
     methods: {
+      getMetaFieldLabel(widget) {
+        const dName = widget.displayName
+        return dName.substring(dName.indexOf('.') + 1, dName.length)
+      },
+
       getWidgetLabel(widget) {
         if (!!widget.alias) {  //优先显示组件别名
           return this.i18n2t(`designer.widgetLabel.${widget.alias}`, `extension.widgetLabel.${widget.alias}`)
@@ -163,14 +330,6 @@
 
       isBanned(wName) {
         return this.getBannedWidgets().indexOf(wName) > -1
-      },
-
-      showFormTemplates() {
-        if (this.designerConfig['formTemplates'] === undefined) {
-          return true
-        }
-
-        return !!this.designerConfig['formTemplates']
       },
 
       getFTTitle(ft) {
@@ -192,6 +351,8 @@
         }).filter(con => {
           return !con.internal && !this.isBanned(con.type)
         })
+
+        this.commonContainers = this.containers.filter(con => !!con.commonFlag)
 
         this.basicFields = BFS.map(fld => {
           return {
@@ -221,6 +382,26 @@
           }
         }).filter(fld => {
           return !this.isBanned(fld.type)
+        })
+
+        this.chartContainers = CHART_CONS.map(con => {
+          return {
+            key: generateId(),
+            ...con,
+            displayName: this.i18n2t(`designer.widgetLabel.${con.type}`, `extension.widgetLabel.${con.type}`)
+          }
+        }).filter(con => {
+          return !con.internal && !this.isBanned(con.type)
+        })
+
+        this.chartWidgets = CWS.map(wgt => {
+          return {
+            key: generateId(),
+            ...wgt,
+            displayName: this.i18n2t(`designer.widgetLabel.${wgt.type}`, `extension.widgetLabel.${wgt.type}`)
+          }
+        }).filter(wgt => {
+          return !this.isBanned(wgt.type)
         })
       },
 
@@ -255,6 +436,14 @@
         this.designer.addFieldByDbClick(widget)
       },
 
+      addChartContainerByDbClick(container) {
+        this.designer.addChartContainerByDbClick(container)
+      },
+
+      addChartByDbClick(chart) {
+        this.designer.addChartByDbClick(chart)
+      },
+
       loadFormTemplate(jsonUrl, jsonStr) {
         this.$confirm(this.i18nt('designer.hint.loadFormTemplateHint'), this.i18nt('render.hint.prompt'), {
           confirmButtonText: this.i18nt('render.hint.confirm'),
@@ -284,6 +473,10 @@
         }).catch(error => {
           console.error(error)
         })
+      },
+
+      setMetaFields(metaFields) {
+        this.metaFields = metaFields
       }
 
     }
@@ -346,7 +539,7 @@
           clear: both;
         }
 
-        .container-widget-item, .field-widget-item {
+        .container-widget-item, .field-widget-item, .chart-container-widget-item, .chart-widget-item {
           //text-align: center; // 居中显示不太美观
           display: inline-block;
           height: 32px;
@@ -364,13 +557,17 @@
           padding: 0 8px;
         }
 
-        .container-widget-item:hover, .field-widget-item:hover {
+        .container-widget-item:hover, .field-widget-item:hover, .chart-container-widget-item:hover, .chart-widget-item:hover {
           background: #F1F2F3;
           border-color: $--color-primary;
 
           .color-svg-icon {
             color: $--color-primary;
           }
+        }
+
+        .chart-container-widget-item, .chart-widget-item {
+          cursor: default !important;
         }
 
         .drag-handler {

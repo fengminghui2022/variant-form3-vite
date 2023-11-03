@@ -6,13 +6,13 @@
           <svg-icon icon-class="el-info" /></el-tooltip>
       </span>
     </template>
-    <template v-if="!!selectedWidget.category || noFieldList">
+    <template v-if="noSubFormList">
       <el-input type="text" v-model="optionModel.name" :readonly="widgetNameReadonly" @change="updateWidgetNameAndRef"></el-input>
     </template>
     <template v-else>
       <el-select v-model="optionModel.name" allow-create filterable :disabled="widgetNameReadonly" @change="updateWidgetNameAndRef"
                  :title="i18nt('designer.setting.editNameHelp')">
-        <el-option v-for="(sf, sfIdx) in serverFieldList" :key="sfIdx" :label="sf.label" :value="sf.name"></el-option>
+        <el-option v-for="(sf, sfIdx) in serverSubFormList" :key="sfIdx" :label="sf.label" :value="sf.name"></el-option>
       </el-select>
     </template>
   </el-form-item>
@@ -24,7 +24,7 @@
   import {isEmptyStr} from "@/utils/util"
 
   export default {
-    name: "name-editor",
+    name: "sub-form-name-editor",
     mixins: [i18n],
     components: {
       SvgIcon
@@ -34,23 +34,23 @@
       selectedWidget: Object,
       optionModel: Object,
     },
-    inject: ['getServerFieldList', 'getDesignerConfig'],
+    inject: ['getServerSubFormList', 'getDesignerConfig'],
     data() {
       return {
         nameRequiredRule: [{required: true, message: 'name required'}],
       }
     },
     computed: {
-      serverFieldList() {
-        return this.getServerFieldList()
+      serverSubFormList() {
+        return this.getServerSubFormList()
       },
 
-      noFieldList() {
-        return !this.serverFieldList || (this.serverFieldList.length <= 0)
+      noSubFormList() {
+        return !this.serverSubFormList || (this.serverSubFormList.length <= 0)
       },
 
       widgetNameReadonly() {
-        return !!this.getDesignerConfig().widgetNameReadonly || !!this.selectedWidget.nameReadonly
+        return !!this.getDesignerConfig().widgetNameReadonly
       },
 
     },
@@ -81,9 +81,9 @@
       },
 
       getLabelByFieldName(fieldName) {
-        for (let i = 0; i < this.serverFieldList.length; i++) {
-          if (this.serverFieldList[i].name === fieldName) {
-            return this.serverFieldList[i].label
+        for (let i = 0; i < this.serverSubFormList.length; i++) {
+          if (this.serverSubFormList[i].name === fieldName) {
+            return this.serverSubFormList[i].label
           }
         }
 

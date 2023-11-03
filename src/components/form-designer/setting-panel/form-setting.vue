@@ -76,12 +76,12 @@
               {{i18nt('designer.setting.addEventHandler')}}</el-button>
           </el-form-item>
           <!-- -->
-          <!--
-          <el-form-item label="onFormValidate">
-            <el-button type="info" icon="el-icon-edit" plain round @click="editFormEventHandler('onFormValidate')">
+          <el-form-item label="onFormValidate" label-width="150px">
+            <el-button type="info" icon="el-icon-edit" plain round
+                       :class="[getFormEventHandled('onFormValidate') ? 'button-text-highlight' : '']"
+                       @click="editFormEventHandler('onFormValidate')">
               {{i18nt('designer.setting.addEventHandler')}}</el-button>
           </el-form-item>
-          -->
         </el-collapse-item>
       </el-collapse>
     </el-form>
@@ -184,7 +184,7 @@
           'onFormCreated':      'onFormCreated() {',
           'onFormMounted':      'onFormMounted() {',
           'onFormDataChange':   'onFormDataChange(fieldName, newValue, oldValue, formModel, subFormName, subFormRowIndex) {',
-          //'onFormValidate':     'onFormValidate() {',
+          'onFormValidate':     'onFormValidate(formModel) {',
         },
 
       }

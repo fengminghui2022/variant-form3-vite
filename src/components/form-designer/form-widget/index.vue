@@ -9,8 +9,8 @@
       </template>
 
       <div class="form-widget-canvas">
-        <draggable :list="designer.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 300}"
-                   tag="transition-group" :component-data="{name: 'fade'}"
+        <draggable :list="designer.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
+                   tag="div" :component-data="{name: 'fade', class: 'canvas-drag-drop-zone'}"
                    handle=".drag-handler" @end="onDragEnd" @add="onDragAdd" @update="onDragUpdate" :move="checkMove">
           <template #item="{ element: widget, index }">
             <div class="transition-group-el">
@@ -241,8 +241,11 @@
       }
 
       .form-widget-canvas {
-        //min-height: calc(100vh - 56px - 68px + 48px);
         padding: 3px;
+
+        div.canvas-drag-drop-zone {
+          height: 100%;
+        }
       }
     }
 

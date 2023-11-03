@@ -267,7 +267,9 @@
         let newSubFormDataRow = {}
         this.fieldWidgetList.forEach(subFormItem => {
           if (!!subFormItem.formItemFlag) {
-            newSubFormDataRow[subFormItem.options.name] = subFormItem.options.defaultValue
+            let fieldKeyName = subFormItem.options.name
+            fieldKeyName = subFormItem.options.keyNameEnabled ? (subFormItem.options.keyName || fieldKeyName) : fieldKeyName
+            newSubFormDataRow[fieldKeyName] = subFormItem.options.defaultValue
           }
         })
 
@@ -287,7 +289,9 @@
         let newSubFormDataRow = {}
         this.fieldWidgetList.forEach(subFormItem => {
           if (!!subFormItem.formItemFlag) {
-            newSubFormDataRow[subFormItem.options.name] = subFormItem.options.defaultValue
+            let fieldKeyName = subFormItem.options.name
+            fieldKeyName = subFormItem.options.keyNameEnabled ? (subFormItem.options.keyName || fieldKeyName) : fieldKeyName
+            newSubFormDataRow[fieldKeyName] = subFormItem.options.defaultValue
           }
         })
 

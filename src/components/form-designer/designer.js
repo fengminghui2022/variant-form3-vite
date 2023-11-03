@@ -7,7 +7,13 @@
  */
 
 import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils/util"
-import {containers, advancedFields, basicFields, customFields} from "@/components/form-designer/widget-panel/widgetsConfig.js"
+import {
+  containers,
+  advancedFields,
+  basicFields,
+  customFields,
+  chartContainers, chartWidgets
+} from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
 
@@ -37,12 +43,12 @@ export function createDesigner(vueInstance) {
       this.widgetList = []
       this.formConfig = deepClone(defaultFormConfig)
 
-      //输出版本信息和语雀链接
-      console.info(`%cVariantForm %cVer${VARIANT_FORM_VERSION} %chttps://www.yuque.com/visualdev/vform3`,
-          "color:#409EFF;font-size: 22px;font-weight:bolder",
-          "color:#999;font-size: 12px",
-          "color:#333"
-      )
+      // //输出版本信息和语雀链接
+      // console.info(`%cVariantForm %cVer${VARIANT_FORM_VERSION} %chttps://www.yuque.com/visualdev/vform3`,
+      //     "color:#409EFF;font-size: 22px;font-weight:bolder",
+      //     "color:#999;font-size: 12px",
+      //     "color:#333"
+      // )
 
       if (!resetFormJson) {
         this.initHistoryData()
@@ -140,15 +146,16 @@ export function createDesigner(vueInstance) {
         let wgCategory = evt.draggedContext.element.category
         let wgType = evt.draggedContext.element.type + ''
 
+        //console.log('evt to className: ', evt.to.className)
         if (!!evt.to) {
           /* 单行子表单只允许拖入非容器组件！！ */
-          if ((evt.to.className === 'sub-form-table') && (wgCategory === 'container')) {
+          if ((evt.to.className === 'sub-form-drag-drop-zone') && (wgCategory === 'container')) {
             //this.$message.info(this.vueInstance.i18nt('designer.hint.onlyFieldWidgetAcceptable'))
             return false
           }
 
           /* 多行子表单只允许拖入栅格组件！！ */
-          if ((evt.to.className === 'grid-sub-form') && (wgType !== 'grid')) {
+          if ((evt.to.className === 'grid-sub-form-drag-drop-zone') && (wgType !== 'grid')) {
             return false
           }
 
@@ -163,13 +170,15 @@ export function createDesigner(vueInstance) {
           }
 
           /* 弹窗、抽屉只允许拖入设计器画布第一层！！ */
-          if ((evt.to.className !== 'form-widget-canvas') && (wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
+          if ((evt.to.className !== 'form-widget-canvas') && (evt.to.className !== 'canvas-drag-drop-zone')
+              && (wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
             return false
           }
 
           /* 对象容器不允许拖入子表单、弹窗和抽屉，对象容器自身也不允许嵌套 */
-          if ((evt.to.className === 'object-group') && (wgType === 'object-group' || wgType === 'sub-form' || wgType === 'grid-sub-form'
-              || wgType === 'table-sub-form' || wgType === 'vf-dialog' || wgType === 'vf-drawer')) {
+          if ((evt.to.className === 'object-group-drag-drop-zone') && (wgType === 'object-group' || wgType === 'sub-form'
+              || wgType === 'grid-sub-form' || wgType === 'table-sub-form' || wgType === 'vf-dialog'
+              || wgType === 'vf-drawer')) {
             return false
           }
 
@@ -623,7 +632,8 @@ export function createDesigner(vueInstance) {
     },
 
     getContainerByType(typeName) {
-      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields]
+      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields,
+        ...chartContainers, ...chartWidgets]
       let foundCon = null
       allWidgets.forEach(con => {
         if (!!con.category && !!con.type && (con.type === typeName)) {
@@ -635,7 +645,7 @@ export function createDesigner(vueInstance) {
     },
 
     getFieldWidgetByType(typeName) {
-      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields]
+      let allWidgets = [...containers, ...basicFields, ...advancedFields, ...customFields, ...chartContainers, ...chartWidgets]
       let foundWidget = null
       allWidgets.forEach(widget => {
         if (!!!widget.category && !!widget.type && (widget.type === typeName)) {
@@ -801,11 +811,31 @@ export function createDesigner(vueInstance) {
       let tempId = generateId()
       newWidget.id = newWidget.type.replace(/-/g, '') + tempId
       //console.log('test id===', newWidget.id)
-      newWidget.options.name = newWidget.id
-      newWidget.options.label = newWidget.options.label || newWidget.type.toLowerCase()
+
+      if (!newWidget.nameReadonly) {
+        newWidget.options.name = newWidget.id
+        newWidget.options.label = newWidget.options.label || newWidget.type.toLowerCase()
+      }
 
       delete newWidget.displayName
+      this.emitEvent('canvas-add-field', newWidget.options.name)
+
       return newWidget
+    },
+
+    buildColsOfGrid(gridCon, colNum, colSpan) {
+      const newSpan = !!colSpan ? colSpan : 24 / colNum
+      for (let i = 0; i < colNum; i++) {
+        let newCol = deepClone( this.getContainerByType('grid-col') )
+        let tmpId = generateId()
+        newCol.id = 'grid-col-' + tmpId
+        newCol.options.name = 'gridCol' + tmpId
+        newCol.options.span = newSpan
+        newCol.options.md = newSpan
+        newCol.options.sm = newSpan
+        newCol.options.xs = newSpan
+        gridCon.cols.push(newCol)
+      }
     },
 
     copyNewContainerWidget(origin) {
@@ -813,17 +843,15 @@ export function createDesigner(vueInstance) {
       newCon.id = newCon.type.replace(/-/g, '') + generateId()
       newCon.options.name = newCon.id
       if (newCon.type === 'grid') {
-        let newCol = deepClone( this.getContainerByType('grid-col') )
-        let tmpId = generateId()
-        newCol.id = 'grid-col-' + tmpId
-        newCol.options.name = 'gridCol' + tmpId
-        newCon.cols.push(newCol)
-        //
-        newCol = deepClone(newCol)
-        tmpId = generateId()
-        newCol.id = 'grid-col-' + tmpId
-        newCol.options.name = 'gridCol' + tmpId
-        newCon.cols.push(newCol)
+        if (newCon.alias === 'column-1-grid') {
+          this.buildColsOfGrid(newCon, 1)
+        } else if (newCon.alias === 'column-2-grid') {
+          this.buildColsOfGrid(newCon, 2)
+        } else if (newCon.alias === 'column-3-grid') {
+          this.buildColsOfGrid(newCon, 3)
+        } else if (newCon.alias === 'column-4-grid') {
+          this.buildColsOfGrid(newCon, 4)
+        }
       } else if (newCon.type === 'table') {
         let newRow = {cols: []}
         newRow.id = 'table-row-' + generateId()
@@ -842,10 +870,16 @@ export function createDesigner(vueInstance) {
         newTabPane.options.name = 'tab1'
         newTabPane.options.label = 'tab 1'
         newCon.tabs.push(newTabPane)
+      } else if (newCon.type === 'grid-sub-form') {
+        const col2Grid = deepClone( this.getContainerByType('grid'))
+        col2Grid.id = newCon.type.replace(/-/g, '') + generateId()
+        col2Grid.options.name = col2Grid.id
+        this.buildColsOfGrid(col2Grid, 4, 12)
+        newCon.widgetList.push(col2Grid)
       }
-      //newCon.options.customClass = []
 
       delete newCon.displayName
+      delete newCon.commonFlag
       return newCon
     },
 
@@ -874,12 +908,102 @@ export function createDesigner(vueInstance) {
       }
 
       this.setSelected(newWidget)
+      this.emitEvent('canvas-add-field', newWidget.options.name)
       this.emitHistoryChange()
+    },
+
+    findDashboardContainer() {
+      if (this.widgetList.length < 1) {
+        console.error('Dashboard container not found')
+        return null
+      }
+
+      let dashboardCon = null
+      this.widgetList.forEach(w => {
+        if (w.type === 'dashboard-container') {
+          dashboardCon = w
+        }
+      })
+
+      if (!dashboardCon) {
+        console.error('Dashboard container not found')
+        return null
+      } else {
+        return dashboardCon
+      }
+    },
+
+    addChartContainerByDbClick(container) {
+      const dbCon = this.findDashboardContainer()
+      if (dbCon) {
+        const newCon = deepClone(container)
+        newCon.id = 'chartCon' + generateId()
+        newCon.options.name = newCon.id
+
+        const ccLayout = {
+          x: newCon.options.x,
+          y: newCon.options.y,
+          w: newCon.options.w,
+          h: newCon.options.h,
+          i: newCon.id
+        }
+        dbCon.options.layout.push(ccLayout)
+        dbCon.widgetList.push(newCon)
+
+        this.setSelected(newCon)
+        this.emitHistoryChange()
+      }
+    },
+
+    addChartByDbClick(chart) {
+      const dbCon = this.findDashboardContainer()
+      if (dbCon) {
+        const newChart = deepClone(chart)
+        newChart.id = 'chart' + generateId()
+        newChart.options.name = newChart.id
+
+        const chartLayout = {
+          x: newChart.options.x,
+          y: newChart.options.y,
+          w: newChart.options.w,
+          h: newChart.options.h,
+          i: newChart.id
+        }
+        dbCon.options.layout.push(chartLayout)
+        dbCon.widgetList.push(newChart)
+
+        this.setSelected(chart)
+        this.emitHistoryChange()
+      }
     },
 
     deleteColOfGrid(gridWidget, colIdx) {
       if (!!gridWidget && !!gridWidget.cols) {
         gridWidget.cols.splice(colIdx, 1)
+      }
+    },
+
+    insertNewColOfGrid(gridWidget, colIdx) {
+      const cols = gridWidget.cols
+      let newGridCol = deepClone(this.getContainerByType('grid-col'))
+      let tmpId = generateId()
+      newGridCol.id = 'grid-col-' + tmpId
+      newGridCol.options.name = 'gridCol' + tmpId
+      if ((!!cols) && (cols.length > 0)) {
+        let spanSum = 0
+        cols.forEach((col) => {
+          spanSum += col.options.span
+        })
+
+        if (spanSum >= 24) {
+          console.log('列栅格之和超出24')
+          gridWidget.cols.splice(colIdx + 1, 0, newGridCol)
+        } else {
+          newGridCol.options.span = (24 - spanSum) > 12 ? 12 : (24 - spanSum)
+          gridWidget.cols.splice(colIdx + 1, 0, newGridCol)
+        }
+      } else {
+        gridWidget.cols = [newGridCol]
       }
     },
 

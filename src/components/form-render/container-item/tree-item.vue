@@ -74,7 +74,8 @@
 				loadingFlag: false,
 				defaultProps: {
 					children: 'children',
-					label: 'label'
+					label: 'label',
+					disabled: this.isDisabled
 				}
 			};
 		},
@@ -123,6 +124,11 @@
       this.unregisterFromRefList()
     },
     methods: {
+			//全部节点是否禁用
+			isDisabled() {
+				return this.widget.options.disabled
+			},
+
 			// 给当前节点添加下级节点
 			append(data) {
 				this.$prompt(this.i18nt('designer.setting.inputNodeName'),

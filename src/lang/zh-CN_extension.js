@@ -6,6 +6,7 @@ export default {
     },
 
     setting: {
+      headerHidden: '隐藏标题区',
       cardFolded: '是否收起',
       cardShowFold: '显示折叠按钮',
       cardWidth: '卡片宽度',

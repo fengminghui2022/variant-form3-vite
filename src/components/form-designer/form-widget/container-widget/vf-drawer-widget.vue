@@ -4,7 +4,7 @@
 
     <div class="drawer-container" :class="[selected ? 'selected' : '', customClass]"
          @click.stop="selectWidget(widget)">
-      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
+      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
                  handle=".drag-handler" @end="(evt) => onDrawerDragEnd(evt, widget.widgetList)"
                  @add="(evt) => onDrawerDragAdd(evt, widget.widgetList)"
                  @update="onDrawerDragUpdate" :move="checkContainerMove">

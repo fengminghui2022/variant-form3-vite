@@ -1,5 +1,3 @@
-//import { vfApp } from '@/utils/create-app'
-
 /**
  * 格式说明：属性名称==对应属性编辑器的组件名称
  */
@@ -55,6 +53,7 @@ const COMMON_PROPERTIES = {
   'showAllLevels'     :            'showAllLevels-editor',
   'multiple'          :            'multiple-editor',
   'multipleLimit'     :            'multipleLimit-editor',
+  'collapseTags'      :            'collapseTags-editor',
   'contentPosition'   :            'contentPosition-editor',
   'optionItems'       :            'optionItems-editor',
   'uploadURL'         :            'uploadURL-editor',
@@ -65,6 +64,8 @@ const COMMON_PROPERTIES = {
   'fileMaxSize'       :            'fileMaxSize-editor',
   'fileTypes'         :            'fileTypes-editor',
   'contentHeight'     :            'contentHeight-editor',
+  'tabType'            :            'tabType-editor',
+  'tabPosition'        :            'tabPosition-editor',
   'customClass'       :            'customClass-editor',
 	// tree
   'showCheckBox':            				'show-checkbox-editor',

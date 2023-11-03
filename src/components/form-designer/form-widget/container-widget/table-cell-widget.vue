@@ -3,8 +3,8 @@
       :style="{width: widget.options.cellWidth + '!important' || '', height: widget.options.cellHeight + '!important' || '', 'word-break': !!widget.options.wordBreak ? 'break-all' : 'normal'}"
       :colspan="widget.options.colspan || 1" :rowspan="widget.options.rowspan || 1"
       @click.stop="selectWidget(widget)">
-    <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
-               tag="transition-group" :component-data="{name: 'fade'}"
+    <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
+               tag="div" :component-data="{name: 'fade', class: 'drag-drop-zone'}"
                handle=".drag-handler" @end="(evt) => onTableDragEnd(evt, widget.widgetList)"
                @add="(evt) => onTableDragAdd(evt, widget.widgetList)"
                @update="onTableDragUpdate" :move="checkContainerMove">
@@ -289,7 +289,7 @@
       height: 100%;
     }
 
-    .form-widget-list {
+    .form-widget-list, .drag-drop-zone {
       border: 1px dashed #336699;
       margin: 3px;
       min-height: 28px;

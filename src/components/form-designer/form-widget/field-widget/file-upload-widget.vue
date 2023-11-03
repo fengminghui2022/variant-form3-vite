@@ -203,6 +203,11 @@
             name: defaultResult.name,
             url: defaultResult.url
           })
+        } else if (!!defaultResult && !!defaultResult.data && !!defaultResult.data.name && !!defaultResult.data.url) {
+          this.fieldModel.push({
+            name: defaultResult.data.name,
+            url: defaultResult.data.url
+          })
         } else {
           this.fieldModel = deepClone(fileList)
         }

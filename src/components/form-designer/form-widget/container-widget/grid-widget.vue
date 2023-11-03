@@ -81,7 +81,7 @@
     //padding: 6px;
     outline: 1px dashed #336699;
 
-    .form-widget-list {
+    .form-widget-list, .drag-drop-zone {
       min-height: 28px;
     }
 

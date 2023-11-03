@@ -20,7 +20,7 @@
       </template>
     </el-input>
     <template v-if="isReadMode">
-      <span class="readonly-mode-field">{{fieldModel}}</span>
+      <span class="readonly-mode-field">{{contentForReadMode}}</span>
     </template>
   </form-item-wrapper>
 </template>
@@ -81,6 +81,10 @@
 
         return this.field.options.type
       },
+
+      contentForReadMode() {
+        return this.fieldModel ? this.fieldModel : '--'
+      }
 
     },
     beforeCreate() {

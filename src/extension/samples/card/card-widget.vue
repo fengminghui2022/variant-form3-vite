@@ -4,10 +4,10 @@
     <el-card class="card-container" @click.stop="selectWidget(widget)"
              :shadow="widget.options.shadow" :style="{width: widget.options.cardWidth + '!important' || ''}"
              :class="[selected ? 'selected' : '', !!widget.options.folded ? 'folded' : '', customClass]">
-      <template #header>
-        <div class="clear-fix">
+      <template #header v-if="!widget.options.headerHidden" >
+        <div class="clear-fix" @click="toggleCard">
           <span>{{widget.options.label}}</span>
-          <i v-if="widget.options.showFold" class="float-right" @click="toggleCard">
+          <i v-if="widget.options.showFold" class="float-right" @click.stop="toggleCard">
             <template v-if="!widget.options.folded">
               <el-icon><ArrowDown /></el-icon>
             </template>
@@ -17,8 +17,8 @@
           </i>
         </div>
       </template>
-      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
-                 handle=".drag-handler" tag="transition-group" :component-data="{name: 'fade'}"
+      <draggable :list="widget.widgetList" item-key="id" v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 400}"
+                 handle=".drag-handler" tag="div" :component-data="{name: 'fade', class: 'drag-drop-zone'}"
                  @add="(evt) => onContainerDragAdd(evt, widget.widgetList)"
                  @update="onContainerDragUpdate" :move="checkContainerMove">
         <template #item="{ element: subWidget, index: swIdx }">
@@ -111,7 +111,7 @@
   .card-container {
     margin: 3px;
 
-    .form-widget-list {
+    .form-widget-list, .drag-drop-zone {
       min-height: 28px;
     }
   }

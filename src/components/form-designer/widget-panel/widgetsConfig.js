@@ -2,9 +2,58 @@
 export const containers = [
   {
     type: 'grid',
-    alias: '',  //组件别名，可以自定义
+    alias: 'column-1-grid',  //组件别名，可以自定义
     category: 'container',
-    icon: 'grid',
+    icon: 'column-1-grid',
+    commonFlag: true,
+    cols: [],
+    options: {
+      name: '',
+      hidden: false,
+      gutter: 12,
+      colHeight: null,  //栅格列统一高度属性，用于解决栅格列设置响应式布局浮动后被挂住的问题！！
+      customClass: '',  //自定义css类名
+    }
+  },
+
+  {
+    type: 'grid',
+    alias: 'column-2-grid',  //组件别名，可以自定义
+    category: 'container',
+    icon: 'column-2-grid',
+    commonFlag: true,
+    cols: [],
+    options: {
+      name: '',
+      hidden: false,
+      gutter: 12,
+      colHeight: null,  //栅格列统一高度属性，用于解决栅格列设置响应式布局浮动后被挂住的问题！！
+      customClass: '',  //自定义css类名
+    }
+  },
+
+  {
+    type: 'grid',
+    alias: 'column-3-grid',  //组件别名，可以自定义
+    category: 'container',
+    icon: 'column-3-grid',
+    commonFlag: true,
+    cols: [],
+    options: {
+      name: '',
+      hidden: false,
+      gutter: 12,
+      colHeight: null,  //栅格列统一高度属性，用于解决栅格列设置响应式布局浮动后被挂住的问题！！
+      customClass: '',  //自定义css类名
+    }
+  },
+
+  {
+    type: 'grid',
+    alias: 'column-4-grid',  //组件别名，可以自定义
+    category: 'container',
+    icon: 'column-4-grid',
+    commonFlag: true,
     cols: [],
     options: {
       name: '',
@@ -31,10 +80,13 @@ export const containers = [
     type: 'tab',
     category: 'container',
     icon: 'tab',
-    displayType: 'border-card',
+    commonFlag: true,
+    //displayType: 'border-card',
     tabs: [],
     options: {
       name: '',
+      tabType: 'border-card',
+      tabPosition: 'top',
       hidden: false,
       customClass: '',  //自定义css类名
       onTabClick: '',  //tab被选中时触发
@@ -45,6 +97,7 @@ export const containers = [
     type: 'sub-form',
     category: 'container',
     icon: 'sub-form',
+    commonFlag: true,
     widgetList: [],
     options: {
       name: '',
@@ -66,6 +119,7 @@ export const containers = [
     type: 'grid-sub-form',
     category: 'container',
     icon: 'grid-sub-form',
+    commonFlag: true,
     widgetList: [],
     options: {
       name: '',
@@ -790,6 +844,7 @@ export const basicFields = [
       automaticDropdown: false,  //自动下拉
       multiple: false,
       multipleLimit: 0,
+      collapseTags: false,  //对多选折叠已选项
       dsEnabled: false, // 是否使用数据源数据
       dsName: '', // 数据源名称
       dataSetName: '',  //数据集名称
@@ -1436,6 +1491,14 @@ export const customFields = [
 
 ]
 
+export const chartContainers = [
+
+]
+
+export const chartWidgets = [
+
+]
+
 export function addContainerWidgetSchema(containerSchema) {
   containers.push(containerSchema)
 }
@@ -1450,4 +1513,12 @@ export function addAdvancedFieldSchema(fieldSchema) {
 
 export function addCustomWidgetSchema(widgetSchema) {
   customFields.push(widgetSchema)
+}
+
+export function addChartContainerSchema(chartContainerSchema) {
+  chartContainers.push(chartContainerSchema)
+}
+
+export function addChartSchema(chartSchema) {
+  chartWidgets.push(chartSchema)
 }

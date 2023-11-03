@@ -6,6 +6,7 @@ export default {
     },
 
     setting: {
+      headerHidden: 'Header Hidden',
       cardFolded: 'Folded',
       cardShowFold: 'Show Fold',
       cardWidth: 'Width Of Card',

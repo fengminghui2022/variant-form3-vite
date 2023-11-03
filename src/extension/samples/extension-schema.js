@@ -2,11 +2,13 @@ export const cardSchema = {
   type: 'card',
   category: 'container',
   icon: 'card',
+  commonFlag: true,
   widgetList: [],
   options: {
     name: '',
     label: 'card',
     hidden: false,
+    headerHidden: false,
     folded: false,
     showFold: true,
     cardWidth: '100%',

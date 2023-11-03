@@ -211,9 +211,9 @@
           this.$nextTick(() => {
             this.parentList.splice(this.indexOfParentList, 1)
             this.designer.setSelected(nextSelected)
-
             this.designer.formWidget.deleteWidgetRef(fieldRefName)  //删除组件ref！！！
             this.designer.emitHistoryChange()
+            this.designer.emitEvent('canvas-remove-field', fieldRefName)
           })
         }
       },

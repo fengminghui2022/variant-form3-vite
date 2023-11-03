@@ -38,6 +38,12 @@ export default {
 
     onMultipleSelected(val) {
       if (val) {
+        // 清空已选项，否则console会报错！！
+        let foundRef = this.designer.formWidget.getWidgetRef(this.optionModel.name)
+        if (!!foundRef && !!foundRef.clearSelectedOptions) {
+          foundRef.clearSelectedOptions()
+        }
+
         this.optionModel.defaultValue = []  //清空原默认值!!
       } else {
         if (!!this.optionModel.defaultValue && (this.optionModel.defaultValue.length > 0)) {
@@ -46,8 +52,13 @@ export default {
           this.optionModel.defaultValue = ''
         }
       }
-    },
 
+      //重新生成select组件
+      const selectWidget = this.designer.formWidget.getSelectedWidgetRef()
+      if (selectWidget && selectWidget.refreshWidgetKey) {
+        selectWidget.refreshWidgetKey()
+      }
+    },
 
   }
 }
