@@ -168,6 +168,10 @@ export default {
     },
 
     initEventHandler() {
+      if (this.designState) {
+        return
+      }
+
       this.on$('setFormData', (newFormData) => {
         //console.log('formModel of globalModel----------', this.globalModel.formModel)
         if (!this.subFormItemFlag) {
@@ -208,10 +212,15 @@ export default {
           return
         }
 
+        const objectName = params[5]
+        if (objectName !== this.getObjectName()) {  //对象容器的objectName不一致则返回
+          return
+        }
+
         const pSubFormName = params[2], pSubFormRowId = params[3], newValue = params[4]
         if (!this.subFormName && !pSubFormName) {
           this.setValue(newValue, true)
-        } else if ((this.subFormName === pSubFormName) && (this.subFormRowId === pSubFormRowId)) {
+        } else if ((this.subFormName === pSubFormName) && (this.subFormRowId === pSubFormRowId)) {  //子表单
           this.setValue(newValue, true)
         }
       })
@@ -498,7 +507,8 @@ export default {
 
       /* 同步更新keyName属性一致的字段组件值！！ */
       this.broadcast('FieldWidget', 'sync-field-value',
-          [this.field.options.name, this.field.options.keyName, this.subFormName, this.subFormRowId, newValue])
+          [this.field.options.name, this.field.options.keyName, this.subFormName, this.subFormRowId,
+            newValue, this.getObjectName()])
 
       /* 必须用dispatch向指定父组件派发消息！！ */
       this.dispatch('VFormRender', 'fieldChange',
