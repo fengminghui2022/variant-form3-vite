@@ -25,6 +25,7 @@
     </el-drawer>
 
     <div class="right-toolbar">
+      <el-scrollbar>
       <div class="right-toolbar-con">
         <el-button v-if="showToolButton('clearDesignerButton')" link type="primary" @click="clearFormWidget">
           <svg-icon icon-class="el-delete" />{{i18nt('designer.toolbar.clear')}}</el-button>
@@ -42,6 +43,7 @@
           <slot :name="slotName"></slot>
         </template>
       </div>
+      </el-scrollbar>
     </div>
 
     <div v-if="showPreviewDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
@@ -338,6 +340,7 @@
         let curNode = {
           id: widget.id,
           label: widget.options.label || widget.type,
+          type: widget.type,
           //selectable: true,
         }
         treeNode.push(curNode)
@@ -352,6 +355,7 @@
             let colNode = {
               id: col.id,
               label: col.options.name || widget.type,
+              type: widget.type,
               children: []
             }
             curNode.children.push(colNode)
@@ -365,6 +369,7 @@
             let rowNode = {
               id: row.id,
               label: 'table-row',
+              type: widget.type,
               selectable: false,
               children: [],
             }
@@ -379,6 +384,7 @@
               let cellNode = {
                 id: cell.id,
                 label: 'table-cell',
+                type: cell.type,
                 children: []
               }
               rowChildren.push(cellNode)
@@ -393,6 +399,7 @@
             let tabNode = {
               id: tab.id,
               label: tab.options.name || widget.type,
+              type: widget.type,
               selectable: false,
               children: []
             }
@@ -766,8 +773,12 @@
     overflow: hidden;
 
     .right-toolbar-con {
-      display:inline-block;
-      text-align: left;
+      //display:inline-block;
+      //text-align: left;
+      display: flex;
+      justify-content: flex-end;
+      min-width: 450px;
+      height: 42px;
     }
 
     :deep(.el-button) {

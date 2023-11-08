@@ -38,7 +38,6 @@
 
 <script>
   import { createVNode, render } from 'vue'
-  //import ElForm from 'element-ui/packages/form/src/form.vue'  /* 用于源码调试Element UI */
   import emitter from '@/utils/emitter'
   import './container-item/index'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
@@ -49,7 +48,6 @@
     insertGlobalFunctionsToHtml,
     getAllContainerWidgets,
     getAllFieldWidgets,
-    traverseFieldWidgets,
     buildDefaultFormJson,
     getDSByName,
     runDataSourceRequest,
@@ -641,7 +639,6 @@
 
         this.$refs['renderForm'].validate((valid) => {
           if (valid) {
-            //执行表单自定义校验
             //执行表单自定义校验
             let customValid = this.doCustomValidation()
             if (customValid) {

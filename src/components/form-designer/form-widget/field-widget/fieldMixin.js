@@ -1,5 +1,23 @@
-import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
+import {
+  deepClone,
+  getDSByName,
+  overwriteObj,
+  runDataSourceRequest,
+  translateOptionItems,
+  evalFn
+} from "@/utils/util"
 import FormValidators from '@/utils/validators'
+import {
+  TODAY,
+  NOW,
+  EYEAR,
+  EMONTH,
+  EDAY,
+  replaceFieldsAndFunctionsOfFormula,
+  findCalFunStartIndex,
+  fieldIsUsedInFormula, calculateFormula,
+} from '@/utils/formula-util'
+import * as formulajs from '@formulajs/formulajs'
 
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData',
@@ -195,7 +213,6 @@ export default {
 
       this.on$('sync-field-value', (params) => {
         const pName = params[0], pKeyName = params[1]
-        //if ((this.field.options.name === pName) || !this.field.options.keyName) {
         if (this.field.options.name === pName) {
           return
         }
@@ -222,6 +239,19 @@ export default {
           this.setValue(newValue, true)
         } else if ((this.subFormName === pSubFormName) && (this.subFormRowId === pSubFormRowId)) {  //子表单
           this.setValue(newValue, true)
+        }
+      })
+
+      /* 执行计算公式运算 */
+      this.on$('calculate-formula', (params) => {
+        if (!!this.field.options.formulaEnabled && !!this.field.options.formula) {
+          let changedFieldRef = params[1]
+          const changedFieldName = params[1].field.options.name
+          //检查计算公式是否包含当前修改字段
+          if (fieldIsUsedInFormula(changedFieldName, this.field.options.formula, this.getFormRef())) {
+            //debugger
+            calculateFormula(this.getFormRef(), this.getGlobalDsv(), formulajs, this, changedFieldRef)
+          }
         }
       })
 
@@ -484,6 +514,10 @@ export default {
           if (opt.value === optionValue) {
             opt.disabled = true
           }
+
+          if (opt.children && Array.isArray(opt.children)) {
+            this.disableOptionOfList(opt.children, optionValue)
+          }
         })
       }
     },
@@ -493,6 +527,10 @@ export default {
         optionList.forEach(opt => {
           if (opt.value === optionValue) {
             opt.disabled = false
+          }
+
+          if (opt.children && Array.isArray(opt.children)) {
+            this.enableOptionOfList(opt.children, optionValue)
           }
         })
       }
@@ -509,6 +547,8 @@ export default {
       this.broadcast('FieldWidget', 'sync-field-value',
           [this.field.options.name, this.field.options.keyName, this.subFormName, this.subFormRowId,
             newValue, this.getObjectName()])
+
+      this.getFormRef().broadcast('FieldWidget', 'calculate-formula', [newValue, this])  //触发计算公式计算
 
       /* 必须用dispatch向指定父组件派发消息！！ */
       this.dispatch('VFormRender', 'fieldChange',

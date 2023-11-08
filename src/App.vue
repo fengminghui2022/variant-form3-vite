@@ -34,7 +34,7 @@ export default {
         //logoHeader: false,
 
         //chartLib: true,
-        metadataLib: true,
+        metadataLib: false,
         //componentLib: false,
         //layoutTypeButton: false,
       },
