@@ -175,6 +175,12 @@
 
       addOption() {
         let newValue = this.optionModel.optionItems.length + 1
+        this.optionModel.optionItems.forEach(oi => {
+          if (Number.isFinite(oi.value) && (oi.value >= newValue)) {
+            newValue += 1
+          }
+        })
+
         this.optionModel.optionItems.push({
           value: newValue,
           label: 'new option'

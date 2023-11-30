@@ -4,6 +4,7 @@
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <div :class="[!!field.options.autoFullWidth ? 'auto-full-width' : '', isReadMode ? 'readonly-mode-date-range' : '']">
       <el-date-picker ref="fieldEditor" :type="field.options.type" v-model="fieldModel"
+                      :key="dateRangeKey"
                       :class="[!!field.options.autoFullWidth ? 'auto-full-width' : '']"
                       :disabled="field.options.disabled" :readonly="field.options.readonly"
                       :clearable="field.options.clearable" :editable="field.options.editable"
@@ -25,6 +26,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {generateId} from "@/utils/util";
 
   export default {
     name: "date-range-widget",
@@ -75,6 +77,10 @@
         }
       },
 
+      dateRangeKey() {
+        return this.widgetKey || this.field.id
+      },
+
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */
@@ -100,6 +106,9 @@
     },
 
     methods: {
+      refreshWidgetKey() {  //强制刷新组件！！
+        this.widgetKey = 'date-range-key-' + generateId()
+      },
 
     }
   }

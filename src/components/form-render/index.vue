@@ -637,7 +637,8 @@
           };
         });
 
-        this.$refs['renderForm'].validate((valid) => {
+        this.$refs['renderForm'].validate((valid, invalidFields) => {
+          //console.error('invalidFields: ', invalidFields)
           if (valid) {
             //执行表单自定义校验
             let customValid = this.doCustomValidation()
@@ -1066,7 +1067,7 @@
         document.body.appendChild(wrapperDiv)
         render(dialogInstance, wrapperDiv)
         document.body.appendChild( dialogInstance.el )
-        dialogInstance.component.ctx.show()
+        return dialogInstance.component.ctx.show()
       },
 
       showDrawer(drawerName, formData = {}, extraData = {}, title = '') {
@@ -1100,7 +1101,7 @@
         document.body.appendChild(wrapperDiv)
         render(drawerInstance, wrapperDiv)
         document.body.appendChild( drawerInstance.el )
-        drawerInstance.component.ctx.show()
+        return drawerInstance.component.ctx.show()
       },
 
       /**

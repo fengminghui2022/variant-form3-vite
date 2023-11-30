@@ -110,6 +110,8 @@
           this.$refs['dFormRef'].setDialogOrDrawerRef(this)
           this.parentFormRef.setChildFormRef(this.$refs['dFormRef'])
         })
+
+        return this
       },
 
       close() {
