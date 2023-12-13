@@ -409,6 +409,18 @@ export function traverseWidgetsOfContainer(con, fieldHandler, containerHandler) 
   }
 }
 
+export function traverseWidgetsOfGridCol(gridCol, fieldHandler, containerHandler) {
+  // if (gridCol.category === 'container') {
+  //   containerHandler(gridCol)
+  // }
+
+  if (gridCol.type === 'grid-col') {
+    gridCol.widgetList.forEach(cw => {
+      handleContainerTraverse(cw, fieldHandler, containerHandler)
+    })
+  }
+}
+
 /**
  * 获取所有字段组件
  * @param widgetList

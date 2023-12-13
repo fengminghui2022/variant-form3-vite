@@ -267,10 +267,12 @@
 
       deleteWholeCol() {
         this.designer.deleteTableWholeCol(this.rowArray, this.colIndex)
+        this.designer.emitEvent('canvas-remove-container', [])  //通知其他组件
       },
 
       deleteWholeRow() {
         this.designer.deleteTableWholeRow(this.rowArray, this.rowIndex)
+        this.designer.emitEvent('canvas-remove-container', [])  //通知其他组件
       },
 
     }

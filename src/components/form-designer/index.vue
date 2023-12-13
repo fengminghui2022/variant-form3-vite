@@ -239,7 +239,10 @@
       this.vsCodeFlag = getQueryParam('vscode') == 1
       this.caseName = getQueryParam('case')
 
-      this.designer.handleEvent('canvas-add-field', (fieldWidgetName) => {
+      // this.designer.handleEvent('canvas-add-field', (fieldWidgetName) => {
+      //   this.$emit('field-widget-used', fieldWidgetName)
+      // })
+      this.designer.handleEvent('canvas-select-field', (fieldWidgetName) => {
         this.$emit('field-widget-used', fieldWidgetName)
       })
       this.designer.handleEvent('canvas-remove-field', (fieldWidgetName) => {
@@ -254,6 +257,9 @@
       })
       this.designer.handleEvent('canvas-redo', () => {
         this.$emit('form-json-updated', 'canvas-redo')
+      })
+      this.designer.handleEvent('canvas-remove-container', () => {
+        this.$emit('form-json-updated', 'canvas-remove-container')
       })
     },
     mounted() {

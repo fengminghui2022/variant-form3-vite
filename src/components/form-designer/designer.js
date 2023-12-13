@@ -6,7 +6,7 @@
  * remark: 如果要分发VForm源码，需在本文件顶部保留此文件头信息！！
  */
 
-import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils/util"
+import {deepClone, generateId, getDefaultFormConfig, overwriteObj, traverseWidgetsOfContainer} from "@/utils/util"
 import {
   containers,
   advancedFields,
@@ -125,6 +125,10 @@ export function createDesigner(vueInstance) {
       if (!!selected.id) {
         this.selectedId = selected.id
         this.selectedWidgetName = selected.options.name
+
+        if (!selected.category) { // 如果是选中字段组件
+          this.emitEvent('canvas-select-field', selected.options.name)
+        }
       }
     },
 
@@ -705,16 +709,27 @@ export function createDesigner(vueInstance) {
       newGridCol.id = 'grid-col-' + tmpId
       newGridCol.options.name = 'gridCol' + tmpId
 
-      if (widget.widgetList.length === 1) {
-        const firstChildWidget = widget.widgetList[0]
-        if (!firstChildWidget.category) { //非容器组件
-          let newField = deepClone(firstChildWidget)
-          const tempId = generateId()
-          newField.id = newField.type.replace(/-/g, '') + tempId
-          newField.options.name = newField.id
-          newGridCol.widgetList.push(newField)
-        }
+      // if (widget.widgetList.length === 1) {
+      //   const firstChildWidget = widget.widgetList[0]
+      //   if (!firstChildWidget.category) { //非容器组件
+      //     let newField = deepClone(firstChildWidget)
+      //     const tempId = generateId()
+      //     newField.id = newField.type.replace(/-/g, '') + tempId
+      //     newField.options.name = newField.id
+      //     newGridCol.widgetList.push(newField)
+      //   }
+      // }
+
+      newGridCol.widgetList = deepClone(widget.widgetList)
+      const fwHandler = (fw) => {
+        fw.options.name = fw.type.replace(/-/g, '') + generateId()
+        fw.id = fw.options.name
       }
+      const cwHandler = (cw) => {
+        cw.options.name = cw.type.replace(/-/g, '') + generateId()
+        cw.id = cw.options.name
+      }
+      traverseWidgetsOfContainer(newGridCol, fwHandler, cwHandler)
 
       parentWidget.cols.push(newGridCol)
     },
@@ -972,7 +987,7 @@ export function createDesigner(vueInstance) {
         dbCon.options.layout.push(chartLayout)
         dbCon.widgetList.push(newChart)
 
-        this.setSelected(chart)
+        this.setSelected(newChart)
         this.emitHistoryChange()
       }
     },

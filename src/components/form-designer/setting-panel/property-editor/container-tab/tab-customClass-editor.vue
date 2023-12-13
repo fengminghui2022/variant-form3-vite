@@ -80,6 +80,7 @@
         }
 
         this.designer.deleteTabPaneOfTabs(curTabs, tpIdx)
+        this.designer.emitEvent('canvas-remove-container', [])  //通知其他组件
         this.designer.emitHistoryChange()
       },
 

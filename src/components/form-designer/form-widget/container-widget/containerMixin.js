@@ -93,6 +93,7 @@ export default {
 
         this.$nextTick(() => {
           this.parentList.splice(this.indexOfParentList, 1)
+          this.designer.emitEvent('canvas-remove-container', [])  //通知其他组件
           this.designer.setSelected(nextSelected)
 
           this.designer.formWidget.deleteWidgetRef(widgetRefName)  //删除组件ref！！！
