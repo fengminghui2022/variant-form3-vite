@@ -328,6 +328,7 @@ export default {
       optionValueType: '选项值类型',
       addOption: '增加选项',
       importOptions: '导入选项',
+      importOptionDataSource: '绑定元数据',
       resetDefault: '重设选中项',
       uploadSetting: '上传参数设置',
       uploadURL: '上传地址',

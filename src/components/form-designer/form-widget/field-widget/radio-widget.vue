@@ -7,12 +7,12 @@
                     :style="{display: field.options.displayStyle + ' !important'}"
                     @change="handleChangeEvent">
       <template v-if="!!field.options.buttonStyle">
-        <el-radio-button v-for="(item, index) in field.options.optionItems" :key="index" :label="item.value"
+        <el-radio-button v-for="(item, index) in optionItems" :key="index" :label="item.value"
                          :disabled="item.disabled" :border="field.options.border"
                          :style="{display: field.options.displayStyle}">{{item.label}}</el-radio-button>
       </template>
       <template v-else>
-        <el-radio v-for="(item, index) in field.options.optionItems" :key="index" :label="item.value"
+        <el-radio v-for="(item, index) in optionItems" :key="index" :label="item.value"
                   :disabled="item.disabled" :border="field.options.border"
                   :style="{display: field.options.displayStyle}">{{item.label}}</el-radio>
       </template>
@@ -28,6 +28,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {CustomRequest} from "@/api/server"
 
   export default {
     name: "radio-widget",
@@ -67,6 +68,7 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        optionItems:[]
       }
     },
     computed: {
@@ -90,6 +92,18 @@
 
     mounted() {
       this.handleOnMounted()
+      //数据源模式
+      if(this.field.options.optionSourceFlag){
+        const optionsParams=this.field.options.optionParamsSource
+        console.log('optionsParams: ', optionsParams);
+        CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
+          console.log('res2222: ', res);
+            this.optionItems=res.data.length?res.data.map(v=>{return {...v,value:v.code,label:v.value}}):[]
+            console.log('this.optionItems: ', this.optionItems);
+        })
+      }else{
+        this.optionItems=this.field.options.optionItems
+      }
     },
 
     beforeUnmount() {

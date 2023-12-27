@@ -17,7 +17,7 @@
                :remote="field.options.remote" :remote-method="remoteMethod"
                @focus="handleFocusCustomEvent" @blur.capture="handleBlurCustomEvent"
                @change="handleChangeEvent">
-      <el-option v-for="item in field.options.optionItems" :key="item.value" :label="item.label"
+      <el-option v-for="item in optionItems" :key="item.value" :label="item.label"
                  :value="item.value" :disabled="item.disabled">
       </el-option>
     </el-select>
@@ -33,6 +33,7 @@
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
   import {generateId} from "@/utils/util";
+  import {CustomRequest} from "@/api/server"
 
   export default {
     name: "select-widget",
@@ -73,6 +74,7 @@
         fieldModel: null,
         rules: [],
         widgetKey: '',
+        optionItems:[]//下拉项集合
       }
     },
     computed: {
@@ -111,6 +113,20 @@
 
     mounted() {
       this.handleOnMounted()
+      //数据源模式
+      if(this.field.options.optionSourceFlag){
+        const optionsParams=this.field.options.optionParamsSource
+        console.log('optionsParams: ', optionsParams);
+        CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
+          console.log('res2222: ', res);
+          console.log('optionsParams.widgetResult: ', optionsParams.widgetResult);
+          let dataStructure=JSON.parse(optionsParams.widgetResult)
+          console.log('dataStructure: ', dataStructure);
+          this.optionItems=res[dataStructure.key].length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
+        })
+      }else{
+        this.optionItems=this.field.options.optionItems
+      }
     },
 
     beforeUnmount() {

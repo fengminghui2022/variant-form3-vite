@@ -341,6 +341,7 @@ export default {
       optionValueType: 'Value Type',
       addOption: 'Add Option',
       importOptions: 'Import Options',
+      importOptionDataSource: 'Import Options DataSource',
       resetDefault: 'Reset Default',
       uploadSetting: 'Upload Setting',
       uploadURL: 'Upload URL',
