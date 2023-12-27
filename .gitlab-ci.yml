@@ -6,8 +6,8 @@ sync_to_gitlab:
   only:
     - schedules  # 如果你希望通过定时任务触发同步
   script:
-    - git clone --mirror https://gitee.com/vdpadmin/variant-form3-vite  # 克隆 GitHub 项目
+    - git clone --mirror https://github.com/vform666/variant-form3-vite  # 克隆 GitHub 项目
     - cd repository.git
-    - git remote set-url --push origin https://github.com/vform666/variant-form3-vite  # 设置推送到 GitLab 仓库
-    - git fetch -p origin
-    - git push --mirror origin  # 推送到 GitLab
+    - git remote set-url --push test https://github.com/vform666/variant-form3-vite  # 设置推送到 GitLab 仓库
+    - git fetch -p test
+    - git push --mirror test  # 推送到 GitLab
