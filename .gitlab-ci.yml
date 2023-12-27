@@ -4,7 +4,7 @@ stages:
 sync_to_gitlab:
   stage: sync
   only:
-    - master  # 如果你希望通过定时任务触发同步
+    - master  # 仅在将更改推送到主分支时同步
   script:
     - git clone --mirror https://github.com/vform666/variant-form3-vite  # 克隆 GitHub 项目
     - cd repository.git
