@@ -30,6 +30,7 @@
     pcTextArr,
     pcaTextArr,
   } from "element-china-area-data";
+  import {CustomRequest} from "@/api/server"
 
   export default {
     name: "cascader-widget",
@@ -69,6 +70,8 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        optionItems:[]
+
       }
     },
     computed: {
@@ -105,7 +108,7 @@
           return pcaTextArr
         }
 
-        return this.field.options.optionItems
+        return this.optionItems
       }
 
     },
@@ -127,6 +130,16 @@
 
     mounted() {
       this.handleOnMounted()
+      //数据源模式
+      if(this.field.options.optionSourceFlag){
+        const optionsParams=this.field.options.optionParamsSource
+        CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
+          let dataStructure=JSON.parse(optionsParams.widgetResult)
+          this.optionItems=res[dataStructure.key].length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
+        })
+      }else{
+        this.optionItems=this.field.options.optionItems
+      }
     },
 
     beforeUnmount() {
@@ -139,7 +152,7 @@
         setTimeout(() => {
           document.querySelectorAll(".el-cascader-panel .el-radio").forEach((el) => {
             el.onclick = () => {
-              console.log('test====', 1111)
+              
               this.$refs.fieldEditor.popperVisible = false // 单选框部分点击隐藏下拉框
             }
           })

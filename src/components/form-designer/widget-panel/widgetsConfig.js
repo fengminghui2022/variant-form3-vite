@@ -1,4 +1,4 @@
-
+//TODO ahao:表单结构参数JSON组成
 export const containers = [
   {
     type: 'grid',
@@ -745,6 +745,17 @@ export const basicFields = [
       labelWrap: false,  //标签超长换行
       disabled: false,
       hidden: false,
+      optionSourceFlag:false,//区分元数据模式与死数据模式
+      optionParamsSource:{
+        widgetCode:null,
+        widgetDesc:null,
+        widgetHeader:null,
+        widgetId:null,
+        widgetMethod:null,
+        widgetName:null,
+        widgetResult:null,
+        widgetUrl:null,
+      },//传递接口元数据参数，用于请求下拉项接口
       dsEnabled: false, // 是否使用数据源数据
       dsName: '', // 数据源名称
       dataSetName: '',  //数据集名称
@@ -794,6 +805,17 @@ export const basicFields = [
       labelWrap: false,  //标签超长换行
       disabled: false,
       hidden: false,
+      optionSourceFlag:false,//区分元数据模式与死数据模式
+      optionParamsSource:{
+        widgetCode:null,
+        widgetDesc:null,
+        widgetHeader:null,
+        widgetId:null,
+        widgetMethod:null,
+        widgetName:null,
+        widgetResult:null,
+        widgetUrl:null,
+      },//传递接口元数据参数，用于请求下拉项接口
       dsEnabled: false, // 是否使用数据源数据
       dsName: '', // 数据源名称
       dataSetName: '',  //数据集名称
@@ -841,6 +863,17 @@ export const basicFields = [
       labelWrap: false,  //标签超长换行
       disabled: false,
       hidden: false,
+      optionSourceFlag:false,//区分元数据模式与死数据模式
+      optionParamsSource:{
+        widgetCode:null,
+        widgetDesc:null,
+        widgetHeader:null,
+        widgetId:null,
+        widgetMethod:null,
+        widgetName:null,
+        widgetResult:null,
+        widgetUrl:null,
+      },//传递接口元数据参数，用于请求下拉项接口
       clearable: true,
       filterable: false,
       allowCreate: false,
@@ -1443,6 +1476,17 @@ export const advancedFields = [
       columnWidth: '200px',
       disabled: false,
       hidden: false,
+      optionSourceFlag:false,//区分元数据模式与死数据模式
+      optionParamsSource:{
+        widgetCode:null,
+        widgetDesc:null,
+        widgetHeader:null,
+        widgetId:null,
+        widgetMethod:null,
+        widgetName:null,
+        widgetResult:null,
+        widgetUrl:null,
+      },//传递接口元数据参数，用于请求下拉项接口
       clearable: true,
       filterable: false,
       multiple: false,

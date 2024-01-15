@@ -691,7 +691,7 @@ export default {
 
     //--------------------- 事件处理 end ------------------//
 
-    //--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
+    //--------------------- //TODO ahao: 以下为组件支持外部调用的API方法 begin ------------------//
     /* 提示：用户可自行扩充这些方法！！！ */
 
     getFormRef() { /* 获取VFrom引用，必须在VForm组件created之后方可调用 */
@@ -787,6 +787,14 @@ export default {
       } else {  //重建组件校验规则
         this.buildFieldRules()
       }
+    },
+
+    /**
+     * 
+     * @returns 组件属性
+     */
+    getOptionsAttribute(){
+      return this.field.options
     },
 
     setRequired(flag) {
