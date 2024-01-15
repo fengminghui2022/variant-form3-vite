@@ -112,21 +112,17 @@ export default {
       formulaABS: "求一个数的绝对值，举例：ABS(-5)=5",
       formulaROUND: "将数值保留指定小数位，举例：ROUND(8.999,2)=9.00",
       formulaCEILING: "将一个数向上取整，举例：CEILING(8.9)=9",
-      formulaLOG:
-          "返回以参数2为底参数1的对数，举例：LOG(8,2)=3，以2为底8的对数为3",
+      formulaLOG: "返回以参数2为底参数1的对数，举例：LOG(8,2)=3，以2为底8的对数为3",
       formulaMOD: "求两数相除的余数，举例：MOD(2,6)=2",
       formulaPOWER: "求数字的N次方，举例：POWER(5, 3)=125",
-      formulaAND:
-          "当所有条件都符合时，返回true，否则返回false，举例：AND(1>0,2>1,...)=TRUE",
-      formulaIF:
-          "判断一个条件能否满足，如果满足则返回一个值，如果不满足则返回另一个值，举例：IF(1>2,1,0)=0",
+      formulaAND: "当所有条件都符合时，返回true，否则返回false，举例：AND(1>0,2>1,...)=TRUE",
+      formulaIF: "判断一个条件能否满足，如果满足则返回一个值，如果不满足则返回另一个值，举例：IF(1>2,1,0)=0",
       formulaIFS: "举例：IFS(false, 'Hello!', true, 'Goodbye!')=Goodbye!",
       formulaIFERROR: "举例：IFERROR('#DIV/0!', 'Error')",
       formulaIFNA: "举例：IFNA('#N/A', 'Error')",
       formulaNOT: "举例：NOT(true)=false",
       formulaOR: "举例: OR (true, false, true)=true",
-      formulaSWITCH:
-          "SWITCH(参数值,条件1,'条件值1',条件2,'条件值2'[,条件N,'条件值N',])，举例：SWITCH(7, 9, 'Nine', 7, 'Seven')=Seven",
+      formulaSWITCH: "SWITCH(参数值,条件1,'条件值1',条件2,'条件值2'[,条件N,'条件值N',])，举例：SWITCH(7, 9, 'Nine', 7, 'Seven')=Seven",
       formulaXOR: "举例：XOR(true, false, true)=false",
       formulaYEAR: '举例：YEAR("2022-10-1")=2022',
       formulaMONTH: '举例：MONTH("2022-10-1")=10',
@@ -135,20 +131,14 @@ export default {
       formulaNOW: '举例: NOW="2022-10-11 17:04:33"',
       formulaEMONTH: "举例: EMONTH ('2022-12-13  ', -1)='2022-11-13 '",
       formulaEDAY: "举例: EMONTH ('2022-12-13  ', -1)='2022-12-12 '",
-      formulaFIND:
-          "查找字符串(参数：\n1、查找句柄 2、查找目标字符串 3、开始查找下标)，\n举例：FIND('M', 'Miriam McGovern', 3)=8",
-      formulaLEFT:
-          "获取字符串左侧N个字符，LEFT(字符串,截取长度)，举例：LEFT('Sale Price', 4)=Sale",
-      formulaRIGHT:
-          "获取字符串右侧N个字符 RIGHT(字符串,截取长度)，举例：RIGHT('Sale Price', 5)=Price",
+      formulaFIND: "查找字符串(参数：\n1、查找句柄 2、查找目标字符串 3、开始查找下标)，\n举例：FIND('M', 'Miriam McGovern', 3)=8",
+      formulaLEFT: "获取字符串左侧N个字符，LEFT(字符串,截取长度)，举例：LEFT('Sale Price', 4)=Sale",
+      formulaRIGHT: "获取字符串右侧N个字符 RIGHT(字符串,截取长度)，举例：RIGHT('Sale Price', 5)=Price",
       formulaLEN: "统计字符串长度，举例：LEN('abcdefgh')=8",
-      formulaLOWER:
-          "字符串转小写，举例：LOWER('E. E. Cummings')=e. e. cummings",
+      formulaLOWER: "字符串转小写，举例：LOWER('E. E. Cummings')=e. e. cummings",
       formulaUPPER: "字符串转大写，举例：UPPER('total')=TOTAL",
-      formulaMID:
-          "截取字符串 MID(字符串,开始下标,截取长度)，举例：MID('Fluid Flow', 7, 20)=Flow",
-      formulaTRIM:
-          "字符串去除多余空格 TRIM(字符串)，举例：TRIM('     First     Quarter  ')=First Quarter",
+      formulaMID: "截取字符串 MID(字符串,开始下标,截取长度)，举例：MID('Fluid Flow', 7, 20)=Flow",
+      formulaTRIM: "字符串去除多余空格 TRIM(字符串)，举例：TRIM('     First     Quarter  ')=First Quarter",
       formulaDateError: "日期格式不正确",
       formulaDateErrorMsg: "日期转换错误明细",
       // 计算公式 - 结尾
@@ -318,6 +308,7 @@ export default {
       collapseTags: '折叠已选项',
       checkStrictly: '任意级节点可选',
       showAllLevels: '显示完整路径',
+      areaDataEnabled: '使用地区数据',
       contentPosition: '文字位置',
       dividerDirection: '分割线方向',
       plain: '朴素按钮',
@@ -383,6 +374,8 @@ export default {
       appendButtonDisabled: '后置按钮禁用',
       appendButtonIcon: '后置按钮Icon',
       buttonIcon: '按钮Icon',
+      appendText: '添加后置文字',
+      textForAppend: '后置文字内容111',
       switchWidth: '开关宽度（像素）',
       activeText: '开启时文字描述',
       inactiveText: '关闭时文字描述',

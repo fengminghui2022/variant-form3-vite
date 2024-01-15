@@ -145,6 +145,8 @@ const ADVANCED_PROPERTIES = {
   'appendButton'      :            'appendButton-editor',
   'appendButtonDisabled':          'appendButtonDisabled-editor',
   'buttonIcon'        :            'buttonIcon-editor',
+  'appendText'        :            'appendText-editor',
+  'textForAppend'     :            'textForAppend-editor',
 
 }
 

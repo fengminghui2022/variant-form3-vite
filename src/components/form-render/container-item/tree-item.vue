@@ -142,7 +142,7 @@
 						}
 						data.children.push(newChild);
 					}).catch((err) => {
-					console.error(err)
+					  console.error(err)
 					});
 			},
 			// 删除节点

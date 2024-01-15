@@ -104,39 +104,25 @@ export default {
       formulaPleaseSelect: "Please select a widget name and function",
       formulaSample: "Sample",
       formulaPara: "parameter",
-      formulaINT:
-          "Remove decimals from numerical values, for example: INT (-8.9)=-9",
-      formulaSUM:
-          "Returns the sum of a set of data, for example: SUM (1,2,3,...)=6",
-      formulaAVERAGE:
-          "Returns the average of a set of data, for example: AVERAGE (1,2,3,...)=2",
-      formulaMAX:
-          "Returns the maximum value in a set of numbers, for example: MAX (1,2,3,...)=3",
-      formulaMIN:
-          "Returns the minimum value in a set of numbers, for example: MIN (1,2,3,...)=1",
-      formulaABS:
-          "Find the absolute value of a number, for example: ABS (-5)=5",
-      formulaROUND:
-          "Keep the numerical value to the specified decimal place, for example: ROUND (8.999,2)=9.00",
+      formulaINT: "Remove decimals from numerical values, for example: INT (-8.9)=-9",
+      formulaSUM: "Returns the sum of a set of data, for example: SUM (1,2,3,...)=6",
+      formulaAVERAGE: "Returns the average of a set of data, for example: AVERAGE (1,2,3,...)=2",
+      formulaMAX: "Returns the maximum value in a set of numbers, for example: MAX (1,2,3,...)=3",
+      formulaMIN: "Returns the minimum value in a set of numbers, for example: MIN (1,2,3,...)=1",
+      formulaABS: "Find the absolute value of a number, for example: ABS (-5)=5",
+      formulaROUND: "Keep the numerical value to the specified decimal place, for example: ROUND (8.999,2)=9.00",
       formulaCEILING: "Round a number up, for example: CEILING (8.9)=9",
-      formulaLOG:
-          "Returns the logarithm of parameter 1 based on parameter 2, for example: LOG (8,2)=3, and the logarithm of parameter 8 based on 2 is 3",
-      formulaMOD:
-          "Find the remainder of dividing two numbers, for example: MOD (2,6)=2",
-      formulaPOWER:
-          "Find the nth power of a number, for example: POWER (5, 3)=125",
-      formulaAND:
-          "Returns true when all conditions are met, otherwise returns false. For example, AND (1>0,2>1,...)=TRUE",
-      formulaIF:
-          "Determine whether a condition can be met. If it is met, return one value. If it is not met, return another value. For example: IF (1>2,1,0)=0",
-      formulaIFS:
-          "Example：IFS(false, 'Hello!', true, 'Goodbye!')=Goodbye!",
+      formulaLOG: "Returns the logarithm of parameter 1 based on parameter 2, for example: LOG (8,2)=3, and the logarithm of parameter 8 based on 2 is 3",
+      formulaMOD: "Find the remainder of dividing two numbers, for example: MOD (2,6)=2",
+      formulaPOWER: "Find the nth power of a number, for example: POWER (5, 3)=125",
+      formulaAND: "Returns true when all conditions are met, otherwise returns false. For example, AND (1>0,2>1,...)=TRUE",
+      formulaIF: "Determine whether a condition can be met. If it is met, return one value. If it is not met, return another value. For example: IF (1>2,1,0)=0",
+      formulaIFS: "Example：IFS(false, 'Hello!', true, 'Goodbye!')=Goodbye!",
       formulaIFERROR: "Example：IFERROR('#DIV/0!', 'Error')",
       formulaIFNA: "Example：IFNA('#N/A', 'Error')",
       formulaNOT: "Example：NOT(true)=false",
       formulaOR: "Example: OR (true, false, true)=true",
-      formulaSWITCH:
-          "SWITCH (parameter value, condition 1, 'condition value 1  ', condition 2, 'condition value 2 ' [, condition N, 'condition value N  ',]), for example: SWITCH (7, 9, 'Nine ', 7, 'Seven  ')=Seven",
+      formulaSWITCH: "SWITCH (parameter value, condition 1, 'condition value 1  ', condition 2, 'condition value 2 ' [, condition N, 'condition value N  ',]), for example: SWITCH (7, 9, 'Nine ', 7, 'Seven  ')=Seven",
       formulaXOR: "Example：XOR(true, false, true)=false",
       formulaYEAR: 'Example：YEAR("2022-10-1")=2022',
       formulaMONTH: 'Example：MONTH("2022-10-1")=10',
@@ -145,22 +131,14 @@ export default {
       formulaNOW: 'Example: NOW="2022-10-11 17:04:33"',
       formulaEMONTH: "Example: EMONTH ('2022-12-13  ', -1)='2022-11-13 '",
       formulaEDAY: "Example: EMONTH ('2022-12-13  ', -1)='2022-12-12 '",
-      formulaFIND:
-          "Find a string (parameters:  n1, Find Handle 2, Find Target String 3, Start Find Subscript),  n Example: FIND ('M  ', 'Miriam McGovern ', 3)=8",
-      formulaLEFT:
-          "Obtain N characters on the left side of the string, Left (string, truncation length), for example: Left ('Sale Price  ', 4)=Sale",
-      formulaRIGHT:
-          "Obtain the N characters on the right side of the string, right (string, truncation length), for example: Right ('Sale Price ', 5)=Price",
-      formulaLEN:
-          "Count the length of a string, for example: LEN ('abcdefgh ')=8",
-      formulaLOWER:
-          "Convert a string to lowercase, for example: POWER ('E. E. Cummings ')=e e. cummings",
-      formulaUPPER:
-          "Convert string to uppercase, for example: UPPER ('total ')=Total",
-      formulaMID:
-          "Truncate the string MID (string, starting index, truncation length), for example: MID ('Fluid Flow ', 7, 20)=Flow",
-      formulaTRIM:
-          "Remove excess spaces from the string TRIM (string), for example: TRIM ('First Quarter ')=First Quarter",
+      formulaFIND: "Find a string (parameters:  n1, Find Handle 2, Find Target String 3, Start Find Subscript),  n Example: FIND ('M  ', 'Miriam McGovern ', 3)=8",
+      formulaLEFT: "Obtain N characters on the left side of the string, Left (string, truncation length), for example: Left ('Sale Price  ', 4)=Sale",
+      formulaRIGHT: "Obtain the N characters on the right side of the string, right (string, truncation length), for example: Right ('Sale Price ', 5)=Price",
+      formulaLEN: "Count the length of a string, for example: LEN ('abcdefgh ')=8",
+      formulaLOWER: "Convert a string to lowercase, for example: POWER ('E. E. Cummings ')=e e. cummings",
+      formulaUPPER: "Convert string to uppercase, for example: UPPER ('total ')=Total",
+      formulaMID: "Truncate the string MID (string, starting index, truncation length), for example: MID ('Fluid Flow ', 7, 20)=Flow",
+      formulaTRIM: "Remove excess spaces from the string TRIM (string), for example: TRIM ('First Quarter ')=First Quarter",
       formulaDateError: "Incorrect date format",
       formulaDateErrorMsg: "Date conversion error details",
       // formula - end
@@ -331,6 +309,7 @@ export default {
       collapseTags: 'Collapse Tags',
       checkStrictly: 'Any Level Selectable',
       showAllLevels: 'Show All Levels',
+      areaDataEnabled: 'Area Data Enabled',
       contentPosition: 'Content Position',
       dividerDirection: 'Direction',
       plain: 'Plain',
@@ -396,6 +375,8 @@ export default {
       appendButtonDisabled: 'Button Disabled',
       appendButtonIcon: 'Append Button Icon',
       buttonIcon: 'Button Icon',
+      appendText: 'Append Text',
+      textForAppend: 'Text For Append',
       switchWidth: 'Width of Switch(px)',
       activeText: 'Active Text',
       inactiveText: 'Inactive Text',

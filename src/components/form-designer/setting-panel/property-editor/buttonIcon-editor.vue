@@ -1,5 +1,5 @@
 <template>
-  <el-form-item :label="i18nt('designer.setting.appendButtonIcon')">
+  <el-form-item v-if="!selectedWidget.options.appendText" :label="i18nt('designer.setting.appendButtonIcon')">
     <icon-picker v-model="optionModel.buttonIcon"></icon-picker>
   </el-form-item>
 </template>

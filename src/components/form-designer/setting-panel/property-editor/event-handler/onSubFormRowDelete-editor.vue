@@ -24,7 +24,7 @@
     },
     data() {
       return {
-        eventParams: ['subFormData', 'deletedDataRow'],
+        eventParams: ['subFormData', 'deletedDataRow', 'deletedRowIndex'],
       }
     }
   }

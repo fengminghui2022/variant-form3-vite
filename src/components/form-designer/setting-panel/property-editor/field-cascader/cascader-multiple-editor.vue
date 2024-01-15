@@ -1,5 +1,5 @@
 <template>
-  <el-form-item :label="i18nt('designer.setting.multiple')">
+  <el-form-item v-if="!selectedWidget.options.areaDataEnabled" :label="i18nt('designer.setting.multiple')">
     <el-switch v-model="optionModel.multiple"></el-switch>
   </el-form-item>
 </template>

@@ -184,23 +184,26 @@ export function replaceFieldsAndFunctionsOfFormula(VFR, formulaFieldRef, changed
         //是否要考虑字符串值的替换？？
         resultFormula = resultFormula.replace(mi, fieldRef.getValue())
       } else {  //getWidgetRef找不到，则可能是子表单字段
-        if (!!changedFieldRef.subFormItemFlag) {
-          if (!formulaFieldRef.subFormItemFlag) {  //
-            /* 在主表单字段的计算公式中使用子表单字段，应将子表单所有记录同字段的值代入！！ */
-            const subFormValue = VFR.formDataModel[changedFieldRef.subFormName]
-            let allSubFieldValues = ''
-            const subFieldName = fieldSchema.options.name
-            subFormValue.forEach((vi, idx) => {
-              allSubFieldValues = (idx === 0) ? vi[subFieldName] : allSubFieldValues + ', ' + vi[subFieldName]
-            })
-            resultFormula = resultFormula.replaceAll(mi, allSubFieldValues)
-          } else {
-            let subFormRowId = changedFieldRef.subFormRowId
-            fieldRef = VFR.getWidgetRef(fieldSchema.options.name + '@row' + subFormRowId)
+        const subFormNameOfField = VFR.getSubFormNameOfWidget(fieldSchema.options.name)
+        if (!!formulaFieldRef.subFormItemFlag) {
+          /* 如果当前计算字段是子表单字段，要判断公式中的子表单字段是否和当前计算字段是否属于同一子表单！！ */
+          if (subFormNameOfField === formulaFieldRef.subFormName) {
+            fieldRef = VFR.getWidgetRef(fieldSchema.options.name + '@row' + formulaFieldRef.subFormRowId)
             if (!!fieldRef) {
               resultFormula = resultFormula.replaceAll(mi, fieldRef.getValue())
             }
+          } else {
+            console.error('Invalid formula!')
           }
+        } else {
+          /* 在主表单字段的计算公式中使用子表单字段，应将子表单所有记录同字段的值代入！！ */
+          const subFormValue = VFR.formDataModel[subFormNameOfField]
+          let allSubFieldValues = ''
+          const subFieldName = fieldSchema.options.name
+          subFormValue.forEach((vi, idx) => {
+            allSubFieldValues = (idx === 0) ? vi[subFieldName] : allSubFieldValues + ', ' + vi[subFieldName]
+          })
+          resultFormula = resultFormula.replaceAll(mi, allSubFieldValues)
         }
       }
     }

@@ -101,6 +101,7 @@ export const containers = [
     widgetList: [],
     options: {
       name: '',
+      label: '',
       showBlankRow: true,
       showRowNumber: true,
       labelAlign: 'label-center-align',
@@ -123,6 +124,7 @@ export const containers = [
     widgetList: [],
     options: {
       name: '',
+      label: '',
       showBlankRow: true,
       showRowNumber: true,
       hidden: false,
@@ -617,6 +619,8 @@ export const basicFields = [
       appendButton: false,
       appendButtonDisabled: false,
       buttonIcon: 'custom-search',
+      appendText: false,
+      textForAppend: '',
       //-------------------
       onCreated: '',
       onMounted: '',
@@ -1450,6 +1454,8 @@ export const advancedFields = [
       labelKey: 'label',
       valueKey: 'value',
       childrenKey: 'children',
+      areaDataEnabled: false,  //是否加载省市区数据
+      areaDataType: 0, //0不开启，1加载省市数据，2加载省市区数据
       optionItems: [
         {label: 'select 1', value: 1, children: [{label: 'child 1', value: 11}]},
         {label: 'select 2', value: 2},

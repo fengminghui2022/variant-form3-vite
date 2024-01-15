@@ -1,5 +1,5 @@
 <template>
-  <el-form-item :label="i18nt('designer.setting.showAllLevels')">
+  <el-form-item v-if="!selectedWidget.options.areaDataEnabled" :label="i18nt('designer.setting.showAllLevels')">
     <el-switch v-model="optionModel.showAllLevels"></el-switch>
   </el-form-item>
 </template>

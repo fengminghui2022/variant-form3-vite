@@ -18,9 +18,17 @@
         <el-button :disabled="field.options.disabled || field.options.appendButtonDisabled"
                    @click="emitAppendButtonClick"><el-icon><component :is="field.options.buttonIcon" /></el-icon></el-button>
       </template>
+      <template #append v-else-if="field.options.appendText">
+        {{field.options.textForAppend}}
+      </template>
     </el-input>
     <template v-if="isReadMode">
-      <span class="readonly-mode-field">{{contentForReadMode}}</span>
+      <template v-if="field.options.type === 'password'">
+        <span class="readonly-mode-field">********</span>
+      </template>
+      <template v-else>
+        <span class="readonly-mode-field">{{contentForReadMode}}</span>
+      </template>
     </template>
   </form-item-wrapper>
 </template>

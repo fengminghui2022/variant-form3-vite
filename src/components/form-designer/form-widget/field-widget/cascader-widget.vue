@@ -3,7 +3,7 @@
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <div class="full-width-input" :class="{'readonly-mode-cascader' : isReadMode}">
-      <el-cascader ref="fieldEditor" :options="field.options.optionItems" v-model="fieldModel"
+      <el-cascader ref="fieldEditor" :options="cascaderOptions" v-model="fieldModel"
                    :disabled="field.options.disabled || isReadMode"
                    :clearable="field.options.clearable"
                    :filterable="field.options.filterable"
@@ -26,6 +26,10 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {
+    pcTextArr,
+    pcaTextArr,
+  } from "element-china-area-data";
 
   export default {
     name: "cascader-widget",
@@ -93,6 +97,16 @@
           return checkedNodes.map(nodeItem => nodeItem.text).join(", ")
         }
       },
+
+      cascaderOptions() {
+        if (this.field.options.areaDataEnabled && (this.field.options.areaDataType === 1)) {
+          return pcTextArr
+        } else if (this.field.options.areaDataEnabled && (this.field.options.areaDataType === 2)) {
+          return pcaTextArr
+        }
+
+        return this.field.options.optionItems
+      }
 
     },
     beforeCreate() {

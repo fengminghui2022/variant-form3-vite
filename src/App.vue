@@ -89,7 +89,7 @@ export default {
     },
 
     handleFWU(fwName) {
-      console.error(fwName)
+      console.info(fwName)
     },
 
     handleFWR(fwName) {

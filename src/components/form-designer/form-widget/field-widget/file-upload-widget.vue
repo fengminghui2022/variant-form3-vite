@@ -16,7 +16,9 @@
              v-if="!!field.options.uploadTip">{{field.options.uploadTip}}</div>
       </template>
       <template #default>
-        <svg-icon icon-class="el-plus" /><i class="el-icon-plus avatar-uploader-icon"></i>
+        <template v-if="!field.options.disabled && !isReadMode">
+          <svg-icon icon-class="el-plus" /><i class="el-icon-plus avatar-uploader-icon"></i>
+        </template>
       </template>
       <template #file="{ file }">
         <div class="upload-file-list">

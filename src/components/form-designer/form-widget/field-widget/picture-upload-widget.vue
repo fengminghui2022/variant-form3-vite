@@ -16,7 +16,9 @@
         <div class="el-upload__tip"
              v-if="!!field.options.uploadTip">{{field.options.uploadTip}}</div>
       </template>
-      <div class="uploader-icon"><svg-icon icon-class="el-plus" /></div>
+      <template v-if="!field.options.disabled && !isReadMode">
+        <div class="uploader-icon"><svg-icon icon-class="el-plus" /></div>
+      </template>
     </el-upload>
 
     <div v-if="showPreviewDialogFlag" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">

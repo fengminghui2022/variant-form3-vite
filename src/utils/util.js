@@ -77,6 +77,17 @@ export const hasPropertyOfObject = function(obj, propPath) {
   return result
 }
 
+export const objectKeysToArray = function(obj) {
+  if (!obj) return []
+
+  const resultArray = []
+  Object.keys(obj).forEach(key => {
+    resultArray.push(key)
+  })
+
+  return resultArray
+}
+
 function isDef(value) {
   return value !== undefined && value !== null
 }

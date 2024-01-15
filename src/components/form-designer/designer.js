@@ -709,17 +709,6 @@ export function createDesigner(vueInstance) {
       newGridCol.id = 'grid-col-' + tmpId
       newGridCol.options.name = 'gridCol' + tmpId
 
-      // if (widget.widgetList.length === 1) {
-      //   const firstChildWidget = widget.widgetList[0]
-      //   if (!firstChildWidget.category) { //非容器组件
-      //     let newField = deepClone(firstChildWidget)
-      //     const tempId = generateId()
-      //     newField.id = newField.type.replace(/-/g, '') + tempId
-      //     newField.options.name = newField.id
-      //     newGridCol.widgetList.push(newField)
-      //   }
-      // }
-
       newGridCol.widgetList = deepClone(widget.widgetList)
       const fwHandler = (fw) => {
         fw.options.name = fw.type.replace(/-/g, '') + generateId()
@@ -857,6 +846,10 @@ export function createDesigner(vueInstance) {
       let newCon = deepClone(origin)
       newCon.id = newCon.type.replace(/-/g, '') + generateId()
       newCon.options.name = newCon.id
+      if (newCon.options.hasOwnProperty('label')) {
+        newCon.options.label = newCon.id
+      }
+
       if (newCon.type === 'grid') {
         if (newCon.alias === 'column-1-grid') {
           this.buildColsOfGrid(newCon, 1)

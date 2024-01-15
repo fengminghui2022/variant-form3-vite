@@ -1,8 +1,13 @@
 <template>
+  <template v-if="!!selectedWidget.options.areaDataEnabled" >
+    <el-form-item :label="i18nt('designer.setting.areaDataEnabled')">
+      <el-switch v-model="optionModel.areaDataEnabled" disabled></el-switch>
+    </el-form-item>
+  </template>
   <template v-if="!!selectedWidget.optionItemsReadonly">
     <div style="display: none" />
   </template>
-  <template v-else>
+  <template v-else-if="!selectedWidget.options.areaDataEnabled">
     <el-form-item label-width="0">
       <el-divider class="custom-divider-margin-top">{{i18nt('designer.setting.optionsSetting')}}</el-divider>
     </el-form-item>

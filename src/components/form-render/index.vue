@@ -60,7 +60,7 @@
     getFieldWidgetById,
     hasPropertyOfObject,
     getObjectValue,
-    setObjectValue, deleteCustomStyleAndScriptNode
+    setObjectValue, deleteCustomStyleAndScriptNode, objectKeysToArray
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
@@ -645,10 +645,10 @@
             if (customValid) {
               callback(this.formDataModel)
             } else {
-              callback(this.formDataModel, this.i18nt('render.hint.validationFailed'))
+              callback(this.formDataModel, this.i18nt('render.hint.validationFailed') + ': ' + JSON.stringify(objectKeysToArray(invalidFields)))
             }
           } else {
-            callback(this.formDataModel, this.i18nt('render.hint.validationFailed'))
+            callback(this.formDataModel, this.i18nt('render.hint.validationFailed') + ': ' + JSON.stringify(objectKeysToArray(invalidFields)))
           }
         })
 
@@ -779,13 +779,13 @@
        * @param callback 回调函数
        */
       validateForm(callback) {
-        this.$refs['renderForm'].validate((valid, obj) => {
+        this.$refs['renderForm'].validate((valid, invalidFields) => {
           if (valid) {
             //执行表单自定义校验
             let customValid = this.doCustomValidation();
-            callback(customValid, obj)
+            callback(customValid, invalidFields)
           } else {
-            callback(valid, obj)
+            callback(valid, invalidFields)
           }
         })
       },
@@ -893,6 +893,23 @@
             sw.setRequired(required)
           }
         })
+      },
+
+      getSubFormNameOfWidget(widgetName) {
+        let result = []
+        let subFormName = null
+        Object.keys(this.subFormRefList).forEach(sfName => {
+          const fwHandler = (fw) => {
+            if (fw.options.name === widgetName) {
+              subFormName = sfName
+            }
+          }
+
+          const sfRef = this.subFormRefList[sfName]
+          traverseFieldWidgetsOfContainer(sfRef.widget, fwHandler)
+        })
+
+        return subFormName
       },
 
       /**

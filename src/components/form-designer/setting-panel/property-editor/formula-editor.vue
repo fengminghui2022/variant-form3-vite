@@ -351,7 +351,7 @@ export default {
         const subFormNode = {
           id: sf.id,
           name: sf.options.name,
-          label:sf.options.name || sf.type,
+          label: sf.options.label || sf.options.name,
           type: sf.type,
           formItemFlag: false,
           children: []
