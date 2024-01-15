@@ -40,6 +40,7 @@
   import { createVNode, render } from 'vue'
   import emitter from '@/utils/emitter'
   import './container-item/index'
+  //TODO ahao:渲染器中字段组件由此导入
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import {
     generateId,
@@ -237,6 +238,7 @@
       },
 
       getWidgetName(widget) {
+        console.log(' widget.type ',  widget.type + '-widget');
         return widget.type + '-widget'
       },
 

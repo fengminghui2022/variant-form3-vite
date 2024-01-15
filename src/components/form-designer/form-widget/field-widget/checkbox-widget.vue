@@ -6,12 +6,12 @@
                        :disabled="field.options.disabled"
                        @change="handleChangeEvent">
       <template v-if="!!field.options.buttonStyle">
-        <el-checkbox-button v-for="(item, index) in field.options.optionItems" :key="index" :label="item.value"
+        <el-checkbox-button v-for="(item, index) in optionItems" :key="index" :label="item.value"
                             :disabled="item.disabled" :border="field.options.border"
                             :style="{display: field.options.displayStyle}">{{item.label}}</el-checkbox-button>
       </template>
       <template v-else>
-        <el-checkbox v-for="(item, index) in field.options.optionItems" :key="index" :label="item.value"
+        <el-checkbox v-for="(item, index) in optionItems" :key="index" :label="item.value"
                      :disabled="item.disabled" :border="field.options.border"
                      :style="{display: field.options.displayStyle}">{{item.label}}</el-checkbox>
       </template>
@@ -27,6 +27,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {CustomRequest} from "@/api/server"
 
   export default {
     name: "checkbox-widget",
@@ -57,6 +58,7 @@
         default: ''
       },
 
+
     },
     components: {
       FormItemWrapper,
@@ -66,6 +68,7 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        optionItems:[]
       }
     },
     computed: {
@@ -89,6 +92,16 @@
 
     mounted() {
       this.handleOnMounted()
+      //数据源模式
+      if(this.field.options.optionSourceFlag){
+        const optionsParams=this.field.options.optionParamsSource
+        CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
+          let dataStructure=JSON.parse(optionsParams.widgetResult)
+          this.optionItems=res[dataStructure.key].length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
+        })
+      }else{
+        this.optionItems=this.field.options.optionItems
+      }
     },
 
     beforeUnmount() {

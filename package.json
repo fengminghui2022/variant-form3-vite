@@ -3,7 +3,7 @@
   "version": "3.3.0",
   "private": false,
   "scripts": {
-    "serve": "vite",
+    "serve": "vite --host",
     "build": "vite build",
     "lib": "vite build --config vite-lib.config.js",
     "lib-render": "vite build --config vite-lib-render.config.js",
@@ -20,6 +20,7 @@
     "dayjs": "^1.11.7",
     "element-plus": "^2.3.4",
     "file-saver": "^2.0.5",
+    "js-cookie": "^3.0.1",
     "mitt": "^3.0.0",
     "sortablejs": "1.14.0",
     "vue": "^3.2.26",

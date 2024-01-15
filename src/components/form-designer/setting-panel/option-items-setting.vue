@@ -6,7 +6,7 @@
         <el-option :label="i18nt('designer.setting.dsRequestValueNumberType')" value="Number"></el-option>
       </el-select>
     </el-form-item>
-    <el-radio-group v-if="(selectedWidget.type === 'radio') || ((selectedWidget.type === 'select') && !selectedWidget.options.multiple)"
+    <el-radio-group v-if="((selectedWidget.type === 'radio') || ((selectedWidget.type === 'select') && !selectedWidget.options.multiple)) && !optionModel.optionSourceFlag"
                     v-model="optionModel.defaultValue" @change="emitDefaultValueChange">
       <draggable tag="ul" :list="optionModel.optionItems" item-key="id"
                  v-bind="{group:'optionsGroup', ghostClass: 'ghost', handle: '.drag-option'}">
@@ -23,7 +23,7 @@
         </template>
       </draggable>
     </el-radio-group>
-    <el-checkbox-group v-else-if="(selectedWidget.type === 'checkbox') || ((selectedWidget.type === 'select') && selectedWidget.options.multiple)"
+    <el-checkbox-group v-else-if="((selectedWidget.type === 'checkbox') || ((selectedWidget.type === 'select') && selectedWidget.options.multiple)) && !optionModel.optionSourceFlag"
                     v-model="optionModel.defaultValue" @change="emitDefaultValueChange">
       <draggable tag="ul" :list="optionModel.optionItems" item-key="id"
                  v-bind="{group:'optionsGroup', ghostClass: 'ghost', handle: '.drag-option'}">
@@ -40,21 +40,37 @@
         </template>
       </draggable>
     </el-checkbox-group>
-    <div v-else-if="(selectedWidget.type === 'cascader')" class="full-width-input">
+    <div v-else-if="(selectedWidget.type === 'cascader') && optionModel.optionItems.length" class="full-width-input">
       <el-cascader v-model="optionModel.defaultValue" :options="optionModel.optionItems"
                    @change="emitDefaultValueChange"
                    :placeholder="i18nt('render.hint.selectPlaceholder')">
       </el-cascader>
     </div>
+    <el-row v-else>
+      <el-col :span="8">元数据</el-col>
+      <el-col :span="16">
+        <el-select  ref="selectOptionRef" v-model="optionModel.optionParamsSource" @change="assignDataSource($event,true)" value-key="widgetId" placeholder="请选择" size="small">
+          <el-option v-for="item in optionDataSource"
+              :key="item.widgetId"
+              :label="item.widgetName"
+              :value="item"/>
+        </el-select>
+      </el-col>
+    </el-row>
+    <!-- TODO ahao:数据源导入----以下为数据操作栏 -->
     <div v-if="(selectedWidget.type === 'cascader')">
       <el-button link type="primary" @click="importCascaderOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
       <el-button link type="primary" @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
+      <!-- 绑定数据源 -->
+      <el-button link type="primary" @click="assignDataSource(null,true)">{{i18nt('designer.setting.importOptionDataSource')}}</el-button>
     </div>
 
     <div v-if="(selectedWidget.type === 'radio') || (selectedWidget.type === 'checkbox') || (selectedWidget.type === 'select')">
       <el-button link type="primary" @click="addOption">{{i18nt('designer.setting.addOption')}}</el-button>
-      <el-button link type="primary" @click="importOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
+      <el-button link type="primary" @click="importOptions(selectedWidget.type)">{{i18nt('designer.setting.importOptions')}}</el-button>
       <el-button link type="primary" @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
+      <!-- 绑定数据源 -->
+      <el-button link type="primary" @click="assignDataSource(null,true)">{{i18nt('designer.setting.importOptionDataSource')}}</el-button>
     </div>
 
     <div v-if="showImportDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
@@ -93,6 +109,7 @@
 <script>
   import CodeEditor from '@/components/code-editor/index'
   import i18n from "@/utils/i18n";
+  import {getSelectSourceOptions} from '@/api/path/options'
 
   export default {
     name: "OptionItemsSetting",
@@ -129,6 +146,12 @@
           //console.log('888888', 'Options change!')
         }
       },
+    },
+    mounted(){
+      getSelectSourceOptions().then(res=>{
+          console.log('res: ', res);
+          this.optionDataSource=res.rows
+        })
     },
     methods: {
       handelValueTypeChange(valueType) {
@@ -174,6 +197,7 @@
       },
 
       addOption() {
+        this.assignDataSource(null)
         let newValue = this.optionModel.optionItems.length + 1
         this.optionModel.optionItems.forEach(oi => {
           if (Number.isFinite(oi.value) && (oi.value >= newValue)) {
@@ -187,7 +211,34 @@
         })
       },
 
+      /**
+       *
+       * @param {object} source 赋值数据源参数
+       * @param {*} flag 是否选择数据源模式
+       * @description 赋值/重置数据源参数
+       */
+       assignDataSource(source,flag=false){
+        console.log('this.optionDataSource: ', this.optionDataSource);
+
+        this.optionModel.optionSourceFlag=flag
+        if(flag) this.optionModel.optionItems.splice(0)
+        // this.optionModel.optionParamsSource=source||{
+        //   widgetCode:null,
+        //   widgetDesc:null,
+        //   widgetHeader:null,
+        //   widgetId:null,
+        //   widgetMethod:null,
+        //   widgetName:null,
+        //   widgetResult:null,
+        //   widgetUrl:null,
+        // }
+
+      },
+      /**
+       * 导入下拉选项死数据
+       */
       importOptions() {
+        this.assignDataSource(null)
         this.optionLines = ''
         if (this.optionModel.optionItems.length > 0) {
           this.optionModel.optionItems.forEach((opt) => {
@@ -203,6 +254,7 @@
       },
 
       saveOptions() {
+        this.assignDataSource(null)
         let lineArray = this.optionLines.split('\n')
         //console.log('test', lineArray)
         if (lineArray.length > 0) {

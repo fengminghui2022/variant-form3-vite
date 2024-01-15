@@ -3,7 +3,7 @@
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <div class="full-width-input" :class="{'readonly-mode-cascader' : isReadMode}">
-      <el-cascader ref="fieldEditor" :options="field.options.optionItems" v-model="fieldModel"
+      <el-cascader ref="fieldEditor" :options="optionItems" v-model="fieldModel"
                    :disabled="field.options.disabled || isReadMode"
                    :clearable="field.options.clearable"
                    :filterable="field.options.filterable"
@@ -26,6 +26,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {CustomRequest} from "@/api/server"
 
   export default {
     name: "cascader-widget",
@@ -65,6 +66,8 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        optionItems:[]
+
       }
     },
     computed: {
@@ -113,6 +116,16 @@
 
     mounted() {
       this.handleOnMounted()
+      //数据源模式
+      if(this.field.options.optionSourceFlag){
+        const optionsParams=this.field.options.optionParamsSource
+        CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
+          let dataStructure=optionsParams.widgetResult
+          this.optionItems=res[dataStructure.key].length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
+        })
+      }else{
+        this.optionItems=this.field.options.optionItems
+      }
     },
 
     beforeUnmount() {
@@ -125,7 +138,7 @@
         setTimeout(() => {
           document.querySelectorAll(".el-cascader-panel .el-radio").forEach((el) => {
             el.onclick = () => {
-              console.log('test====', 1111)
+              
               this.$refs.fieldEditor.popperVisible = false // 单选框部分点击隐藏下拉框
             }
           })
