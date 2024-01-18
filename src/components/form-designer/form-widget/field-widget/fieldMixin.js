@@ -791,7 +791,7 @@ export default {
 
     /**
      * 
-     * @returns 组件属性
+     * @returns 组件属性 //TODO ahao:暴露组件属性
      */
     getOptionsAttribute(){
       return this.field.options

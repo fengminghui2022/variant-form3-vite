@@ -46,23 +46,20 @@
                    :placeholder="i18nt('render.hint.selectPlaceholder')">
       </el-cascader>
     </div>
-    <el-row v-else>
-      <el-col :span="8">元数据</el-col>
-      <el-col :span="16">
-        <el-select  ref="selectOptionRef" v-model="optionModel.optionParamsSource" @change="assignDataSource($event,true)" value-key="widgetId" placeholder="请选择" size="small">
+    <el-form-item v-else label="元数据">
+      <el-select  ref="selectOptionRef" v-model="optionModel.optionParamsSource" @change="assignDataSource(true)" value-key="widgetId" placeholder="请选择" size="small">
           <el-option v-for="item in optionDataSource"
               :key="item.widgetId"
               :label="item.widgetName"
               :value="item"/>
-        </el-select>
-      </el-col>
-    </el-row>
+      </el-select>
+    </el-form-item>
     <!-- TODO ahao:数据源导入----以下为数据操作栏 -->
     <div v-if="(selectedWidget.type === 'cascader')">
       <el-button link type="primary" @click="importCascaderOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
       <el-button link type="primary" @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
       <!-- 绑定数据源 -->
-      <el-button link type="primary" @click="assignDataSource(null,true)">{{i18nt('designer.setting.importOptionDataSource')}}</el-button>
+      <el-button link type="primary" @click="assignDataSource(true)">{{i18nt('designer.setting.importOptionDataSource')}}</el-button>
     </div>
 
     <div v-if="(selectedWidget.type === 'radio') || (selectedWidget.type === 'checkbox') || (selectedWidget.type === 'select')">
@@ -70,7 +67,7 @@
       <el-button link type="primary" @click="importOptions(selectedWidget.type)">{{i18nt('designer.setting.importOptions')}}</el-button>
       <el-button link type="primary" @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
       <!-- 绑定数据源 -->
-      <el-button link type="primary" @click="assignDataSource(null,true)">{{i18nt('designer.setting.importOptionDataSource')}}</el-button>
+      <el-button link type="primary" @click="assignDataSource(true)">{{i18nt('designer.setting.importOptionDataSource')}}</el-button>
     </div>
 
     <div v-if="showImportDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
@@ -131,6 +128,7 @@
 
         //separator: '||',
         separator: ',',
+        optionDataSource:[]
       }
     },
     computed: {
@@ -147,11 +145,8 @@
         }
       },
     },
-    mounted(){
-      getSelectSourceOptions().then(res=>{
-          console.log('res: ', res);
-          this.optionDataSource=res.rows
-        })
+    created(){
+      this.optionModel.optionSourceFlag&&this.getSourceData()
     },
     methods: {
       handelValueTypeChange(valueType) {
@@ -197,7 +192,7 @@
       },
 
       addOption() {
-        this.assignDataSource(null)
+        this.assignDataSource()
         let newValue = this.optionModel.optionItems.length + 1
         this.optionModel.optionItems.forEach(oi => {
           if (Number.isFinite(oi.value) && (oi.value >= newValue)) {
@@ -211,17 +206,26 @@
         })
       },
 
+      getSourceData(){
+        getSelectSourceOptions().then(res=>{
+          this.optionDataSource=res.rows
+        })
+      },
+
       /**
        *
        * @param {object} source 赋值数据源参数
        * @param {*} flag 是否选择数据源模式
        * @description 赋值/重置数据源参数
        */
-       assignDataSource(source,flag=false){
-        console.log('this.optionDataSource: ', this.optionDataSource);
+       assignDataSource(flag=false){
 
         this.optionModel.optionSourceFlag=flag
-        if(flag) this.optionModel.optionItems.splice(0)
+        //清空死数据
+        if(flag) {
+          this.optionModel.optionItems.splice(0)
+          this.getSourceData()
+        }
         // this.optionModel.optionParamsSource=source||{
         //   widgetCode:null,
         //   widgetDesc:null,
@@ -238,7 +242,7 @@
        * 导入下拉选项死数据
        */
       importOptions() {
-        this.assignDataSource(null)
+        this.assignDataSource()
         this.optionLines = ''
         if (this.optionModel.optionItems.length > 0) {
           this.optionModel.optionItems.forEach((opt) => {
@@ -254,7 +258,7 @@
       },
 
       saveOptions() {
-        this.assignDataSource(null)
+        this.assignDataSource()
         let lineArray = this.optionLines.split('\n')
         //console.log('test', lineArray)
         if (lineArray.length > 0) {
