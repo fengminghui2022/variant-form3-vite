@@ -66,7 +66,8 @@
   import i18n, { changeLocale } from "@/utils/i18n"
   import DynamicDialog from './dynamic-dialog'
   import DynamicDrawer from './dynamic-drawer'
-
+  import {getSelectSourceOptions} from '@/api/path/options'
+  import { computed } from '@vue/runtime-core'
   export default {
     name: "VFormRender",
     componentName: 'VFormRender',
@@ -136,6 +137,7 @@
         getObjectFieldFlag: () => false,  //是否对象容器字段
         getObjectName: () => '',  //返回对象容器的名称
         getDSResultCache: () => this.dsResultCache,
+        optionDataSource:computed(()=>this.optionDataSource)
       }
     },
     data() {
@@ -156,6 +158,7 @@
         childFormRef: null, //保存子级VFormRender组件的ref
 
         dsResultCache: {},  //数据源请求结果缓存
+        optionDataSource:[]
       }
     },
     computed: {
@@ -200,6 +203,11 @@
       //
     },
     created() {
+      //全局挂载元数据数组
+      getSelectSourceOptions().then(res=>{
+        this.optionDataSource=res.rows
+        console.log('this.optionDataSource: ', this.optionDataSource);
+      })
       this.buildFormModel(!this.formJsonObj ? null : this.formJsonObj.widgetList)
       this.initFormObject()
     },
