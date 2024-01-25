@@ -99,6 +99,8 @@
     getAllFormTemplates
   } from "@/components/form-designer/widget-panel/templatesConfig";
   import { CaretLeft, CaretRight } from '@element-plus/icons-vue'
+  import {getSelectSourceOptions} from '@/api/path/options'
+  import { computed } from 'vue'
 
   export default {
     name: "VFormDesigner",
@@ -212,6 +214,7 @@
 
         leftAsideVisible: true,
         rightAsideVisible: true,
+        optionDataSource:[]
       }
     },
     provide() {
@@ -221,6 +224,7 @@
         getDesignerConfig: () => this.designerConfig,
         getBannedWidgets: () => this.bannedWidgets,
         getTestOptionData: () => this.optionData,
+        optionDataSource:computed(()=>this.optionDataSource)
       }
     },
     computed: {
@@ -260,6 +264,11 @@
       })
       this.designer.handleEvent('canvas-remove-container', () => {
         this.$emit('form-json-updated', 'canvas-remove-container')
+      })
+      //全局挂载元数据数组
+      getSelectSourceOptions().then(res=>{
+        this.optionDataSource=res.rows
+        console.log('this.optionDataSource: ', this.optionDataSource);
       })
     },
     mounted() {

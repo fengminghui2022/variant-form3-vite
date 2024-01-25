@@ -106,7 +106,6 @@
 <script>
   import CodeEditor from '@/components/code-editor/index'
   import i18n from "@/utils/i18n";
-  import {getSelectSourceOptions} from '@/api/path/options'
 
   export default {
     name: "OptionItemsSetting",
@@ -118,6 +117,7 @@
       designer: Object,
       selectedWidget: Object,
     },
+    inject:['optionDataSource'],
     data() {
       return {
         showImportDialogFlag: false,
@@ -128,7 +128,6 @@
 
         //separator: '||',
         separator: ',',
-        optionDataSource:[]
       }
     },
     computed: {
@@ -146,7 +145,6 @@
       },
     },
     created(){
-      this.optionModel.optionSourceFlag&&this.getSourceData()
     },
     methods: {
       handelValueTypeChange(valueType) {
@@ -206,12 +204,6 @@
         })
       },
 
-      getSourceData(){
-        getSelectSourceOptions().then(res=>{
-          this.optionDataSource=res.rows
-        })
-      },
-
       /**
        *
        * @param {object} source 赋值数据源参数
@@ -224,7 +216,6 @@
         //清空死数据
         if(flag) {
           this.optionModel.optionItems.splice(0)
-          this.getSourceData()
         }
         // this.optionModel.optionParamsSource=source||{
         //   widgetCode:null,

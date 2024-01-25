@@ -63,16 +63,36 @@
     components: {
       FormItemWrapper,
     },
+    inject:['optionDataSource'],
     data() {
       return {
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
-        optionItems:[]
+        optionItems:[],
       }
     },
     computed: {
 
+    },
+    watch:{
+      optionDataSource:{
+        handler(newValue){
+          //数据源模式
+          if(this.field.options.optionSourceFlag){
+            const optionsParams=newValue.find(v=>v.widgetId==this.field.options.optionParamsSource.widgetId)
+            if(!optionsParams) return
+            CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
+              let dataStructure=JSON.parse(optionsParams.widgetResult)
+              this.optionItems=res[dataStructure.key].length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
+            })
+          }else{
+            this.optionItems=this.field.options.optionItems
+          }
+        },
+        deep:true,
+        immediate:true
+      }
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */
@@ -92,16 +112,6 @@
 
     mounted() {
       this.handleOnMounted()
-      //数据源模式
-      if(this.field.options.optionSourceFlag){
-        const optionsParams=this.field.options.optionParamsSource
-        CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,optionsParams?.widgetData??null).then(res=>{
-          let dataStructure=JSON.parse(optionsParams.widgetResult)
-          this.optionItems=res[dataStructure.key].length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
-        })
-      }else{
-        this.optionItems=this.field.options.optionItems
-      }
     },
 
     beforeUnmount() {

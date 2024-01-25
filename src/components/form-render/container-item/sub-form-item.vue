@@ -1,4 +1,4 @@
-<!-- TODO ahao:  子表单渲染区 -->
+<!-- TODO ahao:  子表单渲染区(包含新增、删除按钮等) -->
 <template>
   <container-item-wrapper :widget="widget">
 
@@ -75,9 +75,9 @@
         </template>
         <div v-if="!leftActionColumn" class="sub-form-action-column hide-label">
           <div class="action-button-column">
-            <el-button :disabled="widgetDisabled || actionDisabled || insertDisabled"
+            <!-- <el-button :disabled="widgetDisabled || actionDisabled || insertDisabled"
                        circle @click="insertSubFormRow(sfrIdx)"
-                       v-show="!isReadMode" :title="i18nt('render.hint.insertSubFormRow')"><svg-icon icon-class="el-plus" /></el-button>
+                       v-show="!isReadMode" :title="i18nt('render.hint.insertSubFormRow')"><svg-icon icon-class="el-plus" /></el-button> -->
             <el-button :disabled="widgetDisabled || actionDisabled || deleteDisabled"
                        circle @click="deleteSubFormRow(sfrIdx)"
                        v-show="!isReadMode" :title="i18nt('render.hint.deleteSubFormRow')"><svg-icon icon-class="el-delete" /></el-button>
