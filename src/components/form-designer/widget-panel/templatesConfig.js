@@ -1,4 +1,12 @@
+import customJson from './customPage.json'
+const json=JSON.stringify(customJson)
 export const formTemplates = [
+  {
+    title: '自定义表单',
+    imgUrl: 'https://backend.furenyun.com/file/default/defaultBucket/1750718500554932225.jpeg',
+    jsonStr:  json,
+    description: '各项自定义功能集合的表单'
+  },
   {
     title: '单列表单',
     imgUrl: 'https://ks3-cn-beijing.ksyuncs.com/vform-static/form-samples/t1.png',

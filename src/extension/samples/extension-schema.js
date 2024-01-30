@@ -9,11 +9,11 @@ export const cardSchema = {
     label: 'card',
     hidden: false,
     headerHidden: false,
-    folded: false,
-    showFold: true,
-    cardWidth: '100%',
-    shadow: 'never',
-    customClass: '',
+    folded: false,//是否折叠状态
+    showFold: true,//是否显示折叠切换按钮
+    cardWidth: '100%',//卡片宽度，百分比或像素宽度
+    shadow: 'never',//是否显示阴影
+    customClass: '',//自定义css样式
   }
 }
 

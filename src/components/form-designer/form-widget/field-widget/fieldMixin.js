@@ -691,14 +691,14 @@ export default {
 
     //--------------------- 事件处理 end ------------------//
 
-    //--------------------- //TODO ahao: 以下为组件支持外部调用的API方法 begin ------------------//
+    //--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
     /* 提示：用户可自行扩充这些方法！！！ */
 
     getFormRef() { /* 获取VFrom引用，必须在VForm组件created之后方可调用 */
       return this.refList['v_form_ref']
     },
 
-    getWidgetRef(widgetName, showError) {
+    getWidgetRef(widgetName, showError=true) {
       let foundRef = this.refList[widgetName]
       if (!foundRef && !!showError) {
         this.$message.error(this.i18nt('render.hint.refNotFound') + widgetName)
@@ -787,14 +787,6 @@ export default {
       } else {  //重建组件校验规则
         this.buildFieldRules()
       }
-    },
-
-    /**
-     * 
-     * @returns 组件属性 //TODO ahao:暴露组件属性
-     */
-    getOptionsAttribute(){
-      return this.field.options
     },
 
     setRequired(flag) {
@@ -950,6 +942,25 @@ export default {
         this.field.options.customClass.splice(foundIdx, 1)
       }
     },
+
+    /**--------- //TODO ahao: 以下本地自定义开发方法区，作者自带的上方 ------*/
+
+    /**
+     * @returns 组件属性 //TODO ahao:暴露组件属性（如是否隐藏、只读等
+     */
+    getOptionsAttribute(){
+      return this.field.options
+    },
+
+    /**
+     * 拓展元数据请求入参，可实现组件之间的请求参数联动
+     * @param {string} fieldName 需要变更的字段组件
+     */
+    expandDataSourceParams(fieldName,expandParams=null){
+      console.log('expandParams: ', this);
+      if(!fieldName)this.$message.error('元数据拓展失败，请输入有效组件名')
+      this.getWidgetRef(fieldName).renderDataSourceOption(expandParams)
+    }
 
     //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
 
