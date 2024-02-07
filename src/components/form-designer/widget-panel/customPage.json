@@ -93,7 +93,7 @@
                 "onCreated": "",
                 "onMounted": "",
                 "onRemoteQuery": "",
-                "onChange": "//工装编号控制任务单号的下拉项，任务单号选择后可以回填工装编号，此为相互关联的项\nconst items=this.optionItems\nconst taskNum=this.getWidgetRef('taskNum')//任务单号\n//清空时对其他项置空\nif(!value){\n  taskNum.setValue('')\n  taskNum.renderDataSourceOption({})\n  return\n}\nconst chooseItem= items.find(v=>v.value==value)\nif(chooseItem){\n  //对互相影响的任务单号进行请求参数变更，以及清空其当前值\n  taskNum.renderDataSourceOption({workEffortId:value})\n  //只有之前有值的情况下进行值的切换，才会对任务单号进行清空\n  //这样就能避免任务单号选择后回显时，继续触发编号的change事件，然后将选好的单号清空\n  if(oldValue){\n    taskNum.setValue('')\n  }\n}\n",
+                "onChange": "//工装编号控制任务单号的下拉项，任务单号选择后可以回填工装编号，此为相互关联的项\nconst items=this.optionItems\nconst taskNum=this.getWidgetRef('taskNum')//任务单号\nif(!value){\n  taskNum.setValue('')//清空时对关联项置空\n  taskNum.renderDataSourceOption({})//清空时对关联项的元数据请求置空\n  return\n}\nconst chooseItem= items.find(v=>v.value==value)\nif(chooseItem){\n  //对互相影响的任务单号进行请求参数变更，以及清空其当前值\n  taskNum.renderDataSourceOption({workEffortId:value})\n  //只有之前有值的情况下进行值的切换，才会对任务单号进行清空\n  //这样就能避免任务单号选择后回显时，继续触发编号的change事件，然后将选好的单号清空的bug\n  if(oldValue){\n    taskNum.setValue('')\n  }\n}\n",
                 "onFocus": "",
                 "onBlur": "",
                 "onValidate": ""

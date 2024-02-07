@@ -222,6 +222,7 @@ export default {
       urlValidator: '网址',
       noChineseValidator: '非中文字符',
       chineseValidator: '仅中文字符',
+      naturalNumValidator:'自然数',
 
       rowspanNotConsistentForMergeEntireRow: '存在行高不一致的单元格, 无法合并整行.',
       colspanNotConsistentForMergeEntireColumn: '存在列宽不一致的单元格, 无法合并整列.',

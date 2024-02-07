@@ -923,10 +923,10 @@
 
       /**
        * 获取所有字段组件
-       * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认不包含
+       * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认包含
        * @returns {*[]}
        */
-      getFieldWidgets(staticWidgetsIncluded = false) {
+      getFieldWidgets(staticWidgetsIncluded = true) {
         return getAllFieldWidgets(this.formJsonObj.widgetList, staticWidgetsIncluded)
       },
 

@@ -223,6 +223,7 @@ export default {
       urlValidator: 'URL',
       noChineseValidator: 'Non-Chinese',
       chineseValidator: 'Chinese',
+      naturalNumValidator:'Natural Number',
 
       rowspanNotConsistentForMergeEntireRow: 'Cells in this row don\'t have the same rowspan, operation failed.',
       colspanNotConsistentForMergeEntireColumn: 'Cells in this column don\'t have the same colspan, operation failed.',

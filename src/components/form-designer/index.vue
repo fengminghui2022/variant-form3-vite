@@ -489,7 +489,7 @@
        * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认不包含
        * @returns {*[]}
        */
-      getFieldWidgets(widgetList = null, staticWidgetsIncluded = false) {
+      getFieldWidgets(widgetList = null, staticWidgetsIncluded = true) {
         return !!widgetList ? getAllFieldWidgets(widgetList, staticWidgetsIncluded) :
             getAllFieldWidgets(this.designer.widgetList, staticWidgetsIncluded)
       },

@@ -1,6 +1,7 @@
 import {evalFn, isNull} from "./util";
 
 export const getRegExp = function (validatorName) {
+  //正则表达式被字符串包裹时，元字符必须使用双斜杠（\\）才能正常对应
   const commonRegExp = {
     number: '/^[-]?\\d+(\\.\\d+)?$/',
     letter: '/^[A-Za-z]+$/',
@@ -11,6 +12,7 @@ export const getRegExp = function (validatorName) {
     chinese: '/^[\u4e00-\u9fa5]+$/',
     email: '/^([-_A-Za-z0-9.]+)@([_A-Za-z0-9]+\\.)+[A-Za-z0-9]{2,3}$/',
     url: '/^([hH][tT]{2}[pP]:\\/\\/|[hH][tT]{2}[pP][sS]:\\/\\/)(([A-Za-z0-9-~]+)\\.)+([A-Za-z0-9-~\\/])+$/',
+    naturalNum:'/^\\d*$/'
   }
 
   return commonRegExp[validatorName]
@@ -24,7 +26,6 @@ const validateFn = function (validatorName, rule, value, callback, defaultErrorM
   }
 
   const reg = evalFn(getRegExp(validatorName))
-
   if (!reg.test(value)) {
     let errTxt = rule.errorMsg || defaultErrorMsg
     callback(new Error(errTxt))
@@ -88,6 +89,11 @@ const FormValidators = {
   /* URL网址 */
   url(rule, value, callback) {
     validateFn('url', rule, value, callback, '[' + rule.label + ']URL格式有误')
+  },
+
+  /* 自然数 */
+  naturalNum(rule, value, callback) {
+    validateFn('naturalNum', rule, value, callback, '[' + rule.label + ']请输入自然数')
   },
 
   /*测试

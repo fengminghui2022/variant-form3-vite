@@ -42,6 +42,7 @@
           {value: 'url', label: this.i18nt('designer.hint.urlValidator')},
           {value: 'noChinese', label: this.i18nt('designer.hint.noChineseValidator')},
           {value: 'chinese', label: this.i18nt('designer.hint.chineseValidator')},
+          {value: 'naturalNum', label: this.i18nt('designer.hint.naturalNumValidator')},
         ],
       }
     },
