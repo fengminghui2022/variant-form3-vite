@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import {
   handleChangeRequestHeader,
   handleConfigureAuth,
@@ -15,6 +14,8 @@ const service = axios.create({
   baseURL,
   timeout: 5000,
   withCredentials: false, // 跨域请求时是否需要cookie等凭证
+  retry: 1, //设置全局重试请求次数（最多重试几次请求）
+  retryDelay: 1000, //设置全局请求间隔
   responseType: "json",
   params: {},
   maxContentLength: 2000,
@@ -37,19 +38,23 @@ service.interceptors.request.use((config) => {
 
 service.interceptors.response.use(
   (response) => {
-    if (response.status !== 200) return Promise.reject(response.data);
-    handleAuthError(response.data.code);
-    handleGeneralError(response.data.code, response.data.errMsg);
-    return response;
+    if (response.status == 200){
+      return Promise.resolve(response);
+    }else{
+      handleAuthError(response.data.code);
+      handleGeneralError(response.data.code, response.data.errMsg);
+      return Promise.reject(response.data);
+    }
   },
   (err) => {
-    handleNetworkError(err.response.status);
+    console.log('err: ', err);
+    handleNetworkError(err.response?.status);
     return Promise.reject(err.response);
   }
 );
 
 export const Get = (url, params = {}, clearFn) =>
-  new Promise((resolve) => {
+  new Promise((resolve,reject) => {
     service
       .get(url, { params })
       .then((result) => {
@@ -62,37 +67,45 @@ export const Get = (url, params = {}, clearFn) =>
         resolve(res);
       })
       .catch((err) => {
-        resolve(err);
+        reject(err);
       });
   });
 
 export const Post = (url, data, params = {}) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve,reject) => {
     service
       .post(url, data, { params })
       .then((result) => {
         resolve(result.data);
       })
       .catch((err) => {
-        resolve(err);
+        reject(err);
       });
   });
 };
 
 export const CustomRequest=(url,method,contentType,data)=>{
-  return new Promise((resolve)=>{
-    service({
-      method,
-      url,
-      headers:{
-        'Content-Type': contentType||"application/json;charset=UTF-8",
-      },
-      data
-    }).then((result) => {
-      resolve(result.data);
+  const requestObj={
+    method,
+    url,
+    headers:{
+      'Content-Type': contentType||"application/json;charset=UTF-8",
+    },
+    // timeout:2000
+  }
+  if(method=='get'){
+    requestObj.params=data
+  }else{
+    requestObj.data=data
+  }
+  return new Promise((resolve,reject)=>{
+    service(requestObj).then((result) => {
+      if(result){
+        resolve(result.data);
+      }
     })
     .catch((err) => {
-      resolve(err);
+      reject(err);
     });
   })
 }
