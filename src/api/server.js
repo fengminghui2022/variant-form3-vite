@@ -1,4 +1,5 @@
 import axios from "axios";
+import cookie from 'js-cookie'
 import {
   handleChangeRequestHeader,
   handleConfigureAuth,
@@ -7,7 +8,8 @@ import {
   handleNetworkError,
 } from "./tools";
 
-const baseURL='https://api.dev.furenyun.com/api'
+const baseURL=cookie.get('VUE_APP_API_URL')||'https://api.dev.furenyun.com/api';
+console.log('cookie.get("VUE_APP_API_URL"): ', cookie.get('VUE_APP_API_URL'));
 
 const service = axios.create({
   // 表示请求URL公共部分，它会读取这里的值，然后拼接上页面使用的url

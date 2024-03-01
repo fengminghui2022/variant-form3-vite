@@ -6,7 +6,8 @@ export const handleChangeRequestHeader = (config) => {
 };
 
 export const handleConfigureAuth = (config) => {
-  config.headers["Authorization"] = "Bearer "+ cookie.get('admin-plus-token') || "Bearer eyJhbGciOiJIUzUxMiJ9.eyJ1c2VySWQiOjEyNjU0NzY4OTA2NzI2NzI4MDgsImFjY291bnQiOiJzdXBlckFkbWluIiwidXVpZCI6IjE5ZTQyODg4LWRhNDQtNGM4NS04NmUyLTI2NTM2MTEwNzVkMSIsInN1YiI6IjEyNjU0NzY4OTA2NzI2NzI4MDgiLCJpYXQiOjE3MDI1MjE4NDgsImV4cCI6MTcwMjYwODI0OH0.ZVDCIzlOF2XWda3hWNmRd5Y6mpj-UhSVtfW2Xz7DcyOGHE1ITATNkVYom9iZfKsEEz9CwRvIZgoQe6lR4gTENQ";
+  const token=cookie.get('admin-plus-token')||localStorage.getItem('admin-plus-token')||sessionStorage.getItem('admin-plus-token')
+  config.headers["Authorization"] = "Bearer "+ token;
   return config;
 };
 
