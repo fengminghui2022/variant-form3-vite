@@ -27,7 +27,7 @@
   import emitter from '@/utils/emitter'
   import i18n, {translate} from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
-  import {CustomRequest} from "@/api/server"
+  import {getDataSourceList} from "@/utils/develop.js"
 
   export default {
     name: "checkbox-widget",
@@ -117,12 +117,8 @@
             this.optionItems=[]//未请求到最新的下拉项之前，先将旧下拉项清除
             const optionsParams=this.optionDataSource.find(v=>v.widgetId==this.field.options.optionParamsSource.widgetId)
             if(!optionsParams) return
-            //将传递的入参进行后端元数据接口与前端新增参数进行组合
-            const paramData=optionsParams?.widgetData?{...JSON.parse(optionsParams?.widgetData),...expandParams}:expandParams
-            CustomRequest(optionsParams.widgetUrl,optionsParams.widgetMethod,optionsParams.widgetHeader,paramData).then(res=>{
-              //dataStructure结构由前后端约定组成，此处注意所有元数据请求的下拉项对象中，一定存在的只有value及label两项，其他都是动态变化的，页面中涉及下拉项的函数根据此两项进行判断
-              let dataStructure=JSON.parse(optionsParams.widgetResult)
-              this.optionItems=res[dataStructure.key]?.length?res[dataStructure.key].map(v=>{return {...v,value:v[dataStructure.id],label:v[dataStructure.label]}}):[]
+            getDataSourceList(optionsParams,expandParams).then(res=>{
+              this.optionItems=res
             })
           }else{
             this.optionItems=this.field.options.optionItems

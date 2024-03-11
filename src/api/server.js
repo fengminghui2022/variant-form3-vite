@@ -34,7 +34,6 @@ const service = axios.create({
 service.interceptors.request.use((config) => {
   config = handleChangeRequestHeader(config);
   config = handleConfigureAuth(config);
-  console.log('config: ', config);
   return config;
 });
 
