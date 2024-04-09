@@ -4,6 +4,7 @@
   "private": false,
   "scripts": {
     "serve": "vite --host",
+    "dev": "vite --host",
     "build": "vite build",
     "lib": "vite build --config vite-lib.config.js",
     "lib-render": "vite build --config vite-lib-render.config.js",
