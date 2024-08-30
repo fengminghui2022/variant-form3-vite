@@ -18,6 +18,7 @@
 
 <script>
 import VFormDesigner from './components/form-designer/index.vue'
+import cookie from 'js-cookie'
 
 export default {
   name: 'App',
@@ -69,7 +70,10 @@ export default {
 
       //全局数据源变量
       globalDsv: {
-        testApiHost: 'http://www.test.com/api'
+        testApiHost: 'http://www.test.com/api',
+        //TODO ahao???:估计要改
+        BaseUrl:"https://api.dev.furenyun.com/api",
+        token: 'Bearer ' + cookie.get('admin-plus-token'),
       },
 
     }
