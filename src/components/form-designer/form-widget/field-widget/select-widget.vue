@@ -148,14 +148,19 @@
        * 根据元数据产生下拉项
        * @param {object} [expandParams=null] 需要新增的元数据入参对象
        */
-       renderDataSourceOption(expandParams=null){
+       renderDataSourceOption(expandParams=null,callback){
         //数据源模式
         if(this.field.options.optionSourceFlag){
-            this.optionItems=[]//未请求到最新的下拉项之前，先将旧下拉项清除
+            //this.optionItems=[]//未请求到最新的下拉项之前，先将旧下拉项清除
             const optionsParams=this.optionDataSource.find(v=>v.widgetId==this.field.options.optionParamsSource.widgetId)
             if(!optionsParams) return
             getDataSourceList(optionsParams,expandParams).then(res=>{
-              this.optionItems=res
+              if(res.length){
+                this.optionItems=res
+              } else {
+                this.optionItems=[]
+              }
+              callback&&callback({selectList:this.optionItems})
             })
           }else{
             this.optionItems=this.field.options.optionItems
